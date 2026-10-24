@@ -13,6 +13,10 @@ on:
         description: 'Letterboxd usernames to remove, comma separated'
         required: false
         default: ''
+      mutuals_of:
+        description: 'Build the crew from the mutuals of this Letterboxd username'
+        required: false
+        default: ''
   push:
     paths:
       - 'watchlist/crew.json'
@@ -37,6 +41,7 @@ jobs:
         env:
           ADD_USERS: ${{ github.event.inputs.add }}
           REMOVE_USERS: ${{ github.event.inputs.remove }}
+          MUTUALS_OF: ${{ github.event.inputs.mutuals_of }}
       - name: Commit data
         run: |
           rm -rf node_modules

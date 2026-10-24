@@ -9,13 +9,16 @@ const CREW = 'watchlist/crew.json', OUT = 'watchlist/data.json';
 const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function get(url, tries = 4) {
+// 403 means Letterboxd doesn't serve that page to scripts; we take the hint and stop.
+// Only rate limits and server errors are retried.
+async function get(url, tries = 3) {
   for (let attempt = 1; attempt <= tries; attempt++) {
     const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml', 'Accept-Language': 'en-US,en;q=0.9' } });
     if (res.status === 404) return null;
     if (res.ok) return res.text();
+    if (res.status === 403) { const e = new Error('not served (403) ' + url); e.code = 403; throw e; }
     console.warn(`  ${url} -> HTTP ${res.status}, retry ${attempt}`);
-    await sleep(2000 * attempt);
+    await sleep(3000 * attempt);
   }
   throw new Error('failed ' + url);
 }
@@ -54,7 +57,9 @@ async function watchlist(user) {
   const base = `https://letterboxd.com/${encodeURIComponent(user)}/watchlist/`;
   const all = new Map();
   for (let page = 1; page <= 150; page++) {
-    const html = await get(base + (page > 1 ? `page/${page}/` : ''));
+    let html;
+    try { html = await get(base + (page > 1 ? `page/${page}/` : '')); }
+    catch (e) { if (page > 1 && e.code === 403) { console.warn('  stopped at page', page, '(not served)'); break; } throw e; }
     if (html == null) return page === 1 ? null : [...all.values()];
     const { items, hasNext } = parseGrid(html);
     let added = 0;
@@ -88,21 +93,62 @@ async function watched(user) {
   return [...out.values()];
 }
 
+// People on a /following/ or /followers/ page, as {u: username, n: display name}.
+async function people(user, kind) {
+  const out = new Map();
+  for (let page = 1; page <= 20; page++) {
+    let html;
+    try { html = await get(`https://letterboxd.com/${encodeURIComponent(user)}/${kind}/` + (page > 1 ? `page/${page}/` : ''), 2); }
+    catch (e) { if (e.code === 403 && page > 1) { console.warn(`  ${kind}: only ${page - 1} page(s) served`); break; } throw e; }
+    if (html == null) break;
+    const { document } = parseHTML(html);
+    let added = 0;
+    for (const a of document.querySelectorAll('a.name[href]')) {
+      const u = (a.getAttribute('href').match(/^\/([A-Za-z0-9_]+)\/$/) || [])[1];
+      if (u && !out.has(u.toLowerCase())) { out.set(u.toLowerCase(), { u, n: a.textContent.replace(/[\u202a-\u202e]/g, '').trim() || u }); added++; }
+    }
+    if (!added || !document.querySelector('a.next')) break;
+    await sleep(1500);
+  }
+  return [...out.values()];
+}
+
 const crewFile = JSON.parse(await readFile(CREW, 'utf8'));
 const crew = crewFile.crew = crewFile.crew || [];
+const exclude = new Set((crewFile.exclude || []).map(x => x.toLowerCase()));
+if (process.env.MUTUALS_OF) crewFile.mutualsOf = process.env.MUTUALS_OF.trim().replace(/^@/, '');
+// Crew = you + everyone you follow who follows you back (minus anyone removed).
+if (crewFile.mutualsOf) {
+  const me = crewFile.mutualsOf;
+  try {
+    console.log('Finding mutuals of', me);
+    const following = await people(me, 'following');
+    const followers = new Set((await people(me, 'followers')).map(p => p.u.toLowerCase()));
+    const mutuals = following.filter(p => followers.has(p.u.toLowerCase()));
+    console.log(`  following ${following.length}, followers ${followers.size}, mutuals ${mutuals.length}`);
+    for (const p of [{ u: me, n: crewFile.myName || me }, ...mutuals]) {
+      if (exclude.has(p.u.toLowerCase()) || crew.some(c => c.username.toLowerCase() === p.u.toLowerCase())) continue;
+      crew.push({ username: p.u, name: p.n, mutual: true });
+      console.log('  + crew:', p.u, `(${p.n})`);
+    }
+  } catch (e) { console.warn('  could not read follows:', e.message); }
+}
 // "Run workflow" on GitHub can add people: ADD_USERS="name1, name2" or "user=Display Name"
 for (const raw of (process.env.ADD_USERS || '').split(/[,\n]+/)) {
   let [username, name] = raw.split('=').map(x => (x || '').trim());
   username = (username.match(/letterboxd\.com\/([^/?#\s]+)/i) || [])[1] || username.replace(/^@/, '');
   if (!/^[A-Za-z0-9_]+$/.test(username)) continue;
   const ex = crew.find(c => c.username.toLowerCase() === username.toLowerCase());
+  exclude.delete(username.toLowerCase());
   if (ex) { if (name) ex.name = name; } else crew.push({ username, name: name || username });
   console.log('Added to crew:', username);
 }
 for (const raw of (process.env.REMOVE_USERS || '').split(/[,\n]+/).map(x => x.trim().toLowerCase()).filter(Boolean)) {
   const i = crew.findIndex(c => c.username.toLowerCase() === raw);
   if (i >= 0) { crew.splice(i, 1); console.log('Removed from crew:', raw); }
+  exclude.add(raw);
 }
+crewFile.exclude = [...exclude];
 await writeFile(CREW, JSON.stringify(crewFile, null, 2) + '\n');
 let prev = { friends: [] };
 try { prev = JSON.parse(await readFile(OUT, 'utf8')); } catch {}
