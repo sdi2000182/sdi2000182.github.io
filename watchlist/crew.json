@@ -1,13 +1,34 @@
 {
   "_help": "The movie crew. Add or remove people with GitHub's 'Run workflow' button on the Update Letterboxd watchlists action, or edit this list. Set \"mutualsOf\" to a username to also pull in that person's Letterboxd mutuals automatically.",
   "crew": [
-    { "username": "theodvra", "name": "Theodora" },
-    { "username": "theshiningg", "name": "Giannis" },
-    { "username": "insomnyck", "name": "Nick" },
-    { "username": "irenesrecs", "name": "Irene" },
-    { "username": "evelynnv", "name": "Evelynn" },
-    { "username": "evamoudraki", "name": "Eva" },
-    { "username": "sotiriiax", "name": "Sotiria" }
+    {
+      "username": "theodvra",
+      "name": "Theodora"
+    },
+    {
+      "username": "theshiningg",
+      "name": "Giannis"
+    },
+    {
+      "username": "insomnyck",
+      "name": "Nick"
+    },
+    {
+      "username": "irenesrecs",
+      "name": "Irene"
+    },
+    {
+      "username": "evelynnv",
+      "name": "Evelynn"
+    },
+    {
+      "username": "evamoudraki",
+      "name": "Eva"
+    },
+    {
+      "username": "sotiriiax",
+      "name": "Sotiria"
+    }
   ],
   "exclude": []
 }
