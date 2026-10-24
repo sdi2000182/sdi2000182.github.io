@@ -1,0 +1,32 @@
+name: Probe storage
+on:
+  push:
+    branches: [lbx-test]
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p debug; o=debug/storage.txt
+          H='Origin: https://sdi2000182.github.io'
+          echo "== jsonblob create" >> $o
+          curl -sS -i -X POST -H "$H" -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"t":1}' https://jsonblob.com/api/jsonBlob | grep -iE '^HTTP|^location|access-control|^x-jsonblob' >> $o 2>&1
+          loc=$(curl -sS -i -X POST -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"t":1}' https://jsonblob.com/api/jsonBlob | grep -i '^location' | awk '{print $2}' | tr -d '\r')
+          echo "loc=$loc" >> $o
+          [ -n "$loc" ] && curl -sS -i -X PUT -H "$H" -H 'Content-Type: application/json' -d '{"t":2}' "$loc" | grep -iE '^HTTP|access-control' >> $o
+          [ -n "$loc" ] && curl -sS "$loc" >> $o; echo >> $o
+          echo "== jsonblob preflight" >> $o
+          curl -sS -i -X OPTIONS -H "$H" -H 'Access-Control-Request-Method: PUT' -H 'Access-Control-Request-Headers: content-type' https://jsonblob.com/api/jsonBlob/x | grep -iE '^HTTP|access-control' >> $o
+          echo "== npoint" >> $o
+          curl -sS -i -X POST -H "$H" -H 'Content-Type: application/json' -d '{"t":1}' https://api.npoint.io/ | head -20 | grep -iE '^HTTP|access-control|location|"id"' >> $o
+          echo "== ntfy" >> $o
+          curl -sS -i -H "$H" -d 'hi' https://ntfy.sh/kalees-probe-7731 | grep -iE '^HTTP|access-control' >> $o
+          curl -sS -H "$H" "https://ntfy.sh/kalees-probe-7731/json?poll=1&since=all" | head -c 300 >> $o; echo >> $o
+          echo "== kvdb" >> $o
+          curl -sS -i -X POST -H "$H" https://kvdb.io | grep -iE '^HTTP|access-control' >> $o
+          cat $o
+          git config user.name "github-actions[bot]"; git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add debug && git commit -m probe && git push
