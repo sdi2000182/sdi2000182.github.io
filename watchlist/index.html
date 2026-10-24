@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Watchlist Merger</title>
+<meta name="description" content="Merge your friends' Letterboxd watchlists and find the film most of you want to watch.">
+<meta name="theme-color" content="#14181c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 12'%3E%3Ccircle cx='6' cy='6' r='5.5' fill='%23ff8000'/%3E%3Ccircle cx='18' cy='6' r='5.5' fill='%2300e054'/%3E%3Ccircle cx='30' cy='6' r='5.5' fill='%2340bcf4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="core.css">
+<style>
+.hero{padding:34px 0 18px}
+.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.08}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{max-width:640px;margin:10px 0 0}
+
+.crew{margin-top:8px}
+.crew-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.crew-head h2{font-size:24px}
+.addrow{display:flex;gap:8px;flex-wrap:wrap}
+.addrow .input{flex:1 1 220px}
+.drop{display:block;margin-top:12px;border:1.5px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--ink2);cursor:pointer;font-size:14px;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--accent);color:var(--ink);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:14px}
+.fchip{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;min-width:0;position:relative}
+.fchip.away{opacity:.45}
+.fchip.away .avatar{filter:grayscale(1)}
+.fchip .avatar{cursor:pointer}
+.fchip .who{min-width:0;flex:1}
+.fchip .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
+.fchip .sub{font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fchip .sub.err{color:var(--danger)}
+.fchip .acts{display:flex;gap:2px}
+.fchip .acts button{width:26px;height:26px;border-radius:7px;border:0;background:transparent;cursor:pointer;color:var(--ink3);font-size:14px;display:grid;place-items:center}
+.fchip .acts button:hover{background:var(--card2);color:var(--ink)}
+.crewbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.crewbar .grow{flex:1 1 260px}
+
+.controls{position:sticky;top:58px;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);padding:12px 0;margin-top:22px;border-bottom:1px solid var(--line)}
+.controls .row{gap:8px}
+.controls .input{padding:8px 11px}
+.controls select.input{padding-right:6px}
+.ctl{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.ctl input[type=range]{width:110px;accent-color:var(--accent)}
+.ctl input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.yr{width:76px}
+.genres{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.genres button{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:12px;font-weight:600;color:var(--ink2)}
+.genres button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:18px 0 6px}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.stat .v{font-family:"DM Serif Display",Georgia,serif;font-size:26px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .l{font-size:12px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+
+.tier{margin-top:26px}
+.tier h3{font-size:22px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tier h3 small{font-family:Inter,sans-serif;font-size:13px;color:var(--ink3);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:12px}
+.film{position:relative;cursor:pointer;min-width:0}
+.poster{aspect-ratio:2/3;border-radius:8px;overflow:hidden;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 6px 16px rgba(0,0,0,.3);display:flex;align-items:flex-end;transition:transform .15s}
+.film:hover .poster{transform:translateY(-3px);box-shadow:0 0 0 2px var(--accent),0 10px 22px rgba(0,0,0,.35)}
+.poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.poster .ptitle{position:relative;padding:12px;font-family:"DM Serif Display",Georgia,serif;font-size:19px;line-height:1.1;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.poster .ptitle small{display:block;font-family:Inter,sans-serif;font-size:12px;opacity:.75;margin-top:4px}
+.votes{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.72);color:#fff;font-weight:800;font-size:12px;padding:3px 8px;border-radius:999px;z-index:2}
+.votes.all{background:var(--green);color:#06210f}
+.veto{position:absolute;top:6px;right:6px;z-index:2;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;opacity:0;transition:.15s;font-size:14px}
+.film:hover .veto,.film:focus-within .veto{opacity:1}
+@media (hover:none){.veto{opacity:.85}}
+.veto:hover{background:var(--danger)}
+.film .meta{padding:8px 2px 0}
+.film .t{font-weight:700;font-size:14px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.film .y{font-size:12px;color:var(--ink3);margin:2px 0 6px}
+.film .seen{font-size:11px;color:var(--orange);font-weight:600;margin-top:5px}
+.film.vetoed .poster{filter:grayscale(1) brightness(.5)}
+
+.empty{text-align:center;padding:50px 16px;color:var(--ink2)}
+.empty h3{font-size:26px;color:var(--ink);margin-bottom:8px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:22px;text-align:left}
+.steps .s{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.steps b{display:block;margin-bottom:4px;color:var(--ink)}
+.more{display:flex;justify-content:center;margin:24px 0}
+
+/* spin */
+.reel{height:150px;display:grid;place-items:center;text-align:center;border-radius:14px;background:var(--bg);border:1px solid var(--line);margin:16px 0;overflow:hidden;padding:0 12px}
+.reel .nm{font-family:"DM Serif Display",Georgia,serif;font-size:clamp(24px,5vw,36px);line-height:1.1}
+.reel.done .nm{color:var(--accent);animation:land .5s ease}
+@keyframes land{0%{transform:scale(.8)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.pickcard{display:flex;gap:14px;align-items:flex-start}
+.pickcard .poster{width:110px;flex:none}
+.pickcard .poster .ptitle{font-size:14px;padding:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{padding:7px 12px;border:0;background:var(--card);cursor:pointer;font-weight:600;font-size:13px;color:var(--ink2)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+
+/* showdown */
+.duel{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:14px}
+.duel .vs{font-family:"DM Serif Display",serif;font-size:26px;color:var(--ink3)}
+.duel .film .poster .ptitle{font-size:17px}
+.round{font-size:13px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px}
+
+.detail .poster{width:150px}
+.detail .who{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.detail .who .pill{font-weight:600}
+.detail h4{margin:16px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3)}
+.setrow{margin:14px 0}
+.setrow label{display:block;font-weight:700;margin-bottom:6px}
+.setrow .input{width:100%}
+pre.code{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;font-size:12px;max-height:240px}
+@media (max-width:640px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px}
+  .poster .ptitle{font-size:15px;padding:8px}
+  .controls{position:static}
+  .pickcard .poster{width:90px}
+  .detail .poster{width:110px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><span class="dots"><i></i><i></i><i></i></span> Watchlist <span class="long">Merger</span></a>
+    <nav class="nav">
+    </nav>
+    <button class="iconbtn" id="themeBtn" title="Toggle light/dark" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Movie night, <em>settled.</em></h1>
+    <p class="muted">Add your crew's Letterboxd watchlists. The films the most people want float to the top. Then spin, duel, or veto your way to one pick.</p>
+  </section>
+
+  <section class="panel crew">
+    <div class="crew-head">
+      <h2>The crew <span class="faint" id="crewCount" style="font-family:Inter;font-size:15px"></span></h2>
+      <span class="faint" id="syncNote" style="font-size:13px"></span>
+      <div class="row">
+        <button class="btn small ghost" id="settingsBtn">⚙ Settings</button>
+      </div>
+    </div>
+    <form class="addrow" id="addForm" autocomplete="off">
+      <input class="input" id="addInput" placeholder="Letterboxd usernames — e.g. dave, jay, letterboxd.com/kim" aria-label="Letterboxd usernames">
+      <button class="btn primary" type="submit">+ Add &amp; fetch</button>
+    </form>
+    <label class="drop" id="drop">
+      <input type="file" id="fileInput" multiple accept=".zip,.csv,.json" hidden>
+      <b>Or drop Letterboxd export ZIPs / CSVs here</b> — always works, includes ratings.<br>
+      <span class="faint">Each friend: letterboxd.com → Settings → Data → <i>Export your data</i>. Drop all the zips at once.</span>
+    </label>
+    <div class="friends" id="friends"></div>
+    <div class="crewbar" id="crewbar">
+      <span class="faint grow" id="presentNote"></span>
+      <button class="btn small" id="refreshAll">↻ Refresh all</button>
+      <button class="btn small" id="shareBtn">🔗 Share link</button>
+      <button class="btn small" id="exportBtn">⬇ Save crew file</button>
+    </div>
+  </section>
+
+  <section class="controls" id="controls">
+    <div class="row">
+      <input class="input" id="q" placeholder="Search titles…" style="flex:1 1 170px" aria-label="Search titles">
+      <label class="ctl">Min people <input type="range" id="minV" min="1" max="15" value="2"><span id="minVv">2</span></label>
+      <label class="ctl">Years <input class="input yr" id="y1" type="number" placeholder="from" min="1880" max="2100"> – <input class="input yr" id="y2" type="number" placeholder="to" min="1880" max="2100"></label>
+      <select class="input" id="sort" aria-label="Tie-break">
+        <option value="votes">Most people, then A–Z</option>
+        <option value="votes-new">Most people, then newest</option>
+        <option value="votes-old">Most people, then oldest</option>
+        <option value="votes-tmdb">Most people, then TMDB score</option>
+        <option value="votes-short">Most people, then shortest</option>
+        <option value="random">Most people, shuffled</option>
+      </select>
+      <select class="input hidden" id="runtime" aria-label="Max runtime">
+        <option value="0">Any length</option><option value="100">≤ 1h40</option><option value="120">≤ 2h</option><option value="150">≤ 2h30</option>
+      </select>
+      <label class="ctl" title="Needs watched data: export ZIPs, or 'also fetch watched films' in settings"><input type="checkbox" id="hideSeen" checked> Hide films someone here has seen</label>
+      <label class="ctl"><input type="checkbox" id="showVeto"> Show vetoed</label>
+    </div>
+    <div class="genres hidden" id="genres"></div>
+    <div class="actions">
+      <button class="btn orange" id="spinBtn">🎲 Spin for a pick</button>
+      <button class="btn" id="duelBtn">⚔ Showdown</button>
+      <button class="btn" id="copyBtn">📋 Copy shortlist</button>
+      <button class="btn" id="csvBtn">⬇ CSV</button>
+      <button class="btn ghost hidden" id="clearVeto">Clear vetoes</button>
+    </div>
+  </section>
+
+  <section id="stats" class="stats"></section>
+  <section id="results"></section>
+</main>
+<footer class="foot wrap">
+  Not affiliated with Letterboxd. Lists are fetched through public CORS proxies or read from your own export files; everything stays in this browser.<br>
+  Poster data (optional) from TMDB.
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="core.js"></script>
+<script>
+(function () {
+'use strict';
+const L = window.LBX, $ = s => document.querySelector(s), esc = L.esc;
+let S = L.load();
+const status = {};          // friendId -> {busy, msg, err}
+let index = null;           // cached L.buildIndex
+let uploadTarget = null;    // friend id for single CSV upload
+let shown = 120;
+let genreFilter = new Set();
+let shuffleSeed = Math.random();
+let presetInfo = null;
+const ui = Object.assign({ q: '', minV: 2, y1: '', y2: '', sort: 'votes', runtime: 0, hideSeen: true, showVeto: false }, (() => { try { return JSON.parse(sessionStorage.getItem('lbxm.ui')) || {}; } catch (e) { return {}; } })());
+
+function persist() { L.save(S); index = null; }
+function saveUI() { try { sessionStorage.setItem('lbxm.ui', JSON.stringify(ui)); } catch (e) { } }
+function idx() { return index || (index = L.buildIndex(S.friends)); }
+function present() { return S.friends.filter(f => f.present !== false); }
+function friend(id) { return S.friends.find(f => f.id === id); }
+
+/* ---------------- crew ---------------- */
+function renderCrew() {
+  const fs = S.friends, pr = present();
+  $('#crewCount').textContent = fs.length ? `· ${fs.length} ${fs.length === 1 ? 'person' : 'people'}` : '';
+  $('#friends').innerHTML = fs.map(f => {
+    const st = status[f.id] || {};
+    const wl = f.watchlist ? f.watchlist.length : 0, wd = f.watched ? f.watched.length : null;
+    let sub = st.busy ? `<span class="spin"></span> ${esc(st.msg || 'Fetching…')}`
+      : st.err ? `⚠ ${esc(st.err)}`
+      : `${wl} on watchlist${wd != null ? ` · ${wd} seen` : ''}`;
+    return `<div class="fchip ${f.present === false ? 'away' : ''}" data-id="${f.id}">
+      <span class="avatar" style="--c:${f.color}" data-act="toggle" title="${f.present === false ? 'Not here tonight — tap to add back' : 'Here tonight — tap if they\'re out'}">${esc(L.initials(f.name))}</span>
+      <div class="who"><div class="nm" data-act="rename" title="Double-click to rename">${esc(f.name)}</div>
+      <div class="sub ${st.err ? 'err' : ''}" title="${esc(st.err || (f.username ? '@' + f.username : 'from file'))}">${sub}</div></div>
+      <div class="acts">
+        ${f.username ? `<button data-act="refresh" title="Refresh from Letterboxd">↻</button>` : ''}
+        <button data-act="upload" title="Upload a CSV/ZIP for ${esc(f.name)}">⬆</button>
+        ${f.preset ? '' : `<button data-act="remove" title="Remove">✕</button>`}
+      </div></div>`;
+  }).join('');
+  $('#crewbar').classList.toggle('hidden', !fs.length);
+  $('#presentNote').textContent = fs.length ? `${pr.length} of ${fs.length} here tonight — tap a face to mark someone out.` : '';
+  $('#refreshAll').classList.toggle('hidden', !fs.some(f => f.username));
+  if (presetInfo) {
+    $('#addInput').placeholder = 'Add a guest by Letterboxd username…';
+    $('#syncNote').textContent = presetInfo.updated ? 'Lists auto-synced ' + ago(Date.parse(presetInfo.updated)) : 'Waiting for first auto-sync';
+  }
+  const mv = $('#minV'); mv.max = Math.max(1, pr.length);
+  if (ui.minV > pr.length && pr.length) { ui.minV = pr.length; }
+  mv.value = ui.minV; $('#minVv').textContent = ui.minV;
+}
+
+$('#friends').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const id = b.closest('.fchip').dataset.id, f = friend(id);
+  const act = b.dataset.act;
+  if (act === 'toggle') { f.present = f.present === false; persist(); renderAll(); }
+  else if (act === 'refresh') fetchFriend(f);
+  else if (act === 'upload') { uploadTarget = id; $('#fileInput').click(); }
+  else if (act === 'remove') {
+    if (!confirm(`Remove ${f.name} from the crew?`)) return;
+    S.friends = S.friends.filter(x => x.id !== id); persist(); renderAll();
+  }
+});
+$('#friends').addEventListener('dblclick', e => {
+  const b = e.target.closest('[data-act="rename"]'); if (!b) return;
+  const f = friend(b.closest('.fchip').dataset.id);
+  const n = prompt('Display name', f.name); if (n && n.trim()) { f.name = n.trim(); persist(); renderAll(); }
+});
+
+function addFriend(o) {
+  const f = Object.assign({ id: L.uid(), name: o.username || 'Friend', username: '', color: L.nextColor(S.friends), present: true, watchlist: [], watched: null, updated: 0 }, o);
+  S.friends.push(f); return f;
+}
+function findByUsername(u) { u = (u || '').toLowerCase(); return u ? S.friends.find(f => (f.username || '').toLowerCase() === u) : null; }
+
+$('#addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const names = $('#addInput').value.split(/[\s,;]+/).map(L.cleanUsername).filter(Boolean);
+  if (!names.length) return;
+  const fresh = [];
+  for (const u of names) {
+    if (findByUsername(u)) continue;
+    if (S.friends.length >= 30) { L.toast('That\'s a lot of friends — capped at 30.'); break; }
+    fresh.push(addFriend({ username: u, name: u }));
+  }
+  $('#addInput').value = '';
+  persist(); renderAll();
+  runQueue(fresh);
+});
+
+async function fetchFriend(f) {
+  status[f.id] = { busy: true, msg: 'Watchlist…' }; renderCrew();
+  try {
+    const wl = await L.fetchList(f.username, 'watchlist', S.settings, (p, n) => { status[f.id].msg = `Watchlist p${p} · ${n}`; renderCrew(); });
+    f.watchlist = wl;
+    if (S.settings.fetchWatched) {
+      status[f.id].msg = 'Seen films…'; renderCrew();
+      try {
+        f.watched = await L.fetchList(f.username, 'watched', S.settings, (p, n) => { status[f.id].msg = `Seen p${p} · ${n}`; renderCrew(); });
+      } catch (e) { if (!f.watched) f.watched = null; }
+    }
+    f.updated = Date.now();
+    delete status[f.id];
+    if (!wl.length) status[f.id] = { err: 'Watchlist empty or private' };
+  } catch (e) {
+    status[f.id] = { err: e.code === 404 ? 'User not found' : 'Fetch failed — ' + e.message + '. Try an export ZIP.' };
+  }
+  persist(); renderAll();
+}
+async function runQueue(list) {
+  const q = list.filter(f => f.username).slice();
+  const worker = async () => { while (q.length) await fetchFriend(q.shift()); };
+  await Promise.all([worker(), worker(), worker()]);
+}
+$('#refreshAll').onclick = () => runQueue(S.friends);
+
+/* files */
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => handleFiles([...e.dataTransfer.files]));
+$('#fileInput').addEventListener('change', e => { handleFiles([...e.target.files]); e.target.value = ''; });
+
+async function handleFiles(files) {
+  const target = uploadTarget ? friend(uploadTarget) : null; uploadTarget = null;
+  let n = 0;
+  for (const file of files) {
+    try {
+      if (/\.json$/i.test(file.name)) { await importCrewFile(file); continue; }
+      if (/\.zip$/i.test(file.name)) {
+        const z = await L.readZip(file);
+        let f = target || findByUsername(z.username);
+        if (!f) f = addFriend({ username: '', name: z.username || file.name.replace(/\.zip$/i, '') });
+        if (z.username && !f.username) f.username = z.username;
+        if (z.watchlist) f.watchlist = z.watchlist;
+        if (z.watched) f.watched = z.watched;
+        f.source = 'zip'; f.updated = Date.now(); delete status[f.id]; n++;
+      } else {
+        const text = await file.text();
+        const kind = L.csvKind(file.name, text), films = L.csvToFilms(text);
+        let f = target;
+        if (!f) {
+          const guess = file.name.replace(/\.csv$/i, '').replace(/[-_ ]?(watchlist|watched|ratings?)[-_ ]?/i, '') || '';
+          const name = prompt(`Whose ${kind} is "${file.name}"?`, guess || 'Friend');
+          if (!name) continue;
+          f = S.friends.find(x => x.name.toLowerCase() === name.trim().toLowerCase()) || addFriend({ name: name.trim() });
+        }
+        if (kind === 'watchlist') f.watchlist = films;
+        else f.watched = L.mergeWatched(f.watched || [], films);
+        f.updated = Date.now(); delete status[f.id]; n++;
+      }
+    } catch (e) { L.toast('⚠ ' + file.name + ': ' + e.message, 5000); }
+  }
+  if (n) { persist(); renderAll(); L.toast(`Imported ${n} file${n > 1 ? 's' : ''}.`); }
+}
+
+async function importCrewFile(file) {
+  const j = JSON.parse(await file.text());
+  if (j.type !== 'lbxm-crew' || !Array.isArray(j.friends)) throw new Error('not a crew file');
+  mergeIn(j.friends.map(f => Object.assign({}, f, { id: L.uid() })));
+  persist(); renderAll(); L.toast(`Loaded ${j.friends.length} people from crew file.`);
+}
+function mergeIn(list) {
+  for (const nf of list) {
+    const ex = (nf.username && findByUsername(nf.username)) || S.friends.find(f => f.name === nf.name);
+    if (ex) Object.assign(ex, { watchlist: nf.watchlist, watched: nf.watched || ex.watched, updated: nf.updated });
+    else { nf.color = S.friends.some(f => f.color === nf.color) ? L.nextColor(S.friends) : nf.color; S.friends.push(nf); }
+  }
+}
+$('#exportBtn').onclick = () => {
+  const data = { type: 'lbxm-crew', v: 1, saved: new Date().toISOString(), friends: S.friends.map(({ id, ...f }) => f) };
+  L.download('movie-crew.json', JSON.stringify(data), 'application/json');
+  L.toast('Saved. Friends can drop this file in to load the whole crew.');
+};
+
+/* share */
+$('#shareBtn').onclick = async () => {
+  const base = location.href.split('#')[0];
+  const usersOnly = S.friends.every(f => f.username && f.source !== 'zip' && f.source !== 'shared');
+  let full = '';
+  try { full = base + '#' + await L.packGroup(S); } catch (e) { }
+  const light = base + '#u=' + S.friends.filter(f => f.username).map(f => f.username).join(',');
+  modal(`<h2>Share this crew</h2>
+    <p class="muted">Anyone opening the link sees the same crew and can spin on their own phone.</p>
+    ${full ? `<div class="setrow"><label>Full link — includes everyone's lists (${(full.length / 1024).toFixed(1)} KB)</label>
+      <div class="row"><input class="input" readonly value="${esc(full)}" style="flex:1"><button class="btn primary" data-copy="${esc(full)}">Copy</button></div>
+      ${full.length > 8000 ? '<p class="faint" style="font-size:13px">Long link — some chat apps cut these. If it breaks, use "Save crew file" and send the file instead.</p>' : ''}</div>` : ''}
+    ${S.friends.some(f => f.username) ? `<div class="setrow"><label>Short link — usernames only, re-fetches from Letterboxd</label>
+      <div class="row"><input class="input" readonly value="${esc(light)}" style="flex:1"><button class="btn" data-copy="${esc(light)}">Copy</button></div>
+      ${usersOnly ? '' : '<p class="faint" style="font-size:13px">People added from files are left out of the short link.</p>'}</div>` : ''}`);
+};
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-copy]'); if (!b) return;
+  L.toast(await L.copy(b.dataset.copy) ? 'Copied!' : 'Copy failed — select and copy manually');
+});
+
+async function readHash() {
+  const h = location.hash.slice(1); if (!h) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  if (h.startsWith('d=')) {
+    try {
+      const obj = JSON.parse(await L.inflate(h.slice(2)));
+      const list = L.unpackGroupJSON(obj);
+      const go = S.friends.length ? await ask(`Load the shared crew of ${list.length}?`, 'Replace mine', 'Merge with mine') : 'a';
+      if (!go) return;
+      if (go === 'a') S.friends = [];
+      mergeIn(list); persist(); renderAll(); L.toast(`Loaded ${list.length} people.`);
+    } catch (e) { L.toast('That share link looks broken.'); }
+  } else if (h.startsWith('u=')) {
+    const names = decodeURIComponent(h.slice(2)).split(',').map(L.cleanUsername).filter(Boolean);
+    const fresh = names.filter(u => !findByUsername(u)).map(u => addFriend({ username: u, name: u }));
+    persist(); renderAll(); runQueue(fresh);
+  }
+}
+
+/* ---------------- modal helpers ---------------- */
+function modal(html, onClose) {
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box" role="dialog" aria-modal="true"><button class="iconbtn x" data-close aria-label="Close">✕</button>${html}</div>`;
+  const close = () => { m.remove(); document.removeEventListener('keydown', onKey); onClose && onClose(); };
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) close(); });
+  document.addEventListener('keydown', onKey);
+  document.body.appendChild(m);
+  m.close = close;
+  return m;
+}
+function ask(q, a, b) {
+  return new Promise(res => {
+    let v = null;
+    const m = modal(`<h2>${esc(q)}</h2><div class="row" style="margin-top:16px"><button class="btn primary" data-v="a">${esc(a)}</button><button class="btn" data-v="b">${esc(b)}</button></div>`, () => res(v));
+    m.addEventListener('click', e => { const x = e.target.closest('[data-v]'); if (x) { v = x.dataset.v; m.close(); } });
+  });
+}
+
+/* ---------------- settings ---------------- */
+$('#settingsBtn').onclick = () => {
+  const s = S.settings;
+  const m = modal(`<h2>Settings</h2>
+    <div class="setrow"><label>How to reach Letterboxd</label>
+      <select class="input" id="sProxy">
+        <option value="auto">Auto — try every public proxy</option>
+        ${L.PROXIES.map(p => `<option value="${p.id}">${esc(p.name)} only</option>`).join('')}
+        <option value="custom">My own proxy only</option>
+      </select>
+      <p class="faint" style="font-size:13px;margin:6px 0">Letterboxd has no public API, so usernames are fetched through a CORS proxy. Public ones get rate-limited or blocked sometimes — export ZIPs always work.</p>
+      <input class="input" id="sCustom" placeholder="https://your-worker.workers.dev/?url={url}" value="${esc(s.customProxy)}">
+      <details style="margin-top:8px"><summary class="muted" style="cursor:pointer">Make your own free proxy (Cloudflare Worker, 2 min)</summary>
+<pre class="code">export default {
+  async fetch(req) {
+    const u = new URL(req.url).searchParams.get('url');
+    if (!u || !u.startsWith('https://letterboxd.com/'))
+      return new Response('nope', { status: 400 });
+    const r = await fetch(u, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    return new Response(await r.text(), { status: r.status,
+      headers: { 'Access-Control-Allow-Origin': '*',
+                 'Content-Type': 'text/html; charset=utf-8' } });
+  }
+};</pre><p class="faint" style="font-size:13px">Then paste <span class="kbd">https://NAME.workers.dev/?url={url}</span> above.</p></details>
+    </div>
+    <div class="setrow"><label><input type="checkbox" id="sWatched" ${s.fetchWatched ? 'checked' : ''}> Also fetch each person's watched films &amp; ratings</label>
+      <p class="faint" style="font-size:13px;margin:4px 0 0">Needed for "hide films someone has seen" and the Taste page. Slower for heavy loggers.</p></div>
+    <div class="setrow"><label>TMDB API key (optional)</label>
+      <input class="input" id="sTmdb" placeholder="v3 key or v4 read token" value="${esc(s.tmdbKey)}">
+      <p class="faint" style="font-size:13px;margin:6px 0 0">Adds real posters, TMDB scores, genre and runtime filters. Free at themoviedb.org → Settings → API. Stored only in this browser.</p></div>
+    <div class="row" style="margin-top:18px;justify-content:space-between">
+      <button class="btn" id="sClear" style="color:var(--danger)">Delete all data</button>
+      <button class="btn primary" id="sSave">Save</button>
+    </div>`);
+  m.querySelector('#sProxy').value = s.proxy || 'auto';
+  m.querySelector('#sSave').onclick = () => {
+    const had = s.tmdbKey;
+    s.proxy = m.querySelector('#sProxy').value;
+    s.customProxy = m.querySelector('#sCustom').value.trim();
+    s.fetchWatched = m.querySelector('#sWatched').checked;
+    s.tmdbKey = m.querySelector('#sTmdb').value.trim();
+    if (s.proxy === 'custom' && !s.customProxy) s.proxy = 'auto';
+    L.save(S); m.close(); renderAll();
+    if (s.tmdbKey && s.tmdbKey !== had) L.toast('Loading posters…');
+  };
+  m.querySelector('#sClear').onclick = () => {
+    if (!confirm('Delete every friend, list and setting stored on this device?')) return;
+    S = L.blank(); L.save(S); try { localStorage.removeItem('lbxm.tmdb.v1'); } catch (e) { } index = null; m.close(); renderAll();
+  };
+};
+
+/* ---------------- results ---------------- */
+function compute() {
+  const pr = present(), pset = new Set(pr.map(f => f.id));
+  const { films, seen } = idx();
+  const veto = new Set(S.vetoes), q = L.norm(ui.q);
+  const y1 = +ui.y1 || 0, y2 = +ui.y2 || 9999;
+  const tm = !!S.settings.tmdbKey;
+  const out = [];
+  for (const f of films.values()) {
+    const votes = [...f.wl].filter(id => pset.has(id));
+    if (votes.length < Math.min(ui.minV, Math.max(1, pr.length))) continue;
+    if (q && !L.norm(f.t).includes(q)) continue;
+    if (f.y && (f.y < y1 || f.y > y2)) continue;
+    if (!f.y && (ui.y1 || ui.y2)) continue;
+    const vetoed = veto.has(f.k);
+    if (vetoed && !ui.showVeto) continue;
+    const seenBy = pr.filter(p => { const s = seen.get(p.id); return s && s.get(f); });
+    if (ui.hideSeen && seenBy.length) continue;
+    const info = tm ? L.tmdbCached(f.k) : null;
+    if (tm && genreFilter.size && !(info && info.g && info.g.some(g => genreFilter.has(g)))) continue;
+    if (tm && ui.runtime && !(info && info.rt && info.rt <= ui.runtime)) continue;
+    out.push({ f, votes, seenBy, vetoed, info });
+  }
+  const tb = {
+    'votes': (a, b) => a.f.t.localeCompare(b.f.t),
+    'votes-new': (a, b) => (b.f.y || 0) - (a.f.y || 0),
+    'votes-old': (a, b) => (a.f.y || 9999) - (b.f.y || 9999),
+    'votes-tmdb': (a, b) => ((b.info && b.info.v) || 0) - ((a.info && a.info.v) || 0),
+    'votes-short': (a, b) => ((a.info && a.info.rt) || 999) - ((b.info && b.info.rt) || 999),
+    'random': (a, b) => L.hash(a.f.k + shuffleSeed) - L.hash(b.f.k + shuffleSeed),
+  }[ui.sort] || ((a, b) => 0);
+  out.sort((a, b) => (a.vetoed - b.vetoed) || (b.votes.length - a.votes.length) || tb(a, b));
+  return out;
+}
+
+function fmtRt(m) { return m ? Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0') : ''; }
+function posterHTML(f, info, extra) {
+  const img = info && info.p ? `<img loading="lazy" alt="" src="https://image.tmdb.org/t/p/w342${info.p}">` : '';
+  return `<div class="poster" style="background:${L.posterGradient(f)}">${img}${img ? '' : `<div class="ptitle">${esc(f.t)}<small>${f.y || ''}</small></div>`}${extra || ''}</div>`;
+}
+function cardHTML(r, total) {
+  const { f, votes, seenBy, vetoed, info } = r;
+  const meta = [f.y || '', info && info.v ? '★ ' + info.v : '', info && info.rt ? fmtRt(info.rt) : ''].filter(Boolean).join(' · ');
+  const ppl = votes.map(friend).filter(Boolean);
+  return `<article class="film ${vetoed ? 'vetoed' : ''}" data-k="${esc(f.k)}" tabindex="0">
+    ${posterHTML(f, info, `<span class="votes ${votes.length === total && total > 1 ? 'all' : ''}">${votes.length}/${total}</span>
+    <button class="veto" data-veto="${esc(f.k)}" title="${vetoed ? 'Un-veto' : 'Veto — nobody wants this tonight'}" aria-label="Veto">${vetoed ? '↺' : '✕'}</button>`)}
+    <div class="meta"><div class="t">${esc(f.t)}</div><div class="y">${meta || '&nbsp;'}</div>
+    <div class="stack">${ppl.slice(0, 8).map(p => L.avatar(p, 'xs')).join('')}${ppl.length > 8 ? `<span class="faint" style="font-size:11px;margin-left:4px">+${ppl.length - 8}</span>` : ''}</div>
+    ${seenBy.length ? `<div class="seen">👁 seen by ${esc(seenBy.map(p => p.name).join(', '))}</div>` : ''}</div>
+  </article>`;
+}
+
+let lastRows = [];
+function renderResults() {
+  const pr = present(), total = pr.length;
+  const el = $('#results');
+  if (!S.friends.length) {
+    $('#controls').classList.add('hidden'); $('#stats').innerHTML = '';
+    el.innerHTML = `<div class="empty"><h3>Who's coming to movie night?</h3>
+      <p>Add 2–30 friends above. Works best with your whole group chat.</p>
+      <div class="steps">
+        <div class="s"><b>1 · Add the crew</b>Type Letterboxd usernames, or drop everyone's export ZIPs.</div>
+        <div class="s"><b>2 · Mark who's here</b>Tap someone's face if they're out tonight — only people present count.</div>
+        <div class="s"><b>3 · Pick</b>Films wanted by the most people rise to the top. Spin, duel, or veto.</div>
+      </div></div>`;
+    return;
+  }
+  $('#controls').classList.remove('hidden');
+  const rows = compute(); lastRows = rows;
+  renderStats(rows);
+  $('#clearVeto').classList.toggle('hidden', !S.vetoes.length);
+  if (!rows.length) {
+    const anyData = S.friends.some(f => f.watchlist && f.watchlist.length);
+    el.innerHTML = `<div class="empty"><h3>${anyData ? 'Nothing matches' : 'Waiting for watchlists…'}</h3>
+      <p>${anyData ? 'Try lowering “Min people”, clearing the search, or showing seen films.' : 'Lists appear here as soon as they load.'}</p></div>`;
+    return;
+  }
+  const tiers = new Map();
+  for (const r of rows.slice(0, shown)) {
+    const key = r.vetoed ? 'veto' : r.votes.length;
+    if (!tiers.has(key)) tiers.set(key, []);
+    tiers.get(key).push(r);
+  }
+  let html = '';
+  for (const [n, list] of tiers) {
+    const all = rows.filter(r => !r.vetoed && r.votes.length === n).length;
+    const title = n === 'veto' ? 'Vetoed' : n === total && total > 1 ? 'Everyone wants these' : `${n} of ${total} want${n === 1 ? 's' : ''}`;
+    html += `<div class="tier"><h3>${title} <small>${n === 'veto' ? list.length : all} film${(n === 'veto' ? list.length : all) === 1 ? '' : 's'}</small></h3>
+      <div class="grid">${list.map(r => cardHTML(r, total)).join('')}</div></div>`;
+  }
+  if (rows.length > shown) html += `<div class="more"><button class="btn" id="moreBtn">Show more (${rows.length - shown} left)</button></div>`;
+  el.innerHTML = html;
+  const mb = $('#moreBtn'); if (mb) mb.onclick = () => { shown += 180; renderResults(); };
+  enrich(rows.slice(0, Math.min(shown, 90)).map(r => r.f));
+}
+
+function renderStats(rows) {
+  const pr = present(), { films } = idx();
+  if (pr.length < 2) { $('#stats').innerHTML = ''; return; }
+  const pset = new Set(pr.map(f => f.id));
+  let shared = 0, uniq = 0;
+  const only = new Map(pr.map(p => [p.id, 0]));
+  for (const f of films.values()) {
+    const v = [...f.wl].filter(id => pset.has(id));
+    if (v.length >= 2) shared++;
+    if (v.length) uniq++;
+    if (v.length === 1) only.set(v[0], only.get(v[0]) + 1);
+  }
+  // most aligned pair by watchlist Jaccard
+  let best = null;
+  const sets = pr.map(p => ({ p, s: new Set((p.watchlist || []).map(L.keyOf)) }));
+  for (let i = 0; i < sets.length; i++) for (let j = i + 1; j < sets.length; j++) {
+    const a = sets[i].s, b = sets[j].s; if (!a.size || !b.size) continue;
+    let inter = 0; for (const k of a) if (b.has(k)) inter++;
+    const jac = inter / (a.size + b.size - inter);
+    if (!best || jac > best.jac) best = { a: sets[i].p, b: sets[j].p, jac, inter };
+  }
+  const odd = [...only.entries()].sort((a, b) => b[1] - a[1])[0];
+  const oddF = odd && friend(odd[0]);
+  const top = rows.find(r => !r.vetoed);
+  $('#stats').innerHTML = `
+    <div class="stat"><div class="l">Unique films</div><div class="v">${uniq.toLocaleString()}</div></div>
+    <div class="stat"><div class="l">Wanted by 2+</div><div class="v">${shared.toLocaleString()}</div></div>
+    ${top ? `<div class="stat"><div class="l">Current #1 · ${top.votes.length}/${pr.length}</div><div class="v" title="${esc(top.f.t)}">${esc(top.f.t)}</div></div>` : ''}
+    ${best && best.inter ? `<div class="stat"><div class="l">Watchlist twins · ${best.inter} shared</div><div class="v">${esc(best.a.name)} &amp; ${esc(best.b.name)}</div></div>` : ''}
+    ${oddF && odd[1] ? `<div class="stat"><div class="l">Most niche · ${odd[1]} only they want</div><div class="v">${esc(oddF.name)}</div></div>` : ''}`;
+}
+
+/* TMDB enrichment */
+let enrichQ = [], enriching = 0, tmdbDead = false, genresShown = false;
+function enrich(list) {
+  const key = S.settings.tmdbKey; if (!key || tmdbDead) return;
+  const seen = new Set(enrichQ.map(f => f.k));
+  for (const f of list) if (!L.tmdbCached(f.k) && !seen.has(f.k)) enrichQ.push(f);
+  if (!genresShown) { genresShown = true; L.tmdbGenres(key).then(renderGenres).catch(() => { }); }
+  while (enriching < 4 && enrichQ.length) pump(key);
+}
+let rerenderTimer;
+async function pump(key) {
+  enriching++;
+  while (enrichQ.length && !tmdbDead) {
+    const f = enrichQ.shift();
+    try { await L.tmdbInfo(f, key); } catch (e) { if (e.code === 401) { tmdbDead = true; L.toast('TMDB key was rejected — check Settings.'); } }
+    clearTimeout(rerenderTimer); rerenderTimer = setTimeout(() => { const y = scrollY; renderResults(); scrollTo(0, y); }, 400);
+  }
+  enriching--;
+}
+function renderGenres(map) {
+  const el = $('#genres'); el.classList.remove('hidden'); $('#runtime').classList.remove('hidden');
+  const ids = [28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 53, 10752, 37];
+  el.innerHTML = '<span class="faint" style="font-size:12px;font-weight:700;align-self:center">GENRE</span>' +
+    ids.filter(id => map[id]).map(id => `<button data-g="${id}" class="${genreFilter.has(id) ? 'on' : ''}">${esc(map[id])}</button>`).join('');
+}
+$('#genres').addEventListener('click', e => {
+  const b = e.target.closest('[data-g]'); if (!b) return;
+  const id = +b.dataset.g; genreFilter.has(id) ? genreFilter.delete(id) : genreFilter.add(id);
+  b.classList.toggle('on'); shown = 120; renderResults();
+});
+
+/* result interactions */
+$('#results').addEventListener('click', e => {
+  const v = e.target.closest('[data-veto]');
+  if (v) { e.stopPropagation(); toggleVeto(v.dataset.veto); return; }
+  const c = e.target.closest('.film'); if (c) openFilm(c.dataset.k);
+});
+$('#results').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('film')) openFilm(e.target.dataset.k); });
+function toggleVeto(k) {
+  const i = S.vetoes.indexOf(k);
+  if (i >= 0) S.vetoes.splice(i, 1); else { S.vetoes.push(k); L.toast('Vetoed. Tap “Show vetoed” to undo.'); }
+  L.save(S); renderResults();
+}
+$('#clearVeto').onclick = () => { S.vetoes = []; L.save(S); renderResults(); };
+
+function rowFor(k) {
+  const pr = present(), { films, seen } = idx();
+  const f = films.get(k); if (!f) return null;
+  return { f, votes: [...f.wl].filter(id => pr.some(p => p.id === id)), info: L.tmdbCached(f.k),
+    seenBy: S.friends.map(p => ({ p, w: (seen.get(p.id) || { get() { } }).get(f) })).filter(x => x.w) };
+}
+function openFilm(k) {
+  const r = rowFor(k); if (!r) return;
+  const { f, info } = r;
+  const wants = [...f.wl].map(friend).filter(Boolean);
+  const m = modal(`<div class="pickcard detail">${posterHTML(f, info)}
+    <div style="min-width:0"><h2>${esc(f.t)}</h2>
+      <div class="muted">${[f.y, info && info.v ? '★ ' + info.v + ' TMDB' : '', info && info.rt ? fmtRt(info.rt) : ''].filter(Boolean).join(' · ')}</div>
+      ${info && info.o ? `<p style="font-size:14px">${esc(info.o)}${info.o.length >= 280 ? '…' : ''}</p>` : ''}
+    </div></div>
+    <h4>On the watchlist of ${wants.length}</h4>
+    <div class="who">${wants.map(p => `<span class="pill">${L.avatar(p, 'xs')} ${esc(p.name)}${p.present === false ? ' <span class="faint">(out)</span>' : ''}</span>`).join('')}</div>
+    ${r.seenBy.length ? `<h4>Already seen by</h4><div class="who">${r.seenBy.map(x => `<span class="pill">${L.avatar(x.p, 'xs')} ${esc(x.p.name)}${x.w.r ? ` · ${'★'.repeat(Math.floor(x.w.r))}${x.w.r % 1 ? '½' : ''}` : ''}</span>`).join('')}</div>` : ''}
+    <div class="row" style="margin-top:18px">
+      <a class="btn primary" href="${L.filmUrl(f)}" target="_blank" rel="noopener">Open on Letterboxd ↗</a>
+      <button class="btn" id="dVeto">${S.vetoes.includes(k) ? 'Un-veto' : 'Veto'}</button>
+    </div>`);
+  m.querySelector('#dVeto').onclick = () => { toggleVeto(k); m.close(); };
+}
+
+/* controls */
+function bindCtl(id, key, ev, fn) {
+  const el = $('#' + id);
+  if (el.type === 'checkbox') el.checked = !!ui[key]; else el.value = ui[key];
+  el.addEventListener(ev || 'input', () => {
+    ui[key] = el.type === 'checkbox' ? el.checked : el.type === 'range' || id === 'runtime' ? +el.value : el.value;
+    if (fn) fn();
+    shown = 120; saveUI(); renderResults();
+  });
+}
+bindCtl('q', 'q'); bindCtl('minV', 'minV', 'input', () => $('#minVv').textContent = ui.minV);
+bindCtl('y1', 'y1'); bindCtl('y2', 'y2'); bindCtl('sort', 'sort', 'change', () => shuffleSeed = Math.random());
+bindCtl('runtime', 'runtime', 'change'); bindCtl('hideSeen', 'hideSeen', 'change'); bindCtl('showVeto', 'showVeto', 'change');
+
+/* copy / csv */
+$('#copyBtn').onclick = async () => {
+  const rows = lastRows.filter(r => !r.vetoed).slice(0, 10), total = present().length;
+  if (!rows.length) return L.toast('Nothing to copy yet.');
+  const txt = '🎬 Movie night shortlist\n' + rows.map((r, i) => `${i + 1}. ${r.f.t}${r.f.y ? ` (${r.f.y})` : ''} — ${r.votes.length}/${total}`).join('\n') +
+    '\n\nMerged at ' + location.href.split('#')[0];
+  L.toast(await L.copy(txt) ? 'Top 10 copied — paste it in the group chat.' : 'Copy failed.');
+};
+$('#csvBtn').onclick = () => {
+  const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+  const lines = [['Title', 'Year', 'Votes', 'Present', 'Wanted by', 'Seen by', 'Letterboxd'].join(',')];
+  for (const r of lastRows) lines.push([q(r.f.t), r.f.y || '', r.votes.length, present().length,
+    q(r.votes.map(id => (friend(id) || {}).name).join('; ')), q(r.seenBy.map(p => p.name).join('; ')), L.filmUrl(r.f)].join(','));
+  L.download('merged-watchlist.csv', lines.join('\n'), 'text/csv');
+};
+
+/* spin */
+$('#spinBtn').onclick = () => {
+  const pool = lastRows.filter(r => !r.vetoed);
+  if (!pool.length) return L.toast('No films to spin — loosen the filters.');
+  let mode = 'top';
+  const m = modal(`<h2>Spin for a pick</h2>
+    <div class="row"><div class="seg" id="spMode"><button data-m="top" class="on">Top tier only</button><button data-m="w">Weighted by votes</button><button data-m="any">Anything shown</button></div></div>
+    <div class="reel" id="reel"><div class="nm faint">Ready?</div></div>
+    <div id="spRes"></div>
+    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn orange" id="spGo">🎲 Spin</button></div>`);
+  const reel = m.querySelector('#reel'), res = m.querySelector('#spRes');
+  m.querySelector('#spMode').onclick = e => { const b = e.target.closest('[data-m]'); if (!b) return; mode = b.dataset.m; m.querySelectorAll('#spMode button').forEach(x => x.classList.toggle('on', x === b)); };
+  let spinning = false;
+  const go = () => {
+    if (spinning) return;
+    const live = lastRows.filter(r => !r.vetoed);
+    if (!live.length) { res.innerHTML = '<p class="muted">Everything is vetoed!</p>'; return; }
+    const topN = live[0].votes.length;
+    const cand = mode === 'top' ? live.filter(r => r.votes.length === topN) : live;
+    const w = cand.map(r => mode === 'w' ? Math.pow(r.votes.length, 2.2) : 1);
+    let x = Math.random() * w.reduce((a, b) => a + b, 0), pick = cand[0];
+    for (let i = 0; i < cand.length; i++) { x -= w[i]; if (x <= 0) { pick = cand[i]; break; } }
+    spinning = true; res.innerHTML = ''; reel.classList.remove('done');
+    let t = 0, delay = 45; const steps = 26 + Math.floor(Math.random() * 6);
+    const tick = () => {
+      t++;
+      const r = t >= steps ? pick : cand[Math.floor(Math.random() * cand.length)];
+      reel.innerHTML = `<div class="nm">${esc(r.f.t)}</div>`;
+      if (t < steps) { delay *= 1.11; setTimeout(tick, delay); return; }
+      spinning = false; reel.classList.add('done');
+      const total = present().length;
+      res.innerHTML = `<div class="pickcard">${posterHTML(pick.f, pick.info)}<div><div style="font-weight:700">${pick.f.y || ''} · wanted by ${pick.votes.length}/${total}</div>
+        <div class="stack" style="margin:8px 0">${pick.votes.map(friend).filter(Boolean).map(p => L.avatar(p, 'sm')).join('')}</div>
+        <div class="row"><a class="btn small primary" href="${L.filmUrl(pick.f)}" target="_blank" rel="noopener">Letterboxd ↗</a>
+        <button class="btn small" id="spVeto">Veto &amp; respin</button></div></div></div>
+        <p class="faint" style="font-size:13px;margin-top:10px">${cand.length} candidate${cand.length === 1 ? '' : 's'} in this spin.</p>`;
+      res.querySelector('#spVeto').onclick = () => { S.vetoes.push(pick.f.k); L.save(S); renderResults(); go(); };
+    };
+    tick();
+  };
+  m.querySelector('#spGo').onclick = go;
+  go();
+};
+
+/* showdown bracket */
+$('#duelBtn').onclick = () => {
+  const pool = lastRows.filter(r => !r.vetoed);
+  if (pool.length < 2) return L.toast('Need at least 2 films for a showdown.');
+  const size = pool.length >= 16 ? 16 : pool.length >= 8 ? 8 : pool.length >= 4 ? 4 : 2;
+  let round = pool.slice(0, size), next = [], i = 0;
+  // seed 1 vs last, 2 vs second-last…
+  const seeded = []; for (let a = 0, b = round.length - 1; a < b; a++, b--) seeded.push(round[a], round[b]);
+  round = seeded;
+  const names = n => n === 2 ? 'Final' : n === 4 ? 'Semifinal' : n === 8 ? 'Quarterfinal' : 'Round of ' + n;
+  const total = present().length;
+  const m = modal(`<h2>Showdown</h2><p class="muted" style="margin:0">Top ${size} head to head. Pass the phone around or shout it out — tap the winner.</p><div id="duelBody"></div>`);
+  const body = m.querySelector('#duelBody');
+  const card = r => `<div class="film" data-pick>${posterHTML(r.f, r.info, `<span class="votes">${r.votes.length}/${total}</span>`)}<div class="meta"><div class="t">${esc(r.f.t)}</div><div class="y">${r.f.y || ''}</div></div></div>`;
+  const draw = () => {
+    if (round.length === 1) {
+      const w = round[0];
+      body.innerHTML = `<div class="reel done" style="height:auto;padding:18px"><div><div class="round">Tonight's winner</div><div class="nm">${esc(w.f.t)}</div><div class="muted">${w.f.y || ''}</div></div></div>
+        <div class="row" style="justify-content:center"><a class="btn primary" href="${L.filmUrl(w.f)}" target="_blank" rel="noopener">Open on Letterboxd ↗</a></div>`;
+      return;
+    }
+    const a = round[i], b = round[i + 1];
+    body.innerHTML = `<div class="round" style="margin-top:14px">${names(round.length)} · match ${i / 2 + 1} of ${round.length / 2}</div>
+      <div class="duel"><div data-side="0">${card(a)}</div><div class="vs">vs</div><div data-side="1">${card(b)}</div></div>`;
+    body.querySelectorAll('[data-side]').forEach(el => el.onclick = () => {
+      next.push(el.dataset.side === '0' ? a : b); i += 2;
+      if (i >= round.length) { round = next; next = []; i = 0; }
+      draw();
+    });
+  };
+  draw();
+};
+
+$('#themeBtn').onclick = L.toggleTheme;
+
+function ago(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  return m < 2 ? 'just now' : m < 60 ? m + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago';
+}
+
+/* Preset crew: crew.json lists the group, data.json is refreshed by a GitHub Action. */
+async function loadPreset() {
+  let crew, data = { friends: [] };
+  try { crew = await (await fetch('crew.json', { cache: 'no-cache' })).json(); } catch (e) { return; }
+  try { data = await (await fetch('data.json', { cache: 'no-cache' })).json(); } catch (e) { }
+  const list = (crew.crew || []).filter(c => c.username);
+  if (!list.length) return;
+  presetInfo = { updated: data.updated };
+  const snap = new Map((data.friends || []).map(f => [f.username.toLowerCase(), f]));
+  const t = data.updated ? Date.parse(data.updated) : 0, need = [];
+  for (const c of list) {
+    const d = snap.get(c.username.toLowerCase());
+    let f = findByUsername(c.username);
+    if (!f) f = addFriend({ username: c.username, name: c.name || c.username });
+    f.preset = true;
+    if (c.name && f.name === f.username) f.name = c.name;
+    if (d && t > (f.updated || 0)) { f.watchlist = d.watchlist; f.watched = d.watched; f.updated = t; f.source = 'preset'; delete status[f.id]; }
+    else if (!d && !f.updated) need.push(f);
+  }
+  persist(); renderAll();
+  if (need.length) runQueue(need);
+}
+
+function renderAll() { renderCrew(); renderResults(); }
+renderAll();
+loadPreset().then(readHash);
+addEventListener('hashchange', readHash);
+addEventListener('storage', e => { if (e.key === 'lbxm.v1') { S = L.load(); index = null; renderAll(); } });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+{
+  "_help": "List your movie group here. 'username' is the Letterboxd username (letterboxd.com/USERNAME), 'name' is what shows on the page. Saving this file triggers the GitHub Action that downloads everyone's watchlists into data.json.",
+  "crew": []
+}
