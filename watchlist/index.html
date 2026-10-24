@@ -42,8 +42,19 @@
 .blocked a{color:var(--green);text-decoration:underline}
 .blocked ol{margin:6px 0 8px;padding-left:20px}
 .blocked .row{gap:6px}
-.crewbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
-.crewbar .grow{flex:1 1 260px;font-size:12px}
+.crewbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.picker{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pk-note{font-size:12px;color:var(--ink2);margin-right:4px}
+.pk-note b{color:var(--ink)}
+.groups{display:contents}
+.gchip{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 10px;border-radius:3px;border:0;background:var(--slate);color:var(--ink-hi);cursor:pointer;font-size:12px;font-weight:600}
+.gchip:hover{background:var(--slate-hi)}
+.gchip.on{background:var(--green);color:var(--bg)}
+.gchip .gx{opacity:.55;padding:0 3px;border-radius:2px}
+.gchip .gx:hover{opacity:1;background:rgba(0,0,0,.2)}
+.fchip{cursor:pointer;user-select:none}
+.fchip:not(.away){box-shadow:inset 0 0 0 1px rgba(0,224,84,.35)}
+.newb{position:absolute;left:6px;top:30px;z-index:2;background:var(--orange);color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:3px}
 
 .controls{position:sticky;top:62px;z-index:20;background:rgba(20,24,28,.96);backdrop-filter:blur(8px);padding:12px 0;margin-top:30px;border-top:1px solid var(--line-lo);border-bottom:1px solid var(--line-lo)}
 .controls .row{gap:8px}
@@ -160,10 +171,19 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
     <div class="blocked hidden" id="blocked"></div>
     <div class="friends" id="friends"></div>
     <div class="crewbar" id="crewbar">
-      <span class="faint grow" id="presentNote"></span>
-      <button class="btn small" id="refreshAll">↻ Refresh</button>
-      <button class="btn small" id="shareBtn">Share link</button>
-      <button class="btn small" id="exportBtn">Save crew file</button>
+      <div class="picker">
+        <span class="pk-note" id="presentNote"></span>
+        <button class="btn small ghost" data-pick="all">Everyone</button>
+        <button class="btn small ghost" data-pick="none">No one</button>
+        <span class="groups" id="groups"></span>
+        <button class="btn small ghost" id="saveGroup">+ Save group</button>
+        <button class="btn small ghost" id="missingBtn">Missing someone?</button>
+      </div>
+      <div class="row" style="gap:8px;margin-left:auto">
+        <button class="btn small" id="refreshAll">↻ Refresh</button>
+        <button class="btn small" id="shareBtn">Share link</button>
+        <button class="btn small" id="exportBtn">Save crew file</button>
+      </div>
     </div>
   </section>
 
@@ -185,6 +205,7 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
       </select>
       <label class="ctl" title="Needs watched data: export ZIPs, or 'also fetch watched films' in settings"><input type="checkbox" id="hideSeen" checked> Hide films someone here has seen</label>
       <label class="ctl"><input type="checkbox" id="showVeto"> Show vetoed</label>
+      <label class="ctl" title="Films added to someone's watchlist in the last 7 days"><input type="checkbox" id="onlyNew"> Only new this week</label>
     </div>
     <div class="genres hidden" id="genres"></div>
     <div class="actions">
@@ -216,8 +237,8 @@ let uploadTarget = null;    // friend id for single CSV upload
 let shown = 120;
 let genreFilter = new Set();
 let shuffleSeed = Math.random();
-let presetInfo = null;
-const ui = Object.assign({ q: '', minV: 2, y1: '', y2: '', sort: 'votes', runtime: 0, hideSeen: true, showVeto: false }, (() => { try { return JSON.parse(sessionStorage.getItem('lbxm.ui')) || {}; } catch (e) { return {}; } })());
+let presetInfo = null, presetUser = '';
+const ui = Object.assign({ q: '', minV: 2, y1: '', y2: '', sort: 'votes', runtime: 0, hideSeen: true, showVeto: false, onlyNew: false }, (() => { try { return JSON.parse(sessionStorage.getItem('lbxm.ui')) || {}; } catch (e) { return {}; } })());
 
 function persist() { L.save(S); index = null; }
 function saveUI() { try { sessionStorage.setItem('lbxm.ui', JSON.stringify(ui)); } catch (e) { } }
@@ -235,12 +256,12 @@ function renderCrew() {
     let sub = st.busy ? `<span class="spin"></span> ${esc(st.msg || 'Fetching…')}`
       : st.err ? `⚠ ${esc(st.err)}`
       : `${wl} on watchlist${wd != null ? ` · ${wd} seen` : ''}`;
-    return `<div class="fchip ${f.present === false ? 'away' : ''}" data-id="${f.id}">
-      <span class="avatar" style="--c:${f.color}" data-act="toggle" title="${f.present === false ? 'Not here tonight — tap to add back' : 'Here tonight — tap if they\'re out'}">${esc(L.initials(f.name))}</span>
-      <div class="who"><div class="nm" data-act="rename" title="Double-click to rename">${esc(f.name)}</div>
+    return `<div class="fchip ${f.present === false ? 'away' : ''}" data-id="${f.id}" title="${f.present === false ? 'Not watching — tap to add' : 'Watching — tap to leave out'}">
+      <span class="avatar" style="--c:${f.color}">${esc(L.initials(f.name))}</span>
+      <div class="who"><div class="nm" data-act="rename">${esc(f.name)}</div>
       <div class="sub ${st.err ? 'err' : ''}" title="${esc(st.err || (f.username ? '@' + f.username : 'from file'))}">${sub}</div></div>
       <div class="acts">
-        ${f.username ? `<button data-act="refresh" title="Refresh from Letterboxd">↻</button>` : ''}
+        ${f.username && !f.preset ? `<button data-act="refresh" title="Refresh from Letterboxd">↻</button>` : ''}
         <button data-act="upload" title="Upload a CSV/ZIP for ${esc(f.name)}">⬆</button>
         ${f.preset ? '' : `<button data-act="remove" title="Remove">✕</button>`}
       </div></div>`;
@@ -253,25 +274,28 @@ function renderCrew() {
     $('#blocked').innerHTML = `<b>Letterboxd blocks fetching from the browser.</b> GitHub can fetch it instead — add them to the crew once:
       <ol><li>Open <a href="${workflowUrl()}" target="_blank" rel="noopener">the update workflow on GitHub</a> → <b>Run workflow</b></li>
       <li>Paste <span class="kbd">${esc(names)}</span> into “usernames to add” → <b>Run workflow</b></li>
-      <li>Come back in ~2 minutes; they'll load here automatically, every 6 hours from then on.</li></ol>
+      <li>Come back in ~2 minutes; they'll load here automatically, every 3 hours from then on.</li></ol>
       <div class="row"><button class="btn small" data-copy="${esc(names)}">Copy usernames</button>
       <span class="faint">Not the site owner? Send them the usernames, or drop an export ZIP above.</span></div>`;
   }
-  $('#presentNote').textContent = fs.length ? `${pr.length} of ${fs.length} here tonight — tap a face to mark someone out.` : '';
-  $('#refreshAll').classList.toggle('hidden', !fs.some(f => f.username));
+  $('#presentNote').innerHTML = fs.length ? `Watching: <b>${pr.length}</b> of ${fs.length} · tap people to pick` : '';
+  renderGroups();
+  $('#refreshAll').classList.toggle('hidden', !presetInfo && !fs.some(f => f.username));
+  $('#missingBtn').classList.toggle('hidden', !presetInfo);
   if (presetInfo) {
     $('#addInput').placeholder = 'Add a guest by Letterboxd username…';
     $('#syncNote').textContent = presetInfo.updated ? 'Synced ' + ago(Date.parse(presetInfo.updated)) : 'Waiting for first auto-sync';
   }
-  const mv = $('#minV'); mv.max = Math.max(1, pr.length);
-  if (ui.minV > pr.length && pr.length) { ui.minV = pr.length; }
-  mv.value = ui.minV; $('#minVv').textContent = ui.minV;
+  // the slider shows the effective minimum; ui.minV keeps the setting for when more people are picked
+  const mv = $('#minV'), eff = Math.max(1, Math.min(ui.minV, pr.length));
+  mv.max = Math.max(1, pr.length); mv.value = eff; $('#minVv').textContent = eff;
 }
 
 $('#friends').addEventListener('click', e => {
-  const b = e.target.closest('[data-act]'); if (!b) return;
-  const id = b.closest('.fchip').dataset.id, f = friend(id);
-  const act = b.dataset.act;
+  const chip = e.target.closest('.fchip'); if (!chip) return;
+  const b = e.target.closest('.acts [data-act]');
+  const id = chip.dataset.id, f = friend(id);
+  const act = b ? b.dataset.act : 'toggle';
   if (act === 'toggle') { f.present = f.present === false; persist(); renderAll(); }
   else if (act === 'refresh') fetchFriend(f);
   else if (act === 'upload') { uploadTarget = id; $('#fileInput').click(); }
@@ -285,6 +309,60 @@ $('#friends').addEventListener('dblclick', e => {
   const f = friend(b.closest('.fchip').dataset.id);
   const n = prompt('Display name', f.name); if (n && n.trim()) { f.name = n.trim(); persist(); renderAll(); }
 });
+
+/* ---------------- picking who's watching ---------------- */
+const fkey = f => (f.username || f.id).toLowerCase();
+function setPresent(keys) {
+  const want = new Set(keys.map(k => k.toLowerCase()));
+  for (const f of S.friends) f.present = want.has(fkey(f));
+  shown = 120; persist(); renderAll();
+}
+function renderGroups() {
+  const cur = present().map(fkey).sort().join(',');
+  $('#groups').innerHTML = (S.groups || []).map((g, i) =>
+    `<button class="gchip ${g.keys.slice().sort().join(',') === cur ? 'on' : ''}" data-g="${i}" title="${esc(g.keys.length + ' people')}">${esc(g.name)}<span class="gx" data-gdel="${i}" title="Delete group">✕</span></button>`).join('');
+}
+$('#crewbar').addEventListener('click', e => {
+  const pick = e.target.closest('[data-pick]');
+  if (pick) return setPresent(pick.dataset.pick === 'all' ? S.friends.map(fkey) : []);
+  const del = e.target.closest('[data-gdel]');
+  if (del) { e.stopPropagation(); const g = S.groups[+del.dataset.gdel]; if (confirm(`Delete group “${g.name}”?`)) { S.groups.splice(+del.dataset.gdel, 1); L.save(S); renderGroups(); } return; }
+  const g = e.target.closest('[data-g]');
+  if (g) setPresent(S.groups[+g.dataset.g].keys);
+});
+$('#saveGroup').onclick = () => {
+  const keys = present().map(fkey);
+  if (!keys.length) return L.toast('Pick some people first.');
+  const name = prompt(`Name this group of ${keys.length}:`, keys.length <= 3 ? present().map(f => f.name).join(' + ') : 'Movie night');
+  if (!name || !name.trim()) return;
+  S.groups = (S.groups || []).filter(g => g.name !== name.trim());
+  S.groups.push({ name: name.trim(), keys });
+  L.save(S); renderGroups(); L.toast('Saved. Tap it any time to pick the same people.');
+};
+
+/* Letterboxd only shows scripts the first page of follows, so missing mutuals are
+   collected in the owner's own browser with a bookmarklet, then added via GitHub. */
+const MUTUALS_JS = `(async()=>{const u=location.pathname.split('/')[1];if(!/letterboxd\\.com$/.test(location.hostname)||!u){alert('Open your Letterboxd profile page first, then tap this again.');return}
+const get=async k=>{const out=new Map();for(let p=1;p<=40;p++){const r=await fetch('/'+u+'/'+k+'/page/'+p+'/');if(!r.ok)break;const d=new DOMParser().parseFromString(await r.text(),'text/html');const a=[...d.querySelectorAll('a.name[href]')];for(const x of a){const m=x.getAttribute('href').match(/^\\/([A-Za-z0-9_]+)\\/$/);if(m)out.set(m[1].toLowerCase(),m[1])}if(!a.length||!d.querySelector('a.next'))break}return out};
+const a=await get('following'),b=await get('followers');const m=[...a.keys()].filter(k=>b.has(k)).map(k=>a.get(k));const t=m.join(', ');
+try{await navigator.clipboard.writeText(t)}catch(e){}prompt(m.length+' mutuals found and copied. Paste them into GitHub: Run workflow, usernames to add.',t)})()`;
+$('#missingBtn').onclick = () => {
+  const m = modal(`<h2>Missing someone?</h2>
+    <p class="muted">Letterboxd only lets the sync see the first 25 people you follow. Your own browser can see them all — grab the full list once:</p>
+    <ol class="muted" style="padding-left:20px;line-height:1.8">
+      <li>Drag this to your bookmarks bar: <a class="btn small primary" id="bmk" href="#">Letterboxd mutuals</a><br>
+        <span class="faint" style="font-size:12px">On a phone: copy the code below, bookmark any page, then edit the bookmark's URL and paste it in.</span></li>
+      <li>Open <a href="https://letterboxd.com/${esc(presetUser || 'YOUR_USERNAME')}/" target="_blank" rel="noopener">your Letterboxd profile</a> and tap the bookmark. It copies all your mutuals.</li>
+      <li>Open <a href="${workflowUrl()}" target="_blank" rel="noopener">the update workflow</a> → <b>Run workflow</b> → paste into “usernames to add” → <b>Run workflow</b>.</li>
+      <li>Back here in ~3 minutes, everyone's in.</li>
+    </ol>
+    <div class="row"><button class="btn small" id="bmkCopy">Copy bookmarklet code</button>
+    <span class="faint" style="font-size:12px">Or just type their usernames straight into step 3.</span></div>`);
+  const js = 'javascript:' + encodeURIComponent(MUTUALS_JS);
+  m.querySelector('#bmk').href = js;
+  m.querySelector('#bmk').onclick = e => { e.preventDefault(); L.toast('Drag it to your bookmarks bar instead of clicking it here.'); };
+  m.querySelector('#bmkCopy').onclick = async () => L.toast(await L.copy(js) ? 'Copied — paste it as a bookmark URL.' : 'Copy failed.');
+};
 
 function addFriend(o) {
   const f = Object.assign({ id: L.uid(), name: o.username || 'Friend', username: '', color: L.nextColor(S.friends), present: true, watchlist: [], watched: null, updated: 0 }, o);
@@ -335,7 +413,7 @@ async function runQueue(list) {
   const worker = async () => { while (q.length) await fetchFriend(q.shift()); };
   await Promise.all([worker(), worker()]);
 }
-$('#refreshAll').onclick = () => runQueue(S.friends);
+$('#refreshAll').onclick = () => { if (presetInfo) poll(true); runQueue(S.friends.filter(f => !f.preset)); };
 
 /* files */
 const drop = $('#drop');
@@ -403,7 +481,12 @@ $('#shareBtn').onclick = async () => {
   let full = '';
   try { full = base + '#' + await L.packGroup(S); } catch (e) { }
   const light = base + '#u=' + S.friends.filter(f => f.username).map(f => f.username).join(',');
+  const pr = present();
+  const withLink = base + '#with=' + pr.map(fkey).join(',');
+  const subset = presetInfo && pr.length && pr.length < S.friends.length;
   modal(`<h2>Share this crew</h2>
+    ${subset ? `<div class="setrow"><label>Link for tonight's ${pr.length} — opens with just these people picked</label>
+      <div class="row"><input class="input" readonly value="${esc(withLink)}" style="flex:1"><button class="btn primary" data-copy="${esc(withLink)}">Copy</button></div></div>` : ''}
     <p class="muted">Anyone opening the link sees the same crew and can spin on their own phone.</p>
     ${full ? `<div class="setrow"><label>Full link — includes everyone's lists (${(full.length / 1024).toFixed(1)} KB)</label>
       <div class="row"><input class="input" readonly value="${esc(full)}" style="flex:1"><button class="btn primary" data-copy="${esc(full)}">Copy</button></div>
@@ -429,6 +512,9 @@ async function readHash() {
       if (go === 'a') S.friends = [];
       mergeIn(list); persist(); renderAll(); L.toast(`Loaded ${list.length} people.`);
     } catch (e) { L.toast('That share link looks broken.'); }
+  } else if (h.startsWith('with=')) {
+    const keys = decodeURIComponent(h.slice(5)).split(',').map(x => x.trim()).filter(Boolean);
+    setPresent(keys); L.toast(`Picked ${present().length} people from the link.`);
   } else if (h.startsWith('u=')) {
     const names = decodeURIComponent(h.slice(2)).split(',').map(L.cleanUsername).filter(Boolean);
     const fresh = names.filter(u => !findByUsername(u)).map(u => addFriend({ username: u, name: u }));
@@ -514,7 +600,7 @@ function compute() {
   const veto = new Set(S.vetoes), q = L.norm(ui.q);
   const y1 = +ui.y1 || 0, y2 = +ui.y2 || 9999;
   const tm = !!S.settings.tmdbKey;
-  const out = [];
+  const out = [], now = Date.now();
   for (const f of films.values()) {
     const votes = [...f.wl].filter(id => pset.has(id));
     if (votes.length < Math.min(ui.minV, Math.max(1, pr.length))) continue;
@@ -528,7 +614,9 @@ function compute() {
     const info = tm ? L.tmdbCached(f.k) : null;
     if (tm && genreFilter.size && !(info && info.g && info.g.some(g => genreFilter.has(g)))) continue;
     if (tm && ui.runtime && !(info && info.rt && info.rt <= ui.runtime)) continue;
-    out.push({ f, votes, seenBy, vetoed, info });
+    const isNew = votes.some(id => { const a = (friend(id) || {}).added; return a && a[f.k] && now - a[f.k] < WEEK; });
+    if (ui.onlyNew && !isNew) continue;
+    out.push({ f, votes, seenBy, vetoed, info, isNew });
   }
   const tb = {
     'votes': (a, b) => a.f.t.localeCompare(b.f.t),
@@ -549,11 +637,11 @@ function posterHTML(f, info, extra) {
   return `<div class="poster" style="background:${L.posterGradient(f)}"><div class="ptitle">${esc(f.t)}<small>${f.y || ''}</small></div>${img}${extra || ''}</div>`;
 }
 function cardHTML(r, total) {
-  const { f, votes, seenBy, vetoed, info } = r;
+  const { f, votes, seenBy, vetoed, info, isNew } = r;
   const meta = [f.y || '', info && info.v ? '★ ' + info.v : '', info && info.rt ? fmtRt(info.rt) : ''].filter(Boolean).join(' · ');
   const ppl = votes.map(friend).filter(Boolean);
   return `<article class="film ${vetoed ? 'vetoed' : ''}" data-k="${esc(f.k)}" tabindex="0">
-    ${posterHTML(f, info, `<span class="votes ${votes.length === total && total > 1 ? 'all' : ''}">${votes.length}/${total}</span>
+    ${posterHTML(f, info, `<span class="votes ${votes.length === total && total > 1 ? 'all' : ''}">${votes.length}/${total}</span>${isNew ? '<span class="newb" title="Added to a watchlist this week">NEW</span>' : ''}
     <button class="veto" data-veto="${esc(f.k)}" title="${vetoed ? 'Un-veto' : 'Veto — nobody wants this tonight'}" aria-label="Veto">${vetoed ? '↺' : '✕'}</button>`)}
     <div class="meta"><div class="t">${esc(f.t)}</div><div class="y">${meta || '&nbsp;'}</div>
     <div class="stack">${ppl.slice(0, 8).map(p => L.avatar(p, 'xs')).join('')}${ppl.length > 8 ? `<span class="faint" style="font-size:11px;margin-left:4px">+${ppl.length - 8}</span>` : ''}</div>
@@ -719,7 +807,7 @@ function bindCtl(id, key, ev, fn) {
 }
 bindCtl('q', 'q'); bindCtl('minV', 'minV', 'input', () => $('#minVv').textContent = ui.minV);
 bindCtl('y1', 'y1'); bindCtl('y2', 'y2'); bindCtl('sort', 'sort', 'change', () => shuffleSeed = Math.random());
-bindCtl('runtime', 'runtime', 'change'); bindCtl('hideSeen', 'hideSeen', 'change'); bindCtl('showVeto', 'showVeto', 'change');
+bindCtl('runtime', 'runtime', 'change'); bindCtl('hideSeen', 'hideSeen', 'change'); bindCtl('showVeto', 'showVeto', 'change'); bindCtl('onlyNew', 'onlyNew', 'change');
 
 /* copy / csv */
 $('#copyBtn').onclick = async () => {
@@ -825,13 +913,17 @@ function ago(t) {
 }
 
 /* Preset crew: crew.json lists the group, data.json is refreshed by a GitHub Action. */
+const WEEK = 7 * 864e5;
 async function loadPreset() {
   let crew, data = { friends: [] };
-  try { crew = await (await fetch('crew.json', { cache: 'no-cache' })).json(); } catch (e) { return; }
+  try { crew = await (await fetch('crew.json', { cache: 'no-cache' })).json(); } catch (e) { return 0; }
   try { data = await (await fetch('data.json', { cache: 'no-cache' })).json(); } catch (e) { }
   const list = (crew.crew || []).filter(c => c.username);
-  if (!list.length) return;
+  if (!list.length) return 0;
   presetInfo = { updated: data.updated };
+  presetUser = crew.mutualsOf || '';
+  let fresh = 0, changed = false;
+  const now = Date.now();
   const snap = new Map((data.friends || []).map(f => [f.username.toLowerCase(), f]));
   const t = data.updated ? Date.parse(data.updated) : 0, need = [];
   for (const c of list) {
@@ -840,12 +932,39 @@ async function loadPreset() {
     if (!f) f = addFriend({ username: c.username, name: c.name || c.username });
     f.preset = true;
     if (c.name && f.name === f.username) f.name = c.name;
-    if (d && t > (f.updated || 0)) { f.watchlist = d.watchlist; f.watched = d.watched; f.updated = t; f.source = 'preset'; delete status[f.id]; }
+    if (d && t > (f.updated || 0)) {
+      // remember films that appeared since the last sync this device saw, for the NEW badge
+      const added = Object.fromEntries(Object.entries(f.added || {}).filter(([, at]) => now - at < 2 * WEEK));
+      if (f.updated && f.watchlist && f.watchlist.length) {
+        const before = new Set(f.watchlist.map(L.keyOf));
+        for (const x of d.watchlist) { const k = L.keyOf(x); if (!before.has(k) && !added[k]) { added[k] = now; fresh++; } }
+      }
+      f.added = added;
+      f.watchlist = d.watchlist; f.watched = d.watched; f.updated = t; f.source = 'preset'; delete status[f.id];
+      changed = true;
+    }
     else if (!d && !f.updated) need.push(f);
   }
-  persist(); renderAll();
+  // drop crew members who were removed from crew.json
+  const keep = new Set(list.map(c => c.username.toLowerCase()));
+  const before = S.friends.length;
+  S.friends = S.friends.filter(f => !f.preset || keep.has((f.username || '').toLowerCase()));
+  if (S.friends.length !== before) changed = true;
+  if (changed || !index) { persist(); renderAll(); } else renderCrew();
   if (need.length) runQueue(need);
+  return fresh;
 }
+/* pick up new syncs while the page stays open */
+let lastPoll = Date.now();
+async function poll(force) {
+  if (!presetInfo || (!force && Date.now() - lastPoll < 5 * 60e3)) return;
+  lastPoll = Date.now();
+  const was = presetInfo.updated, fresh = await loadPreset();
+  if (presetInfo.updated !== was) L.toast(fresh ? `Watchlists updated — ${fresh} new film${fresh > 1 ? 's' : ''} added.` : 'Watchlists updated.');
+  else if (force) L.toast('Already up to date — synced ' + ago(Date.parse(presetInfo.updated)) + '.');
+}
+setInterval(() => poll(), 10 * 60e3);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
 
 function renderAll() { renderCrew(); renderResults(); }
 renderAll();

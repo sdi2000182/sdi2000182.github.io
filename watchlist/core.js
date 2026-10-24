@@ -29,7 +29,7 @@
 
   /* ---------- store ---------- */
   function blank() {
-    return { v: 1, friends: [], vetoes: [], settings: { proxy: 'auto', customProxy: '', tmdbKey: '', fetchWatched: true } };
+    return { v: 1, friends: [], vetoes: [], groups: [], settings: { proxy: 'auto', customProxy: '', tmdbKey: '', fetchWatched: true } };
   }
   function load() {
     try {
