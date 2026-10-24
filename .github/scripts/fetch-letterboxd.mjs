@@ -215,12 +215,7 @@ if (crewFile.ballotTopic) {
     }
   } catch (e) { console.warn('ballot read failed:', e.message); }
 }
-// films the crew rated highly feed the taste recommender, so they come right after the shared picks
-const loved = new Map();
-for (const f of friends) for (const w of f.watched || []) if (w.s && w.r >= 3.5) loved.set(w.s, Math.max(loved.get(w.s) || 0, w.r));
-const byWant = [...want].sort((a, b) => b[1] - a[1]);
-const todo = [...new Set([...ballot, ...byWant.filter(x => x[1] >= 2).map(x => x[0]),
-  ...[...loved].sort((a, b) => b[1] - a[1]).map(x => x[0]), ...byWant.map(x => x[0])])].filter(s => !films[s]);
+const todo = [...new Set([...ballot, ...[...want].sort((a, b) => b[1] - a[1]).map(x => x[0])])].filter(s => !films[s]);
 const LIMIT = +(process.env.DETAILS_LIMIT || 300);
 console.log(`Film details: ${Object.keys(films).length} cached, ${todo.length} to go (${ballot.length} on ballot), fetching up to ${LIMIT}`);
 let got = 0;

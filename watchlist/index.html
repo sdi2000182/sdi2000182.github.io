@@ -90,20 +90,6 @@
 @media (hover:none){.addb{opacity:.9}}
 .addb:hover{background:var(--green);color:var(--bg)}
 .addb.on{background:var(--green);color:var(--bg)}
-.recs{margin-top:34px}
-.moods{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
-.moods button{padding:4px 9px;border-radius:3px;border:0;background:var(--slate);cursor:pointer;font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em}
-.moods button:hover{color:#fff}
-.moods button.on{background:var(--blue);color:var(--bg)}
-.recrow{display:flex;gap:14px;overflow-x:auto;padding:14px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
-.rcard{flex:0 0 132px;scroll-snap-align:start;cursor:pointer;position:relative;min-width:0}
-.rcard .t{font-weight:600;font-size:13px;color:var(--ink-hi);line-height:1.3;margin-top:7px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.rcard:hover .t{color:var(--blue)}
-.rcard .why{font-size:11px;color:var(--ink2);line-height:1.4;margin-top:3px}
-.rcard .why b{color:var(--green);font-weight:600}
-.rcard:hover .poster::after{box-shadow:inset 0 0 0 3px var(--green)}
-.rcard .addb{opacity:1;right:5px}
-.recempty{color:var(--ink3);font-size:13px;padding:16px 0}
 .newb{position:absolute;left:6px;top:30px;z-index:2;background:var(--orange);color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:3px}
 
 .controls{position:sticky;top:62px;z-index:20;background:rgba(20,24,28,.96);backdrop-filter:blur(8px);padding:12px 0;margin-top:30px;border-top:1px solid var(--line-lo);border-bottom:1px solid var(--line-lo)}
@@ -263,17 +249,6 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
       <button class="btn small ghost" id="ballotReset">Clear</button>
     </div>
     <div class="blist" id="blist"></div>
-  </section>
-
-  <section class="recs hidden" id="recs">
-    <div class="sh"><h2>Recommended for tonight</h2><span class="aside" id="recsFor"></span></div>
-    <div class="row" style="gap:8px">
-      <div class="seg" id="recTabs">
-        <button data-rt="loved" class="on">Crew loved it</button><button data-rt="taste">Your taste</button><button data-rt="gems">Highly rated</button><button data-rt="short">Short</button>
-      </div>
-    </div>
-    <div class="moods" id="moods"></div>
-    <div class="recrow" id="recrow"></div>
   </section>
 
   <section class="controls" id="controls">
@@ -1115,7 +1090,7 @@ function takeEvent(m) {
   return true;
 }
 let bRenderT;
-function ballotChanged() { clearTimeout(bRenderT); bRenderT = setTimeout(() => { reduceBallot(); renderBallot(); renderRecs(); renderResults(); }, 60); }
+function ballotChanged() { clearTimeout(bRenderT); bRenderT = setTimeout(() => { reduceBallot(); renderBallot(); renderResults(); }, 60); }
 async function publish(d) {
   if (!ballotTopic) return;
   try {
@@ -1242,115 +1217,7 @@ $('#filmQ').addEventListener('keydown', e => {
 $('#sugg').addEventListener('mousedown', e => { const b = e.target.closest('[data-si]'); if (b) { e.preventDefault(); chooseSugg(+b.dataset.si); } });
 $('#filmQ').addEventListener('blur', () => setTimeout(() => $('#sugg').classList.add('hidden'), 150));
 
-/* ---------------- recommendations for whoever is watching ----------------
-   loved: rated ★4+ by someone in the crew, unseen by the rest of tonight's group
-   taste: watchlist films scored against the genres/directors/actors tonight's group rates well
-   gems:  watchlist films with a high Letterboxd rating
-   short: watchlist films under 1h40 */
-let recTab = 'loved', mood = '';
-try { recTab = sessionStorage.getItem('lbxm.rt') || 'loved'; } catch (e) { }
-function seenByAny(people, film, except) {
-  const { seen } = idx();
-  return people.some(p => !(except && except.has(p.id)) && (seen.get(p.id) || { get() { } }).get(film));
-}
-function recommend(tab) {
-  const pr = present(); if (!pr.length) return [];
-  const pset = new Set(pr.map(p => p.id)), veto = new Set(S.vetoes), { films } = idx();
-  const out = [];
-  const wantHere = f => f.wl ? [...f.wl].filter(id => pset.has(id)).length : 0;
-  const moodOk = f => !mood || ((fd(f) || {}).g || []).includes(mood);
-  if (tab === 'loved') {
-    const m = new Map();
-    for (const p of S.friends) for (const w of p.watched || []) if (w.r >= 4) {
-      const k = L.keyOf(w);
-      if (!m.has(k)) m.set(k, { f: Object.assign({ k }, films.get(k) || {}, { t: w.t, y: w.y, s: w.s || (films.get(k) || {}).s, i: w.i || (films.get(k) || {}).i, v: w.v || (films.get(k) || {}).v }), raters: [] });
-      m.get(k).raters.push({ p, r: w.r });
-    }
-    for (const x of m.values()) {
-      if (veto.has(x.f.k) || !moodOk(x.f)) continue;
-      // fine if the people who loved it are here and have seen it; not fine if anyone else here has
-      if (seenByAny(pr, x.f, new Set(x.raters.map(r => r.p.id)))) continue;
-      const avg = x.raters.reduce((a, r) => a + r.r, 0) / x.raters.length, wh = films.get(x.f.k) ? wantHere(films.get(x.f.k)) : 0;
-      const top = x.raters.slice().sort((a, b) => b.r - a.r).slice(0, 2);
-      out.push({ f: x.f, score: avg * 2 + x.raters.length * 1.2 + wh * 1.5,
-        why: top.map(r => `${esc(r.p.name)} <b>${stars(r.r)}</b>`).join(', ') + (wh ? ` · ${wh} here want it` : '') });
-    }
-  } else {
-    // candidates: watchlist films of people here that nobody here has seen
-    const cands = [];
-    for (const f of films.values()) {
-      const wh = wantHere(f);
-      if (!wh || veto.has(f.k) || !moodOk(f) || seenByAny(pr, f)) continue;
-      cands.push({ f, wh, d: fd(f) });
-    }
-    if (tab === 'gems') {
-      for (const c of cands) if (c.d && c.d.r >= 3.7)
-        out.push({ f: c.f, score: c.d.r * 3 + c.wh, why: `<b>★ ${c.d.r.toFixed(2)}</b> on Letterboxd · ${c.wh} want it` });
-    } else if (tab === 'short') {
-      for (const c of cands) if (c.d && c.d.rt && c.d.rt <= 100)
-        out.push({ f: c.f, score: c.wh * 2 + (c.d.r || 3) - c.d.rt / 200, why: `<b>${fmtRt(c.d.rt)}</b> · ${c.wh} want it` });
-    } else if (tab === 'taste') {
-      // group profile: what tonight's people rate above or below 3★
-      const w = { g: new Map(), dir: new Map(), c: new Map() }, add = (mp, key, v) => mp.set(key, (mp.get(key) || 0) + v);
-      let n = 0;
-      // compare against each person's own average, so genres everyone watches (Drama…) don't win by default
-      const avg = new Map(pr.map(p => { const rs = (p.watched || []).filter(x => x.r).map(x => x.r); return [p.id, rs.length ? rs.reduce((a, b) => a + b, 0) / rs.length : 3.5]; }));
-      for (const p of pr) for (const x of p.watched || []) {
-        const d = fd(x); if (!d) continue;
-        const v = x.r ? x.r - avg.get(p.id) : 0.1; n++;
-        for (const g of d.g || []) add(w.g, g, v);
-        for (const [nm] of d.dir || []) add(w.dir, nm, v * 2);
-        for (const [nm] of (d.c || []).slice(0, 5)) add(w.c, nm, v * 0.6);
-      }
-      if (n < 5) return [{ empty: 'Still learning everyone\'s taste — the site is fetching details for the films you\'ve rated. Check back after the next sync.' }];
-      for (const c of cands) {
-        if (!c.d) continue;
-        const parts = [];
-        for (const g of c.d.g || []) parts.push([g, w.g.get(g) || 0, 0]);
-        for (const [nm] of c.d.dir || []) parts.push([nm, w.dir.get(nm) || 0, 1]);
-        for (const [nm] of (c.d.c || []).slice(0, 5)) parts.push([nm, w.c.get(nm) || 0, 1]);
-        const sc = parts.reduce((a, x) => a + x[1], 0);
-        if (sc <= 0) continue;
-        // name a director/actor you rate well before a genre — it's the more telling reason
-        const because = parts.filter(x => x[1] > 0).sort((a, b) => b[2] - a[2] || b[1] - a[1]).slice(0, 2).map(x => esc(x[0]));
-        out.push({ f: c.f, score: Math.log1p(sc) * 3 + c.wh + (c.d.r || 3) * 0.5, why: `Because you like <b>${because.join(' · ')}</b>` });
-      }
-    }
-  }
-  return out.sort((a, b) => b.score - a.score).slice(0, 18);
-}
-function renderRecs() {
-  const sec = $('#recs');
-  if (!S.friends.length) { sec.classList.add('hidden'); return; }
-  sec.classList.remove('hidden');
-  const pr = present();
-  $('#recsFor').textContent = pr.length ? `for ${pr.length === S.friends.length ? 'everyone' : pr.length + ' ' + (pr.length === 1 ? 'person' : 'people')}` : '';
-  $('#recTabs').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.rt === recTab));
-  // mood chips from the genres of films we have details for
-  const gc = new Map();
-  for (const f of idx().films.values()) for (const g of (fd(f) || {}).g || []) gc.set(g, (gc.get(g) || 0) + 1);
-  const genres = [...gc].sort((a, b) => b[1] - a[1]).slice(0, 14).map(x => x[0]);
-  $('#moods').innerHTML = genres.length ? '<span class="faint" style="font-size:11px;font-weight:700;align-self:center;letter-spacing:.08em">MOOD</span>' +
-    genres.map(g => `<button data-mood="${esc(g)}" class="${g === mood ? 'on' : ''}">${esc(g)}</button>`).join('') : '';
-  if (!pr.length) { $('#recrow').innerHTML = '<div class="recempty">Pick who\'s watching to get recommendations.</div>'; return; }
-  const list = recommend(recTab);
-  if (list[0] && list[0].empty) { $('#recrow').innerHTML = `<div class="recempty">${list[0].empty}</div>`; return; }
-  $('#recrow').innerHTML = list.length ? list.map(r => `<div class="rcard" data-rk="${esc(r.f.k)}">
-      ${posterHTML(r.f, null, `<button class="addb ${onBallot(r.f.k) ? 'on' : ''}" data-radd="${esc(r.f.k)}" title="Add to tonight's ballot">${onBallot(r.f.k) ? '✓' : '+'}</button>`)}
-      <div class="t">${esc(r.f.t)}${r.f.y ? ` <span class="faint" style="font-weight:400">${r.f.y}</span>` : ''}</div><div class="why">${r.why}</div></div>`).join('')
-    : `<div class="recempty">Nothing fits${mood ? ' that mood' : ''} yet${recTab === 'loved' ? ' — no one\'s rated an unseen film ★4+ recently' : ''}. Try another tab${mood ? ' or mood' : ''}.</div>`;
-  recCache = new Map(list.map(r => [r.f.k, r.f]));
-}
-let recCache = new Map();
-$('#recTabs').addEventListener('click', e => { const b = e.target.closest('[data-rt]'); if (!b) return; recTab = b.dataset.rt; try { sessionStorage.setItem('lbxm.rt', recTab); } catch (x) { } renderRecs(); $('#recrow').scrollLeft = 0; });
-$('#moods').addEventListener('click', e => { const b = e.target.closest('[data-mood]'); if (!b) return; mood = mood === b.dataset.mood ? '' : b.dataset.mood; renderRecs(); $('#recrow').scrollLeft = 0; });
-$('#recrow').addEventListener('click', e => {
-  const a = e.target.closest('[data-radd]');
-  if (a) { e.stopPropagation(); const f = recCache.get(a.dataset.radd); if (f && !onBallot(f.k)) ballotAdd(f); return; }
-  const c = e.target.closest('[data-rk]'); if (c) openFilm(c.dataset.rk, recCache.get(c.dataset.rk));
-});
-
-function renderAll() { renderCrew(); renderRecs(); renderResults(); if (ballotTopic) renderBallot(); }
+function renderAll() { renderCrew(); renderResults(); if (ballotTopic) renderBallot(); }
 renderAll();
 loadPreset().then(readHash);
 addEventListener('hashchange', readHash);
