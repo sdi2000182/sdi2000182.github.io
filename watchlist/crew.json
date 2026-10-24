@@ -1,6 +1,117 @@
 {
   "_help": "The crew is you plus your Letterboxd mutuals (mutualsOf), found automatically every run. Add or remove people with GitHub's 'Run workflow' button on the Update Letterboxd watchlists action; removed people go into 'exclude' so they don't come back.",
   "mutualsOf": "theodvra",
-  "crew": [],
+  "crew": [
+    {
+      "username": "theodvra",
+      "name": "theodvra",
+      "mutual": true
+    },
+    {
+      "username": "_maureen",
+      "name": "_maureen",
+      "mutual": true
+    },
+    {
+      "username": "simonlind",
+      "name": "simonlind",
+      "mutual": true
+    },
+    {
+      "username": "solfege",
+      "name": "uta",
+      "mutual": true
+    },
+    {
+      "username": "chatzif",
+      "name": "chatzif",
+      "mutual": true
+    },
+    {
+      "username": "irenesrecs",
+      "name": "irenesrecs",
+      "mutual": true
+    },
+    {
+      "username": "johnias",
+      "name": "Johnias",
+      "mutual": true
+    },
+    {
+      "username": "ann4444",
+      "name": "ann4444",
+      "mutual": true
+    },
+    {
+      "username": "edouardpeanut",
+      "name": "Vegel Del CpTown",
+      "mutual": true
+    },
+    {
+      "username": "insomnyck",
+      "name": "nick",
+      "mutual": true
+    },
+    {
+      "username": "orestis_karap",
+      "name": "Orestis",
+      "mutual": true
+    },
+    {
+      "username": "palais2doberman",
+      "name": "Leache <3",
+      "mutual": true
+    },
+    {
+      "username": "theshiningg",
+      "name": "Giannis",
+      "mutual": true
+    },
+    {
+      "username": "imhendrikjan",
+      "name": "imhendrikjan",
+      "mutual": true
+    },
+    {
+      "username": "theodorentnt",
+      "name": "theodorentnt",
+      "mutual": true
+    },
+    {
+      "username": "oddfishgirl",
+      "name": "oddfishgirl",
+      "mutual": true
+    },
+    {
+      "username": "nikosim",
+      "name": "nikosim",
+      "mutual": true
+    },
+    {
+      "username": "lunaticflower",
+      "name": "maddie",
+      "mutual": true
+    },
+    {
+      "username": "lovebloodorange",
+      "name": "Barbies dreamhouse🙏💯🔥",
+      "mutual": true
+    },
+    {
+      "username": "tiropitakia",
+      "name": "tsoura",
+      "mutual": true
+    },
+    {
+      "username": "mmmassi",
+      "name": "mmmassi",
+      "mutual": true
+    },
+    {
+      "username": "reemiooo",
+      "name": "ريم",
+      "mutual": true
+    }
+  ],
   "exclude": []
 }
