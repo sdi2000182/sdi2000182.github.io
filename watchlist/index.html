@@ -9,157 +9,155 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 12'%3E%3Ccircle cx='6' cy='6' r='5.5' fill='%23ff8000'/%3E%3Ccircle cx='18' cy='6' r='5.5' fill='%2300e054'/%3E%3Ccircle cx='30' cy='6' r='5.5' fill='%2340bcf4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="core.css">
 <style>
-.hero{padding:34px 0 18px}
-.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.08}
-.hero h1 em{font-style:normal;color:var(--accent)}
-.hero p{max-width:640px;margin:10px 0 0}
+.hero{padding:44px 0 30px}
+.hero h1{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(30px,5.4vw,50px);line-height:1.05;letter-spacing:-.5px}
+.hero h1 em{font-style:normal;color:var(--green)}
+.hero p{max-width:600px;margin:12px 0 0;font-size:16px;color:var(--ink2)}
 
-.crew{margin-top:8px}
-.crew-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.crew-head h2{font-size:24px}
+.crew{margin-top:6px}
 .addrow{display:flex;gap:8px;flex-wrap:wrap}
 .addrow .input{flex:1 1 220px}
-.drop{display:block;margin-top:12px;border:1.5px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--ink2);cursor:pointer;font-size:14px;transition:.15s}
-.drop:hover,.drop.over{border-color:var(--accent);color:var(--ink);background:color-mix(in srgb,var(--accent) 8%,transparent)}
-.friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-top:14px}
-.fchip{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;min-width:0;position:relative}
-.fchip.away{opacity:.45}
+.drop{display:block;margin-top:10px;border-radius:4px;padding:12px 14px;color:var(--ink3);cursor:pointer;font-size:13px;background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(68,85,102,.18) 8px 9px);box-shadow:inset 0 0 0 1px var(--line-lo);transition:.15s}
+.drop b{color:var(--ink2);font-weight:600}
+.drop:hover,.drop.over{box-shadow:inset 0 0 0 1px var(--green);color:var(--ink2)}
+.drop:hover b,.drop.over b{color:var(--green)}
+.friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:16px}
+.fchip{display:flex;align-items:center;gap:10px;background:var(--slate);border-radius:4px;padding:8px 8px 8px 9px;min-width:0;position:relative;transition:opacity .15s}
+.fchip.away{opacity:.4}
+.fchip.away .nm{text-decoration:line-through}
 .fchip.away .avatar{filter:grayscale(1)}
 .fchip .avatar{cursor:pointer}
 .fchip .who{min-width:0;flex:1}
-.fchip .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
-.fchip .sub{font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fchip .sub.err{color:var(--danger)}
-.fchip .acts{display:flex;gap:2px}
-.fchip .acts button{width:26px;height:26px;border-radius:7px;border:0;background:transparent;cursor:pointer;color:var(--ink3);font-size:14px;display:grid;place-items:center}
-.fchip .acts button:hover{background:var(--card2);color:var(--ink)}
-.crewbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
-.crewbar .grow{flex:1 1 260px}
+.fchip .nm{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
+.fchip .sub{font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fchip .sub.err{color:var(--orange)}
+.fchip .acts{display:flex;gap:1px}
+.fchip .acts button{width:24px;height:24px;border-radius:3px;border:0;background:transparent;cursor:pointer;color:var(--ink3);font-size:13px;display:grid;place-items:center}
+.fchip .acts button:hover{background:var(--line);color:#fff}
+.crewbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.crewbar .grow{flex:1 1 260px;font-size:12px}
 
-.controls{position:sticky;top:58px;z-index:20;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);padding:12px 0;margin-top:22px;border-bottom:1px solid var(--line)}
+.controls{position:sticky;top:62px;z-index:20;background:rgba(20,24,28,.96);backdrop-filter:blur(8px);padding:12px 0;margin-top:30px;border-top:1px solid var(--line-lo);border-bottom:1px solid var(--line-lo)}
 .controls .row{gap:8px}
-.controls .input{padding:8px 11px}
 .controls select.input{padding-right:6px}
-.ctl{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink2);white-space:nowrap}
-.ctl input[type=range]{width:110px;accent-color:var(--accent)}
-.ctl input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
-.yr{width:76px}
-.genres{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.genres button{padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:12px;font-weight:600;color:var(--ink2)}
-.genres button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ctl{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:var(--ink2);white-space:nowrap;text-transform:uppercase;letter-spacing:.07em}
+.ctl input[type=range]{width:110px;accent-color:var(--green)}
+.ctl input[type=checkbox]{accent-color:var(--green);width:15px;height:15px}
+#minVv{color:var(--ink);font-size:13px}
+.yr{width:74px}
+.genres{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.genres button{padding:4px 9px;border-radius:3px;border:0;background:var(--slate);cursor:pointer;font-size:11px;font-weight:600;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em}
+.genres button:hover{color:#fff}
+.genres button.on{background:var(--green);color:var(--bg)}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:18px 0 6px}
-.stat{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
-.stat .v{font-family:"DM Serif Display",Georgia,serif;font-size:26px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stat .l{font-size:12px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.stats{display:flex;flex-wrap:wrap;margin:26px 0 4px;border-bottom:1px solid var(--line-lo);padding-bottom:18px}
+.stat{padding:0 22px;min-width:0;max-width:100%;border-left:1px solid var(--line)}
+.stat:first-child{padding-left:0;border-left:0}
+.stat .v{font-size:22px;font-weight:700;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .l{font-size:10px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.1em}
 
-.tier{margin-top:26px}
-.tier h3{font-size:22px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.tier h3 small{font-family:Inter,sans-serif;font-size:13px;color:var(--ink3);font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:12px}
-.film{position:relative;cursor:pointer;min-width:0}
-.poster{aspect-ratio:2/3;border-radius:8px;overflow:hidden;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.06) inset,0 6px 16px rgba(0,0,0,.3);display:flex;align-items:flex-end;transition:transform .15s}
-.film:hover .poster{transform:translateY(-3px);box-shadow:0 0 0 2px var(--accent),0 10px 22px rgba(0,0,0,.35)}
+.tier{margin-top:30px}
+.tier h3{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--ink2);display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.tier h3 small{font-size:11px;color:var(--ink3);font-weight:600;letter-spacing:.06em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:18px 14px;margin-top:14px}
+.film{position:relative;cursor:pointer;min-width:0;outline:0}
+.poster{aspect-ratio:2/3;border-radius:4px;overflow:hidden;position:relative;display:flex;align-items:flex-end;background:var(--slate)}
+.poster::after{content:"";position:absolute;inset:0;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(221,238,255,.25);pointer-events:none;transition:box-shadow .12s}
+.film:hover .poster::after,.film:focus-visible .poster::after{box-shadow:inset 0 0 0 3px var(--green)}
 .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.poster .ptitle{position:relative;padding:12px;font-family:"DM Serif Display",Georgia,serif;font-size:19px;line-height:1.1;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
-.poster .ptitle small{display:block;font-family:Inter,sans-serif;font-size:12px;opacity:.75;margin-top:4px}
-.votes{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.72);color:#fff;font-weight:800;font-size:12px;padding:3px 8px;border-radius:999px;z-index:2}
-.votes.all{background:var(--green);color:#06210f}
-.veto{position:absolute;top:6px;right:6px;z-index:2;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;cursor:pointer;opacity:0;transition:.15s;font-size:14px}
+.poster .ptitle{position:relative;padding:10px;font-family:"Source Serif 4",Georgia,serif;font-weight:700;font-size:17px;line-height:1.12;color:var(--ink-hi)}
+.poster .ptitle small{display:block;font-family:Inter,sans-serif;font-weight:500;font-size:11px;color:var(--ink2);margin-top:4px}
+.votes{position:absolute;top:6px;left:6px;background:rgba(20,24,28,.85);color:var(--ink-hi);font-weight:700;font-size:11px;padding:2px 7px;border-radius:3px;z-index:2;letter-spacing:.03em}
+.votes.all{background:var(--green);color:var(--bg)}
+.veto{position:absolute;top:5px;right:5px;z-index:2;width:24px;height:24px;border-radius:50%;border:0;background:rgba(20,24,28,.85);color:var(--ink-hi);cursor:pointer;opacity:0;transition:.12s;font-size:12px}
 .film:hover .veto,.film:focus-within .veto{opacity:1}
-@media (hover:none){.veto{opacity:.85}}
-.veto:hover{background:var(--danger)}
-.film .meta{padding:8px 2px 0}
-.film .t{font-weight:700;font-size:14px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.film .y{font-size:12px;color:var(--ink3);margin:2px 0 6px}
-.film .seen{font-size:11px;color:var(--orange);font-weight:600;margin-top:5px}
-.film.vetoed .poster{filter:grayscale(1) brightness(.5)}
+@media (hover:none){.veto{opacity:.9}}
+.veto:hover{background:var(--orange);color:#fff}
+.film .meta{padding:7px 1px 0}
+.film .t{font-weight:600;font-size:13px;line-height:1.3;color:var(--ink-hi);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.film:hover .t{color:var(--blue)}
+.film .y{font-size:11px;color:var(--ink3);margin:1px 0 6px}
+.film .seen{font-size:11px;color:var(--orange);margin-top:5px}
+.film.vetoed .poster{filter:grayscale(1) brightness(.45)}
 
 .empty{text-align:center;padding:50px 16px;color:var(--ink2)}
-.empty h3{font-size:26px;color:var(--ink);margin-bottom:8px}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:22px;text-align:left}
-.steps .s{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.empty h3{font-family:"Source Serif 4",Georgia,serif;font-size:26px;color:var(--ink);margin-bottom:8px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:22px;text-align:left}
+.steps .s{background:var(--slate);border-radius:4px;padding:14px}
 .steps b{display:block;margin-bottom:4px;color:var(--ink)}
 .more{display:flex;justify-content:center;margin:24px 0}
 
 /* spin */
-.reel{height:150px;display:grid;place-items:center;text-align:center;border-radius:14px;background:var(--bg);border:1px solid var(--line);margin:16px 0;overflow:hidden;padding:0 12px}
-.reel .nm{font-family:"DM Serif Display",Georgia,serif;font-size:clamp(24px,5vw,36px);line-height:1.1}
-.reel.done .nm{color:var(--accent);animation:land .5s ease}
+.reel{height:150px;display:grid;place-items:center;text-align:center;border-radius:4px;background:var(--bg);box-shadow:inset 0 0 0 1px var(--line-lo);margin:16px 0;overflow:hidden;padding:0 12px}
+.reel .nm{font-family:"Source Serif 4",Georgia,serif;font-weight:700;color:var(--ink);font-size:clamp(24px,5vw,34px);line-height:1.1}
+.reel.done .nm{color:var(--green);animation:land .5s ease}
 @keyframes land{0%{transform:scale(.8)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
 .pickcard{display:flex;gap:14px;align-items:flex-start}
 .pickcard .poster{width:110px;flex:none}
 .pickcard .poster .ptitle{font-size:14px;padding:8px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.seg button{padding:7px 12px;border:0;background:var(--card);cursor:pointer;font-weight:600;font-size:13px;color:var(--ink2)}
-.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.seg{display:inline-flex;border-radius:3px;overflow:hidden;background:var(--slate)}
+.seg button{padding:7px 11px;border:0;background:transparent;cursor:pointer;font-weight:700;font-size:11px;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em}
+.seg button.on{background:var(--line);color:#fff}
 
 /* showdown */
 .duel{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:14px}
-.duel .vs{font-family:"DM Serif Display",serif;font-size:26px;color:var(--ink3)}
-.duel .film .poster .ptitle{font-size:17px}
-.round{font-size:13px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px}
+.duel .vs{font-family:"Source Serif 4",serif;font-weight:700;font-size:24px;color:var(--ink3)}
+.duel .film .poster .ptitle{font-size:16px}
+.round{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em}
 
 .detail .poster{width:150px}
 .detail .who{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.detail .who .pill{font-weight:600}
-.detail h4{margin:16px 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3)}
-.setrow{margin:14px 0}
-.setrow label{display:block;font-weight:700;margin-bottom:6px}
+.detail h4{margin:18px 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);border-bottom:1px solid var(--line-lo);padding-bottom:4px}
+.setrow{margin:16px 0}
+.setrow label{display:block;font-weight:600;color:var(--ink-hi);margin-bottom:6px}
 .setrow .input{width:100%}
-pre.code{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;font-size:12px;max-height:240px}
+pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-size:12px;max-height:240px;color:var(--ink-hi)}
 @media (max-width:640px){
-  .grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px}
-  .poster .ptitle{font-size:15px;padding:8px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:14px 10px}
+  .poster .ptitle{font-size:14px;padding:8px}
   .controls{position:static}
   .pickcard .poster{width:90px}
   .detail .poster{width:110px}
+  .stat{padding:0 14px}
+  .stat .v{font-size:18px}
 }
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="./"><span class="dots"><i></i><i></i><i></i></span> Watchlist <span class="long">Merger</span></a>
-    <nav class="nav">
-    </nav>
-    <button class="iconbtn" id="themeBtn" title="Toggle light/dark" aria-label="Toggle theme">◐</button>
+    <a class="brand" href="./"><span class="dots"><i></i><i></i><i></i></span><span>Watchlist <span class="lite">Merger</span></span></a>
+    <span style="flex:1"></span>
+    <button class="iconbtn" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
   </div>
 </header>
 
 <main class="wrap">
   <section class="hero">
     <h1>Movie night, <em>settled.</em></h1>
-    <p class="muted">Add your crew's Letterboxd watchlists. The films the most people want float to the top. Then spin, duel, or veto your way to one pick.</p>
+    <p>Everyone's Letterboxd watchlist in one place. The films the most people want rise to the top — then spin, duel or veto your way to a pick.</p>
   </section>
 
-  <section class="panel crew">
-    <div class="crew-head">
-      <h2>The crew <span class="faint" id="crewCount" style="font-family:Inter;font-size:15px"></span></h2>
-      <span class="faint" id="syncNote" style="font-size:13px"></span>
-      <div class="row">
-        <button class="btn small ghost" id="settingsBtn">⚙ Settings</button>
-      </div>
-    </div>
+  <section class="crew">
+    <div class="sh"><h2>The crew <span id="crewCount"></span></h2><span class="aside" id="syncNote"></span></div>
     <form class="addrow" id="addForm" autocomplete="off">
       <input class="input" id="addInput" placeholder="Letterboxd usernames — e.g. dave, jay, letterboxd.com/kim" aria-label="Letterboxd usernames">
-      <button class="btn primary" type="submit">+ Add &amp; fetch</button>
+      <button class="btn primary" type="submit">Add</button>
     </form>
     <label class="drop" id="drop">
       <input type="file" id="fileInput" multiple accept=".zip,.csv,.json" hidden>
-      <b>Or drop Letterboxd export ZIPs / CSVs here</b> — always works, includes ratings.<br>
-      <span class="faint">Each friend: letterboxd.com → Settings → Data → <i>Export your data</i>. Drop all the zips at once.</span>
+      <b>Drop Letterboxd export ZIPs here</b> — always works, includes ratings. On letterboxd.com: Settings → Data → Export your data.
     </label>
     <div class="friends" id="friends"></div>
     <div class="crewbar" id="crewbar">
       <span class="faint grow" id="presentNote"></span>
-      <button class="btn small" id="refreshAll">↻ Refresh all</button>
-      <button class="btn small" id="shareBtn">🔗 Share link</button>
-      <button class="btn small" id="exportBtn">⬇ Save crew file</button>
+      <button class="btn small" id="refreshAll">↻ Refresh</button>
+      <button class="btn small" id="shareBtn">Share link</button>
+      <button class="btn small" id="exportBtn">Save crew file</button>
     </div>
   </section>
 
@@ -184,7 +182,7 @@ pre.code{background:var(--bg);border:1px solid var(--line);border-radius:10px;pa
     </div>
     <div class="genres hidden" id="genres"></div>
     <div class="actions">
-      <button class="btn orange" id="spinBtn">🎲 Spin for a pick</button>
+      <button class="btn primary" id="spinBtn">🎲 Spin for a pick</button>
       <button class="btn" id="duelBtn">⚔ Showdown</button>
       <button class="btn" id="copyBtn">📋 Copy shortlist</button>
       <button class="btn" id="csvBtn">⬇ CSV</button>
@@ -196,8 +194,7 @@ pre.code{background:var(--bg);border:1px solid var(--line);border-radius:10px;pa
   <section id="results"></section>
 </main>
 <footer class="foot wrap">
-  Not affiliated with Letterboxd. Lists are fetched through public CORS proxies or read from your own export files; everything stays in this browser.<br>
-  Poster data (optional) from TMDB.
+  Not affiliated with Letterboxd. Lists come from public Letterboxd pages or your own export files and stay in this browser. Optional poster data from TMDB.
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -225,7 +222,7 @@ function friend(id) { return S.friends.find(f => f.id === id); }
 /* ---------------- crew ---------------- */
 function renderCrew() {
   const fs = S.friends, pr = present();
-  $('#crewCount').textContent = fs.length ? `· ${fs.length} ${fs.length === 1 ? 'person' : 'people'}` : '';
+  $('#crewCount').textContent = fs.length ? '· ' + fs.length : '';
   $('#friends').innerHTML = fs.map(f => {
     const st = status[f.id] || {};
     const wl = f.watchlist ? f.watchlist.length : 0, wd = f.watched ? f.watched.length : null;
@@ -247,7 +244,7 @@ function renderCrew() {
   $('#refreshAll').classList.toggle('hidden', !fs.some(f => f.username));
   if (presetInfo) {
     $('#addInput').placeholder = 'Add a guest by Letterboxd username…';
-    $('#syncNote').textContent = presetInfo.updated ? 'Lists auto-synced ' + ago(Date.parse(presetInfo.updated)) : 'Waiting for first auto-sync';
+    $('#syncNote').textContent = presetInfo.updated ? 'Synced ' + ago(Date.parse(presetInfo.updated)) : 'Waiting for first auto-sync';
   }
   const mv = $('#minV'); mv.max = Math.max(1, pr.length);
   if (ui.minV > pr.length && pr.length) { ui.minV = pr.length; }
@@ -308,7 +305,7 @@ async function fetchFriend(f) {
     delete status[f.id];
     if (!wl.length) status[f.id] = { err: 'Watchlist empty or private' };
   } catch (e) {
-    status[f.id] = { err: e.code === 404 ? 'User not found' : 'Fetch failed — ' + e.message + '. Try an export ZIP.' };
+    status[f.id] = { err: e.code === 404 ? 'User not found' : 'Letterboxd blocked the browser fetch. Add them to crew.json, or drop their export ZIP.' };
   }
   persist(); renderAll();
 }
@@ -526,8 +523,9 @@ function compute() {
 
 function fmtRt(m) { return m ? Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0') : ''; }
 function posterHTML(f, info, extra) {
-  const img = info && info.p ? `<img loading="lazy" alt="" src="https://image.tmdb.org/t/p/w342${info.p}">` : '';
-  return `<div class="poster" style="background:${L.posterGradient(f)}">${img}${img ? '' : `<div class="ptitle">${esc(f.t)}<small>${f.y || ''}</small></div>`}${extra || ''}</div>`;
+  const src = info && info.p ? 'https://image.tmdb.org/t/p/w342' + info.p : L.lbPoster(f);
+  const img = src ? `<img loading="lazy" alt="" referrerpolicy="no-referrer" src="${esc(src)}" onerror="this.remove()">` : '';
+  return `<div class="poster" style="background:${L.posterGradient(f)}"><div class="ptitle">${esc(f.t)}<small>${f.y || ''}</small></div>${img}${extra || ''}</div>`;
 }
 function cardHTML(r, total) {
   const { f, votes, seenBy, vetoed, info } = r;
@@ -795,7 +793,6 @@ $('#duelBtn').onclick = () => {
   draw();
 };
 
-$('#themeBtn').onclick = L.toggleTheme;
 
 function ago(t) {
   const m = Math.round((Date.now() - t) / 60000);

@@ -80,10 +80,17 @@
     return f.s ? 'https://letterboxd.com/film/' + f.s + '/'
       : 'https://letterboxd.com/search/films/' + encodeURIComponent(f.t + (f.y ? ' ' + f.y : '')) + '/';
   }
+  /* Letterboxd poster URL from the film id + cache key scraped off the grid */
+  function lbPoster(f, w, h) {
+    if (!f.i || !f.s) return '';
+    w = w || 230; h = h || 345;
+    const id = String(f.i);
+    return `https://a.ltrbxd.com/resized/film-poster/${id.split('').join('/')}/${id}-${f.s}-0-${w}-0-${h}-crop.jpg${f.v ? '?v=' + f.v : ''}`;
+  }
   function posterGradient(f) {
     const h = hash(keyOf(f));
     const a = h % 360, b = (a + 40 + (h >> 9) % 80) % 360;
-    return `linear-gradient(160deg,hsl(${a} 45% 32%),hsl(${b} 55% 14%))`;
+    return `linear-gradient(170deg,hsl(${a} 22% 30%),hsl(${b} 24% 15%))`;
   }
   function download(name, text, type) {
     const blob = new Blob([text], { type: type || 'text/plain' });
@@ -227,6 +234,9 @@
       if (m) { name = m[1]; y = y || +m[2]; }
       if (!name) name = slug.replace(/-\d{4}$/, '').replace(/-/g, ' ');
       const f = { t: name, y, s: slug };
+      const a = k => n.getAttribute(k) || '';
+      const pid = ((a('data-postered-identifier') || '').match(/film:(\d+)/) || [])[1];
+      if (pid) { f.i = +pid; const ck = (a('data-resolvable-poster-path').match(/"cacheBustingKey":"([^"]+)"/) || [])[1]; if (ck) f.v = ck; }
       const box = n.closest('li') || n.parentElement;
       const own = parseFloat(d.ownerRating || (box && box.dataset && box.dataset.ownerRating) || '');
       if (own > 0) f.r = own > 5 ? own / 2 : own;
@@ -278,10 +288,11 @@
       if (!f.y) { const c = byTitle.get(norm(f.t)); if (c && c.length === 1) k = c[0]; }
       let e = films.get(k);
       if (!e) {
-        e = { k, t: f.t, y: f.y || 0, s: f.s || '', wl: new Set() }; films.set(k, e);
+        e = { k, t: f.t, y: f.y || 0, s: f.s || '', i: f.i || 0, v: f.v || '', wl: new Set() }; films.set(k, e);
         const n = norm(f.t); if (!byTitle.has(n)) byTitle.set(n, []); byTitle.get(n).push(k);
       }
       if (!e.s && f.s) e.s = f.s;
+      if (!e.i && f.i) { e.i = f.i; e.v = f.v || ''; e.s = f.s || e.s; }
       e.wl.add(fid);
     };
     for (const fr of friends) for (const f of fr.watchlist || []) if (f.y) put(f, fr.id);
@@ -330,7 +341,7 @@
   /* ---------- share links (compressed) ---------- */
   async function packGroup(state) {
     const films = [], idx = new Map();
-    const ref = f => { const k = keyOf(f); if (!idx.has(k)) { idx.set(k, films.length); films.push([f.t, f.y || 0, f.s || '']); } return idx.get(k); };
+    const ref = f => { const k = keyOf(f); if (!idx.has(k)) { idx.set(k, films.length); films.push([f.t, f.y || 0, f.s || '', f.i || 0, f.v || '']); } return idx.get(k); };
     const fr = state.friends.map(f => [f.name, f.username || '', f.color,
       (f.watchlist || []).map(ref),
       f.watched ? f.watched.map(w => w.r ? [ref(w), w.r * 2] : ref(w)) : null]);
@@ -338,7 +349,7 @@
     return 'd=' + await deflate(json);
   }
   function unpackGroupJSON(obj) {
-    const F = obj.films.map(a => ({ t: a[0], y: a[1] || 0, s: a[2] || '' }));
+    const F = obj.films.map(a => ({ t: a[0], y: a[1] || 0, s: a[2] || '', i: a[3] || 0, v: a[4] || '' }));
     const film = i => Object.assign({}, F[i]);
     return obj.fr.map(a => ({
       id: uid(), name: a[0], username: a[1] || '', color: a[2], present: true, source: 'shared', updated: Date.now(),
@@ -374,7 +385,7 @@
   }
 
   window.LBX = {
-    PALETTE, PROXIES, load, save, blank, esc, norm, keyOf, hash, initials, uid, nextColor, avatar, toast, filmUrl,
+    PALETTE, PROXIES, lbPoster, load, save, blank, esc, norm, keyOf, hash, initials, uid, nextColor, avatar, toast, filmUrl,
     posterGradient, download, copy, parseCSV, csvToFilms, csvKind, mergeWatched, readZip, fetchText, parseGrid, fetchList,
     cleanUsername, buildIndex, lookupFor, tmdbInfo, tmdbCached, tmdbGenres, packGroup, unpackGroupJSON, inflate, deflate,
     toggleTheme, tip,
