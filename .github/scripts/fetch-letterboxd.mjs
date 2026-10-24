@@ -152,8 +152,9 @@ crewFile.exclude = [...exclude];
 await writeFile(CREW, JSON.stringify(crewFile, null, 2) + '\n');
 let prev = { friends: [] };
 try { prev = JSON.parse(await readFile(OUT, 'utf8')); } catch {}
-const friends = [];
-for (const c of crew) {
+const ONLY_DETAILS = !!process.env.ONLY_DETAILS;
+const friends = ONLY_DETAILS ? (prev.friends || []) : [];
+for (const c of ONLY_DETAILS ? [] : crew) {
   if (!c.username) continue;
   const old = (prev.friends || []).find(f => f.username.toLowerCase() === c.username.toLowerCase());
   try {
@@ -171,5 +172,64 @@ for (const c of crew) {
     if (old) friends.push(Object.assign(old, { name: c.name || c.username }));
   }
 }
-await writeFile(OUT, JSON.stringify({ updated: new Date().toISOString(), friends }));
-console.log('Wrote', OUT, 'with', friends.length, 'people');
+if (!ONLY_DETAILS) {
+  await writeFile(OUT, JSON.stringify({ updated: new Date().toISOString(), friends }));
+  console.log('Wrote', OUT, 'with', friends.length, 'people');
+}
+
+/* ---------- film details (poster, description, cast…) from each film page's JSON-LD ---------- */
+const FILMS = 'watchlist/films.json';
+let films = {};
+try { films = JSON.parse(await readFile(FILMS, 'utf8')); } catch {}
+const LB = 'https://a.ltrbxd.com/resized/';
+const slugOf = url => (String(url || '').match(/letterboxd\.com\/(?:actor|director)\/([^/]+)/) || [])[1] || '';
+function details(html) {
+  const m = html.match(/<script type="application\/ld\+json">\s*(?:\/\*[\s\S]*?\*\/)?\s*(\{[\s\S]*?\})\s*(?:\/\*[\s\S]*?\*\/)?\s*<\/script>/);
+  if (!m) return null;
+  const d = JSON.parse(m[1]), arr = x => Array.isArray(x) ? x : x ? [x] : [];
+  const dur = String(d.duration || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+  const tag = (html.match(/class="tagline">([^<]*)/) || [])[1];
+  const out = {
+    p: String(d.image || '').replace(LB, ''),
+    d: decode(String(d.description || '')).slice(0, 600),
+    dir: arr(d.director).map(x => [x.name, slugOf(x.sameAs)]),
+    c: arr(d.actor).slice(0, 12).map(x => [x.name, slugOf(x.sameAs)]),
+    g: arr(d.genre),
+    rt: dur ? (+dur[1] || 0) * 60 + (+dur[2] || 0) : 0,
+    r: d.aggregateRating ? Math.round(d.aggregateRating.ratingValue * 100) / 100 : 0,
+    cc: arr(d.countryOfOrigin).map(x => x.name).slice(0, 2),
+  };
+  if (tag) out.tl = decode(tag);
+  for (const k of Object.keys(out)) if (out[k] === '' || out[k] === 0 || (Array.isArray(out[k]) && !out[k].length)) delete out[k];
+  return out;
+}
+// what to fetch first: tonight's ballot, then films more people want
+const want = new Map();
+for (const f of friends) for (const w of f.watchlist || []) if (w.s) want.set(w.s, (want.get(w.s) || 0) + 1);
+const ballot = [];
+if (crewFile.ballotTopic) {
+  try {
+    const res = await fetch(`https://ntfy.sh/${crewFile.ballotTopic}/json?poll=1&since=all`);
+    for (const line of (await res.text()).split('\n')) {
+      try { const d = JSON.parse(JSON.parse(line).message); if (d.op === 'add' && d.f && d.f.s) ballot.push(d.f.s); } catch {}
+    }
+  } catch (e) { console.warn('ballot read failed:', e.message); }
+}
+const todo = [...new Set([...ballot, ...[...want].sort((a, b) => b[1] - a[1]).map(x => x[0])])].filter(s => !films[s]);
+const LIMIT = +(process.env.DETAILS_LIMIT || 300);
+console.log(`Film details: ${Object.keys(films).length} cached, ${todo.length} to go (${ballot.length} on ballot), fetching up to ${LIMIT}`);
+let got = 0;
+for (const slug of todo.slice(0, LIMIT)) {
+  try {
+    const html = await get(`https://letterboxd.com/film/${slug}/`, 2);
+    if (html == null) { films[slug] = { x: 1 }; continue; }
+    const d = details(html);
+    if (d) { films[slug] = d; got++; }
+  } catch (e) {
+    if (e.code === 403) { console.warn('  film pages not served right now, stopping'); break; }
+    console.warn('  ', slug, e.message);
+  }
+  await sleep(900);
+}
+await writeFile(FILMS, JSON.stringify(films));
+console.log(`  fetched ${got}; films.json has ${Object.keys(films).length}`);

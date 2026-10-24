@@ -26,7 +26,7 @@ permissions:
 
 concurrency:
   group: letterboxd-data
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   update:
@@ -47,5 +47,5 @@ jobs:
           rm -rf node_modules
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add watchlist/data.json watchlist/crew.json
+          git add watchlist/data.json watchlist/crew.json watchlist/films.json
           git diff --cached --quiet || (git commit -m "Update Letterboxd data" && git pull --rebase && git push)

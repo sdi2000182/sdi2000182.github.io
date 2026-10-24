@@ -1,0 +1,34 @@
+name: Fetch film details for the ballot
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # every 30 minutes: details for films just added to the ballot
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: letterboxd-data
+  cancel-in-progress: false
+
+jobs:
+  details:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-save --no-package-lock linkedom@0.18.5
+      - run: node .github/scripts/fetch-letterboxd.mjs
+        env:
+          ONLY_DETAILS: '1'
+          DETAILS_LIMIT: '60'
+      - name: Commit details
+        run: |
+          rm -rf node_modules
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add watchlist/films.json
+          git diff --cached --quiet || (git commit -m "Update film details" && git pull --rebase && git push)

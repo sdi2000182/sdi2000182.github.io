@@ -162,6 +162,18 @@
 .round{font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em}
 
 .detail .poster{width:150px}
+.film-detail{display:flex;gap:18px;align-items:flex-start}
+.fd-poster{width:170px;flex:none}
+.fd-poster .poster{width:100%}
+.fd-body{min-width:0}
+.fd-body h2{margin:0 0 4px;padding-right:30px}
+.fd-tag{font-family:"Source Serif 4",Georgia,serif;font-style:italic;color:var(--ink-hi);margin-bottom:6px}
+.fd-meta{font-size:12px;color:var(--ink2);line-height:1.6}
+.fd-desc{font-size:14px;line-height:1.6;color:var(--ink-hi);margin:10px 0 0}
+.fd-cast{display:flex;flex-wrap:wrap;gap:5px}
+.fd-cast .pill{padding:3px 10px;color:var(--ink-hi)}
+.fd-cast a.pill:hover{background:var(--line);color:#fff}
+@media (max-width:560px){.film-detail{flex-direction:column}.fd-poster{width:140px}}
 .detail .who{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .detail h4{margin:18px 0 6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);border-bottom:1px solid var(--line-lo);padding-bottom:4px}
 .setrow{margin:16px 0}
@@ -683,14 +695,26 @@ function compute() {
 }
 
 function fmtRt(m) { return m ? Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0') : ''; }
-function posterHTML(f, info, extra) {
-  const src = info && info.p ? 'https://image.tmdb.org/t/p/w342' + info.p : L.lbPoster(f);
-  const img = src ? `<img loading="lazy" alt="" referrerpolicy="no-referrer" src="${esc(src)}" onerror="this.remove()">` : '';
+/* film details (poster, description, cast…) saved by the GitHub job in films.json, keyed by slug */
+let FD = {};
+const fd = f => (f && f.s && FD[f.s] && !FD[f.s].x) ? FD[f.s] : null;
+function fdPoster(f, big) {
+  const d = fd(f); if (!d || !d.p) return '';
+  return 'https://a.ltrbxd.com/resized/' + (big ? d.p : d.p.replace('-0-600-0-900-', '-0-230-0-345-'));
+}
+window.posterFail = img => {
+  const alt = (img.dataset.alt || '').split(' ').filter(Boolean);
+  if (alt.length) { img.dataset.alt = alt.slice(1).join(' '); img.src = alt[0]; } else img.remove();
+};
+function posterHTML(f, info, extra, big) {
+  const srcs = [info && info.p ? 'https://image.tmdb.org/t/p/w342' + info.p : '', fdPoster(f, big), L.lbPoster(f)].filter(Boolean);
+  const img = srcs.length ? `<img loading="lazy" alt="" referrerpolicy="no-referrer" src="${esc(srcs[0])}" data-alt="${esc(srcs.slice(1).join(' '))}" onerror="posterFail(this)">` : '';
   return `<div class="poster" style="background:${L.posterGradient(f)}"><div class="ptitle">${esc(f.t)}<small>${f.y || ''}</small></div>${img}${extra || ''}</div>`;
 }
 function cardHTML(r, total) {
   const { f, votes, seenBy, vetoed, info, isNew } = r;
-  const meta = [f.y || '', info && info.v ? '★ ' + info.v : '', info && info.rt ? fmtRt(info.rt) : ''].filter(Boolean).join(' · ');
+  const d = fd(f), rt = (info && info.rt) || (d && d.rt);
+  const meta = [f.y || '', d && d.r ? '★ ' + d.r.toFixed(1) : info && info.v ? '★ ' + info.v : '', rt ? fmtRt(rt) : ''].filter(Boolean).join(' · ');
   const ppl = votes.map(friend).filter(Boolean);
   return `<article class="film ${vetoed ? 'vetoed' : ''}" data-k="${esc(f.k)}" tabindex="0">
     ${posterHTML(f, info, `<span class="votes ${votes.length === total && total > 1 ? 'all' : ''}">${votes.length}/${total}</span>${isNew ? '<span class="newb" title="Added to a watchlist this week">NEW</span>' : ''}
@@ -831,22 +855,31 @@ function rowFor(k) {
   return { f, votes: [...f.wl].filter(id => pr.some(p => p.id === id)), info: L.tmdbCached(f.k),
     seenBy: S.friends.map(p => ({ p, w: (seen.get(p.id) || { get() { } }).get(f) })).filter(x => x.w) };
 }
-function openFilm(k) {
-  const r = rowFor(k); if (!r) return;
-  const { f, info } = r;
+function stars(r) { return '★'.repeat(Math.floor(r)) + (r % 1 ? '½' : ''); }
+function openFilm(k, fallback) {
+  const r = rowFor(k) || (fallback && { f: Object.assign({ wl: new Set() }, fallback), info: null, seenBy: [] });
+  if (!r) return;
+  const { f, info } = r, d = fd(f);
   const wants = [...f.wl].map(friend).filter(Boolean);
-  const m = modal(`<div class="pickcard detail">${posterHTML(f, info)}
-    <div style="min-width:0"><h2>${esc(f.t)}</h2>
-      <div class="muted">${[f.y, info && info.v ? '★ ' + info.v + ' TMDB' : '', info && info.rt ? fmtRt(info.rt) : ''].filter(Boolean).join(' · ')}</div>
-      ${info && info.o ? `<p style="font-size:14px">${esc(info.o)}${info.o.length >= 280 ? '…' : ''}</p>` : ''}
+  const rt = (d && d.rt) || (info && info.rt);
+  const meta = [f.y, d && d.dir ? 'Directed by ' + d.dir.map(x => x[0]).join(', ') : '', rt ? fmtRt(rt) : '',
+    d && d.g ? d.g.join(', ') : '', d && d.r ? '★ ' + d.r.toFixed(2) + ' on Letterboxd' : info && info.v ? '★ ' + info.v + ' TMDB' : ''].filter(Boolean);
+  const desc = (d && d.d) || (info && info.o) || '';
+  const m = modal(`<div class="film-detail">
+    <div class="fd-poster">${posterHTML(f, info, '', true)}</div>
+    <div class="fd-body"><h2>${esc(f.t)}</h2>
+      ${d && d.tl ? `<div class="fd-tag">${esc(d.tl)}</div>` : ''}
+      <div class="fd-meta">${meta.map(esc).join(' · ')}</div>
+      ${desc ? `<p class="fd-desc">${esc(desc)}</p>` : `<p class="faint" style="font-size:13px">${f.s ? 'Description, cast and poster are on their way — the site fetches them every 30 minutes.' : 'Added by name, so there are no details here — open it on Letterboxd.'}</p>`}
     </div></div>
-    <h4>On the watchlist of ${wants.length}</h4>
-    <div class="who">${wants.map(p => `<span class="pill">${L.avatar(p, 'xs')} ${esc(p.name)}${p.present === false ? ' <span class="faint">(out)</span>' : ''}</span>`).join('')}</div>
-    ${r.seenBy.length ? `<h4>Already seen by</h4><div class="who">${r.seenBy.map(x => `<span class="pill">${L.avatar(x.p, 'xs')} ${esc(x.p.name)}${x.w.r ? ` · ${'★'.repeat(Math.floor(x.w.r))}${x.w.r % 1 ? '½' : ''}` : ''}</span>`).join('')}</div>` : ''}
+    ${d && d.c ? `<h4>Cast</h4><div class="fd-cast">${d.c.map(([n, sl]) => sl ? `<a class="pill" href="https://letterboxd.com/actor/${esc(sl)}/" target="_blank" rel="noopener">${esc(n)}</a>` : `<span class="pill">${esc(n)}</span>`).join('')}</div>` : ''}
+    ${wants.length ? `<h4>On the watchlist of ${wants.length}</h4>
+    <div class="who">${wants.map(p => `<span class="pill">${L.avatar(p, 'xs')} ${esc(p.name)}${p.present === false ? ' <span class="faint">(out)</span>' : ''}</span>`).join('')}</div>` : ''}
+    ${r.seenBy.length ? `<h4>Already seen by</h4><div class="who">${r.seenBy.map(x => `<span class="pill">${L.avatar(x.p, 'xs')} ${esc(x.p.name)}${x.w.r ? ' · ' + stars(x.w.r) : ''}</span>`).join('')}</div>` : ''}
     <div class="row" style="margin-top:18px">
       <a class="btn primary" href="${L.filmUrl(f)}" target="_blank" rel="noopener">Open on Letterboxd ↗</a>
       <button class="btn" id="dAdd">${onBallot(k) ? '✓ On ballot' : '+ Add to ballot'}</button>
-      <button class="btn" id="dVeto">${S.vetoes.includes(k) ? 'Un-veto' : 'Veto'}</button>
+      ${S.vetoes ? `<button class="btn" id="dVeto">${S.vetoes.includes(k) ? 'Un-veto' : 'Veto'}</button>` : ''}
     </div>`);
   m.querySelector('#dVeto').onclick = () => { toggleVeto(k); m.close(); };
   m.querySelector('#dAdd').onclick = () => { if (!onBallot(k)) ballotAdd(f); m.close(); };
@@ -975,6 +1008,9 @@ async function loadPreset() {
   let crew, data = { friends: [] };
   try { crew = await (await fetch('crew.json', { cache: 'no-cache' })).json(); } catch (e) { return 0; }
   try { data = await (await fetch('data.json', { cache: 'no-cache' })).json(); } catch (e) { }
+  const fdBefore = Object.keys(FD).length;
+  try { FD = await (await fetch('films.json', { cache: 'no-cache' })).json(); } catch (e) { }
+  const fdChanged = Object.keys(FD).length !== fdBefore;
   const list = (crew.crew || []).filter(c => c.username);
   if (!list.length) return 0;
   presetInfo = { updated: data.updated };
@@ -1008,7 +1044,7 @@ async function loadPreset() {
   const before = S.friends.length;
   S.friends = S.friends.filter(f => !f.preset || keep.has((f.username || '').toLowerCase()));
   if (S.friends.length !== before) changed = true;
-  if (changed || !index) { persist(); renderAll(); } else renderCrew();
+  if (changed || !index) { persist(); renderAll(); } else if (fdChanged) renderAll(); else renderCrew();
   if (need.length) runQueue(need);
   return fresh;
 }
@@ -1101,22 +1137,25 @@ function renderBallot() {
   $('#ballotCount').textContent = list.length ? '· ' + list.length : '';
   const top = list.length && list[0].v.size ? list[0].v.size : -1;
   const w = ballot.winner && ballot.films.get(ballot.winner);
-  $('#winner').innerHTML = w ? `<div class="winner">${posterHTML(w, null)}<div><div class="lbl">Tonight we're watching</div><h3>${esc(w.t)}</h3>
+  $('#winner').innerHTML = w ? `<div class="winner"><span data-detail="${esc(w.k)}" style="cursor:pointer">${posterHTML(w, null)}</span><div><div class="lbl">Tonight we're watching</div><h3>${esc(w.t)}</h3>
     <div class="muted">${[w.y, (n => n + ' vote' + (n === 1 ? '' : 's'))((ballot.votes.get(w.k) || new Set()).size)].filter(Boolean).join(' · ')} · <a href="${L.filmUrl(w)}" target="_blank" rel="noopener">Letterboxd ↗</a></div></div></div>` : '';
   $('#blist').innerHTML = list.length ? list.map(({ f, v }) => {
     const mine = v.has(me), ppl = [...v].map(k => names.get(k)).filter(Boolean);
     const adder = names.get(f.by);
     return `<div class="bitem ${v.size === top ? 'lead' : ''}" data-bk="${esc(f.k)}">
-      <a href="${L.filmUrl(f)}" target="_blank" rel="noopener" title="Open on Letterboxd">${posterHTML(f, null)}</a>
-      <div class="bt"><b>${esc(f.t)}</b><small>${f.y || ''}${adder ? ' · added by ' + esc(adder.name) : ''}</small>
+      <span data-detail="${esc(f.k)}" title="Details">${posterHTML(f, null)}</span>
+      <div class="bt" data-detail="${esc(f.k)}" style="cursor:pointer"><b>${esc(f.t)}</b><small>${f.y || ''}${adder ? ' · added by ' + esc(adder.name) : ''}</small>
         <div class="stack" style="margin-top:4px">${ppl.map(p => L.avatar(p, 'xs')).join('')}</div></div>
       <button class="vbtn ${mine ? 'on' : ''}" data-vote="${esc(f.k)}" title="${mine ? 'Take back your vote' : 'Vote for this'}">👍 ${v.size}</button>
       <button class="bx" data-unadd="${esc(f.k)}" title="Remove from ballot">✕</button>
     </div>`;
   }).join('') : `<div class="bempty">Nothing on the ballot yet. Tap <b>+</b> on any poster below, search above, or add the top 5 — then everyone votes from their own phone.</div>`;
 }
+$('#winner').addEventListener('click', e => { const d = e.target.closest('[data-detail]'); if (d) openFilm(d.dataset.detail, ballot.films.get(d.dataset.detail)); });
 $('#me').addEventListener('change', e => { setMe(e.target.value); renderBallot(); });
 $('#blist').addEventListener('click', e => {
+  const det = e.target.closest('[data-detail]');
+  if (det && !e.target.closest('a')) { openFilm(det.dataset.detail, ballot.films.get(det.dataset.detail)); return; }
   const v = e.target.closest('[data-vote]');
   if (v) { if (!needMe()) return; const k = v.dataset.vote; publish({ op: 'vote', k, by: myKey(), on: !(ballot.votes.get(k) || new Set()).has(myKey()) }); return; }
   const x = e.target.closest('[data-unadd]');
