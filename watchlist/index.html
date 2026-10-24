@@ -293,17 +293,21 @@ $('#addForm').addEventListener('submit', e => {
 async function fetchFriend(f) {
   status[f.id] = { busy: true, msg: 'Watchlist…' }; renderCrew();
   try {
-    const wl = await L.fetchList(f.username, 'watchlist', S.settings, (p, n) => { status[f.id].msg = `Watchlist p${p} · ${n}`; renderCrew(); });
-    f.watchlist = wl;
-    if (S.settings.fetchWatched) {
-      status[f.id].msg = 'Seen films…'; renderCrew();
-      try {
-        f.watched = await L.fetchList(f.username, 'watched', S.settings, (p, n) => { status[f.id].msg = `Seen p${p} · ${n}`; renderCrew(); });
-      } catch (e) { if (!f.watched) f.watched = null; }
+    const [wl, seen] = await Promise.all([
+      L.fetchWatchlist(f.username, S.settings, (d, n) => { status[f.id].msg = n > 1 ? `Watchlist ${d}/${n} pages` : 'Watchlist…'; renderCrew(); }),
+      S.settings.fetchWatched ? L.fetchWatched(f.username, S.settings) : null,
+    ]);
+    f.watchlist = wl.items;
+    if (seen && seen.length) {
+      // keep films seen in earlier fetches; Letterboxd only exposes the latest ones
+      const m = new Map((f.watched || []).map(x => [L.keyOf(x), x]));
+      for (const x of seen) m.set(L.keyOf(x), Object.assign(m.get(L.keyOf(x)) || {}, x));
+      f.watched = [...m.values()];
     }
     f.updated = Date.now();
     delete status[f.id];
-    if (!wl.length) status[f.id] = { err: 'Watchlist empty or private' };
+    if (!wl.items.length) status[f.id] = { err: 'Watchlist empty or private' };
+    else if (wl.missed) status[f.id] = { err: `${wl.missed} page${wl.missed > 1 ? 's' : ''} didn't load — hit ↻ to retry` };
   } catch (e) {
     status[f.id] = { err: e.code === 404 ? 'User not found' : 'Letterboxd blocked the browser fetch. Add them to crew.json, or drop their export ZIP.' };
   }
@@ -312,7 +316,7 @@ async function fetchFriend(f) {
 async function runQueue(list) {
   const q = list.filter(f => f.username).slice();
   const worker = async () => { while (q.length) await fetchFriend(q.shift()); };
-  await Promise.all([worker(), worker(), worker()]);
+  await Promise.all([worker(), worker()]);
 }
 $('#refreshAll').onclick = () => runQueue(S.friends);
 

@@ -8,10 +8,8 @@
     '#9be564', '#f7a072', '#7f9cff', '#e36bff', '#57d9a3', '#ffb3c1', '#d9b44a', '#8fd3ff'];
 
   const PROXIES = [
-    { id: 'corsproxy', name: 'corsproxy.io', make: u => 'https://corsproxy.io/?url=' + encodeURIComponent(u) },
     { id: 'allorigins', name: 'allorigins.win', make: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u) },
     { id: 'codetabs', name: 'codetabs.com', make: u => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u) },
-    { id: 'thingproxy', name: 'thingproxy', make: u => 'https://thingproxy.freeboard.io/fetch/' + u },
   ];
 
   /* ---------- theme ---------- */
@@ -195,26 +193,49 @@
     if (preferred) list.sort((a, b) => (b.id === preferred) - (a.id === preferred));
     return list;
   }
+  /* Proxies that time out or get blocked are skipped for the rest of the session;
+     the first one that works is reused, and only if it fails are the others raced. */
+  const dead = new Set();
+  async function tryProxy(p, url, ms, ctrl) {
+    ctrl = ctrl || new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const res = await fetch(p.make(url), { signal: ctrl.signal });
+      const txt = await res.text();
+      if (res.status === 404 && /letterboxd/i.test(txt)) { const e = new Error('not found'); e.code = 404; throw e; }
+      if (!res.ok) throw new Error(p.name + ' returned HTTP ' + res.status);
+      if (!/letterboxd/i.test(txt)) throw new Error(p.name + ' returned something unexpected');
+      if (/Just a moment\.\.\.|challenge-platform/i.test(txt) && !/data-(item|film)-slug|\/film\//.test(txt))
+        throw new Error(p.name + ' was blocked by Cloudflare');
+      return txt;
+    } catch (e) {
+      if (e.code === 404) throw e;
+      if (e.name === 'AbortError') { if (ctrl.raceLost) throw e; e = new Error(p.name + ' timed out'); }
+      dead.add(p.id);
+      throw e;
+    } finally { clearTimeout(t); }
+  }
   async function fetchText(url, settings) {
-    let lastErr = null;
-    for (const p of proxyList(settings)) {
-      const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 25000);
-      try {
-        const res = await fetch(p.make(url), { signal: ctrl.signal });
-        const txt = await res.text();
-        if (res.status === 404 && /letterboxd/i.test(txt)) { const e = new Error('not found'); e.code = 404; throw e; }
-        if (!res.ok) throw new Error(p.name + ' returned HTTP ' + res.status);
-        if (!/letterboxd/i.test(txt)) throw new Error(p.name + ' returned something unexpected');
-        if (/Just a moment\.\.\.|challenge-platform/i.test(txt) && !/data-(item|film)-slug|\/film\//.test(txt))
-          throw new Error(p.name + ' was blocked by Cloudflare');
-        preferred = p.id;
-        return txt;
-      } catch (e) {
-        if (e.code === 404) throw e;
-        lastErr = e.name === 'AbortError' ? new Error(p.name + ' timed out') : e;
-      } finally { clearTimeout(t); }
+    let list = proxyList(settings);
+    if (list.every(p => dead.has(p.id))) dead.clear();
+    list = list.filter(p => !dead.has(p.id));
+    const pref = list.find(p => p.id === preferred);
+    if (pref) {
+      try { return await tryProxy(pref, url, 12000); }
+      catch (e) { if (e.code === 404) throw e; preferred = null; list = list.filter(p => p !== pref && !dead.has(p.id)); }
     }
-    throw lastErr || new Error('No proxy configured');
+    if (!list.length) throw new Error('every proxy failed');
+    const ctrls = list.map(() => new AbortController());
+    try {
+      return await Promise.any(list.map((p, i) => tryProxy(p, url, 15000, ctrls[i]).then(txt => {
+        preferred = p.id;
+        ctrls.forEach((c, j) => { if (j !== i) { c.raceLost = true; c.abort(); } });
+        return txt;
+      })));
+    } catch (agg) {
+      const errs = agg.errors || [agg];
+      throw errs.find(e => e.code === 404) || errs[errs.length - 1] || new Error('No proxy configured');
+    }
   }
   function parseGrid(html) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -246,18 +267,58 @@
     const hasNext = !!doc.querySelector('a.next, .paginate-nextprev .next a, link[rel="next"]');
     return { items: out, hasNext };
   }
-  async function fetchList(username, kind, settings, onPage) {
-    const base = 'https://letterboxd.com/' + encodeURIComponent(username) + (kind === 'watched' ? '/films/' : '/watchlist/');
+  async function pool(n, jobs) {
+    const q = jobs.slice(), run = async () => { while (q.length) await q.shift()(); };
+    await Promise.all(Array.from({ length: Math.min(n, q.length) }, run));
+  }
+  function lastPage(html) {
+    const nums = [...html.matchAll(/\/page\/(\d+)\/"/g)].map(m => +m[1]);
+    return nums.length ? Math.max(...nums) : 1;
+  }
+  /* Whole watchlist: page 1 tells how many pages there are, the rest load 4 at a time. */
+  async function fetchWatchlist(username, settings, onProgress) {
+    const base = 'https://letterboxd.com/' + encodeURIComponent(username) + '/watchlist/';
+    const first = await fetchText(base, settings);
+    const pages = [parseGrid(first).items];
+    const last = Math.min(lastPage(first), 200);
+    let done = 1, missed = 0;
+    if (onProgress) onProgress(done, last);
+    await pool(4, Array.from({ length: last - 1 }, (_, i) => async () => {
+      const n = i + 2;
+      let html = null;
+      for (let attempt = 0; attempt < 2 && html == null; attempt++) {
+        try { html = await fetchText(base + 'page/' + n + '/', settings); } catch (e) { if (e.code === 404) break; }
+      }
+      if (html == null) missed++; else pages[n - 1] = parseGrid(html).items;
+      done++; if (onProgress) onProgress(done, last);
+    }));
     const all = new Map();
-    for (let page = 1; page <= 120; page++) {
-      const html = await fetchText(base + (page > 1 ? 'page/' + page + '/' : ''), settings);
-      const { items, hasNext } = parseGrid(html);
-      let added = 0;
-      for (const f of items) if (!all.has(f.s)) { all.set(f.s, f); added++; }
-      if (onPage) onPage(page, all.size);
-      if (!added || (!hasNext && items.length < 20)) break;
+    for (const items of pages) for (const f of items || []) if (!all.has(f.s)) all.set(f.s, f);
+    return { items: [...all.values()], missed };
+  }
+  function parseRSS(xml) {
+    const dec = s => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").trim();
+    const out = [];
+    for (const item of xml.split('<item>').slice(1)) {
+      const tag = t => { const m = item.match(new RegExp('<' + t + '>([\\s\\S]*?)</' + t + '>')); return m ? dec(m[1]) : ''; };
+      const t = tag('letterboxd:filmTitle'), s = (tag('link').match(/\/film\/([^/]+)/) || [])[1];
+      if (!t || !s) continue;
+      const f = { t, y: +tag('letterboxd:filmYear') || 0, s }, r = parseFloat(tag('letterboxd:memberRating'));
+      if (r > 0) f.r = r;
+      out.push(f);
     }
-    return [...all.values()];
+    return out;
+  }
+  /* Letterboxd only serves page 1 of /films/ to non-browsers, so watched = that page + the RSS diary. */
+  async function fetchWatched(username, settings) {
+    const base = 'https://letterboxd.com/' + encodeURIComponent(username);
+    const [films, rss] = await Promise.all([
+      fetchText(base + '/films/', settings).then(h => parseGrid(h).items).catch(() => []),
+      fetchText(base + '/rss/', settings).then(parseRSS).catch(() => []),
+    ]);
+    const m = new Map(films.map(f => [f.s, f]));
+    for (const f of rss) m.set(f.s, Object.assign(m.get(f.s) || {}, f));
+    return [...m.values()];
   }
   function cleanUsername(s) {
     s = String(s || '').trim();
@@ -386,7 +447,7 @@
 
   window.LBX = {
     PALETTE, PROXIES, lbPoster, load, save, blank, esc, norm, keyOf, hash, initials, uid, nextColor, avatar, toast, filmUrl,
-    posterGradient, download, copy, parseCSV, csvToFilms, csvKind, mergeWatched, readZip, fetchText, parseGrid, fetchList,
+    posterGradient, download, copy, parseCSV, csvToFilms, csvKind, mergeWatched, readZip, fetchText, parseGrid, fetchWatchlist, fetchWatched, parseRSS,
     cleanUsername, buildIndex, lookupFor, tmdbInfo, tmdbCached, tmdbGenres, packGroup, unpackGroupJSON, inflate, deflate,
     toggleTheme, tip,
   };
