@@ -1,4 +1,4 @@
-name: Probe storage
+name: Probe film pages
 on:
   push:
     branches: [lbx-test]
@@ -10,18 +10,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p debug; o=debug/ntfy.txt; T=kalees-probe-$RANDOM$RANDOM
-          ( timeout 12 curl -sS -N "https://ntfy.sh/$T/json" > debug/stream.txt ) &
-          sleep 2
-          curl -sS -H 'Origin: https://sdi2000182.github.io' -d '{"op":"vote","k":"heat|1995","by":"eva"}' "https://ntfy.sh/$T" >> $o; echo >> $o
-          curl -sS -d '{"op":"add","t":"Heat","y":1995}' "https://ntfy.sh/$T" > /dev/null
-          sleep 3
-          echo "== poll since=all" >> $o
-          curl -sS "https://ntfy.sh/$T/json?poll=1&since=all" >> $o
-          echo "== poll w/ Origin" >> $o
-          curl -sS -i -H 'Origin: https://sdi2000182.github.io' "https://ntfy.sh/$T/json?poll=1&since=all" | grep -iE '^HTTP|access-control|"message"' >> $o
-          wait
-          echo "== live stream got" >> $o; cat debug/stream.txt >> $o
+          mkdir -p debug; o=debug/film.txt
+          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+          for s in a-beautiful-mind who-killed-captain-alex city-of-god; do
+            curl -sS -A "$UA" -H 'Accept-Language: en-US,en;q=0.9' -o debug/$s.html -w "film/$s %{http_code} %{size_download}\n" "https://letterboxd.com/film/$s/" >> $o; sleep 2
+            curl -sS -A "$UA" -o debug/$s.json -w "film/$s/json %{http_code}\n" "https://letterboxd.com/film/$s/json/" >> $o; sleep 2
+          done
+          for s in a-beautiful-mind who-killed-captain-alex; do
+            img=$(grep -o '<meta property="og:image" content="[^"]*"' debug/$s.html | sed 's/.*content="//;s/"$//')
+            echo "og:image $img" >> $o
+            [ -n "$img" ] && curl -sS -o /dev/null -w "  og img %{http_code} %{content_type}\n" "$img" >> $o
+            grep -o '<meta name="description" content="[^"]\{0,120\}' debug/$s.html >> $o
+            echo "  cast links: $(grep -o 'href="/actor/[^"]*"' debug/$s.html | wc -l)  director: $(grep -o 'href="/director/[^"]*"' debug/$s.html | head -1)" >> $o
+            echo "  json: $(head -c 400 debug/$s.json)" >> $o
+          done
           cat $o
           git config user.name "github-actions[bot]"; git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add debug && git commit -m probe && git push
