@@ -1,29 +1,28 @@
-name: Probe film pages
+name: Probe posters
 on:
   push:
     branches: [lbx-test]
 permissions:
   contents: write
 jobs:
-  probe:
+  p:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
-          mkdir -p debug; o=debug/film.txt
-          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
-          for s in a-beautiful-mind who-killed-captain-alex city-of-god; do
-            curl -sS -A "$UA" -H 'Accept-Language: en-US,en;q=0.9' -o debug/$s.html -w "film/$s %{http_code} %{size_download}\n" "https://letterboxd.com/film/$s/" >> $o; sleep 2
-            curl -sS -A "$UA" -o debug/$s.json -w "film/$s/json %{http_code}\n" "https://letterboxd.com/film/$s/json/" >> $o; sleep 2
-          done
-          for s in a-beautiful-mind who-killed-captain-alex; do
-            img=$(grep -o '<meta property="og:image" content="[^"]*"' debug/$s.html | sed 's/.*content="//;s/"$//')
-            echo "og:image $img" >> $o
-            [ -n "$img" ] && curl -sS -o /dev/null -w "  og img %{http_code} %{content_type}\n" "$img" >> $o
-            grep -o '<meta name="description" content="[^"]\{0,120\}' debug/$s.html >> $o
-            echo "  cast links: $(grep -o 'href="/actor/[^"]*"' debug/$s.html | wc -l)  director: $(grep -o 'href="/director/[^"]*"' debug/$s.html | head -1)" >> $o
-            echo "  json: $(head -c 400 debug/$s.json)" >> $o
-          done
-          cat $o
+          mkdir -p debug
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/1/0/8/3/3/3/1/1083331-bad-apples-0-230-0-345-crop.jpg?v=9ca0220221\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/1/0/8/3/3/3/1/1083331-bad-apples-0-230-0-345-crop.jpg?v=9ca0220221' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/1/0/8/3/3/3/1/1083331-bad-apples-0-600-0-900-crop.jpg?v=9ca0220221\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/1/0/8/3/3/3/1/1083331-bad-apples-0-600-0-900-crop.jpg?v=9ca0220221' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/5/1/6/4/8/51648-a-beautiful-mind-0-230-0-345-crop.jpg?v=790ccfb890\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/5/1/6/4/8/51648-a-beautiful-mind-0-230-0-345-crop.jpg?v=790ccfb890' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/5/1/6/4/8/51648-a-beautiful-mind-0-600-0-900-crop.jpg?v=790ccfb890\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/5/1/6/4/8/51648-a-beautiful-mind-0-600-0-900-crop.jpg?v=790ccfb890' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/3/2/5/0/2/32502-a-woman-under-the-influence-0-230-0-345-crop.jpg?v=b86a71d9ea\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/3/2/5/0/2/32502-a-woman-under-the-influence-0-230-0-345-crop.jpg?v=b86a71d9ea' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/3/2/5/0/2/32502-a-woman-under-the-influence-0-600-0-900-crop.jpg?v=b86a71d9ea\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/3/2/5/0/2/32502-a-woman-under-the-influence-0-600-0-900-crop.jpg?v=b86a71d9ea' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/5/0/1/1/4/50114-about-schmidt-0-230-0-345-crop.jpg?v=b0249f3d23\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/5/0/1/1/4/50114-about-schmidt-0-230-0-345-crop.jpg?v=b0249f3d23' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/5/0/1/1/4/50114-about-schmidt-0-600-0-900-crop.jpg?v=b0249f3d23\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/5/0/1/1/4/50114-about-schmidt-0-600-0-900-crop.jpg?v=b0249f3d23' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/5/1/7/0/7/51707-raising-arizona-0-230-0-345-crop.jpg?v=4a10e2c93f\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/5/1/7/0/7/51707-raising-arizona-0-230-0-345-crop.jpg?v=4a10e2c93f' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/film-poster/5/1/7/0/7/51707-raising-arizona-0-600-0-900-crop.jpg?v=4a10e2c93f\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/film-poster/5/1/7/0/7/51707-raising-arizona-0-600-0-900-crop.jpg?v=4a10e2c93f' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/sm/upload/4c/00/5v/3l/xLblSyhe4qSbYM5vGLC6yCn332E-0-230-0-345-crop.jpg?v=153e71c706\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/sm/upload/4c/00/5v/3l/xLblSyhe4qSbYM5vGLC6yCn332E-0-230-0-345-crop.jpg?v=153e71c706' >> debug/posters.txt
+          curl -sS -o /dev/null -w '%{http_code} %{content_type} %{size_download} https://a.ltrbxd.com/resized/sm/upload/4c/00/5v/3l/xLblSyhe4qSbYM5vGLC6yCn332E-0-600-0-900-crop.jpg?v=153e71c706\n' -H 'Referer: https://sdi2000182.github.io/' 'https://a.ltrbxd.com/resized/sm/upload/4c/00/5v/3l/xLblSyhe4qSbYM5vGLC6yCn332E-0-600-0-900-crop.jpg?v=153e71c706' >> debug/posters.txt
+          cat debug/posters.txt
           git config user.name "github-actions[bot]"; git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add debug && git commit -m probe && git push
