@@ -37,6 +37,11 @@
 .fchip .acts{display:flex;gap:1px}
 .fchip .acts button{width:24px;height:24px;border-radius:3px;border:0;background:transparent;cursor:pointer;color:var(--ink3);font-size:13px;display:grid;place-items:center}
 .fchip .acts button:hover{background:var(--line);color:#fff}
+.blocked{margin-top:12px;padding:12px 14px;border-radius:4px;background:rgba(255,128,0,.08);box-shadow:inset 3px 0 0 var(--orange);color:var(--ink2);font-size:13px}
+.blocked b{color:var(--ink)}
+.blocked a{color:var(--green);text-decoration:underline}
+.blocked ol{margin:6px 0 8px;padding-left:20px}
+.blocked .row{gap:6px}
 .crewbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
 .crewbar .grow{flex:1 1 260px;font-size:12px}
 
@@ -152,6 +157,7 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
       <input type="file" id="fileInput" multiple accept=".zip,.csv,.json" hidden>
       <b>Drop Letterboxd export ZIPs here</b> — always works, includes ratings. On letterboxd.com: Settings → Data → Export your data.
     </label>
+    <div class="blocked hidden" id="blocked"></div>
     <div class="friends" id="friends"></div>
     <div class="crewbar" id="crewbar">
       <span class="faint grow" id="presentNote"></span>
@@ -240,6 +246,17 @@ function renderCrew() {
       </div></div>`;
   }).join('');
   $('#crewbar').classList.toggle('hidden', !fs.length);
+  const blocked = fs.filter(f => status[f.id] && status[f.id].blocked && f.username);
+  $('#blocked').classList.toggle('hidden', !blocked.length);
+  if (blocked.length) {
+    const names = blocked.map(f => f.username).join(', ');
+    $('#blocked').innerHTML = `<b>Letterboxd blocks fetching from the browser.</b> GitHub can fetch it instead — add them to the crew once:
+      <ol><li>Open <a href="${workflowUrl()}" target="_blank" rel="noopener">the update workflow on GitHub</a> → <b>Run workflow</b></li>
+      <li>Paste <span class="kbd">${esc(names)}</span> into “usernames to add” → <b>Run workflow</b></li>
+      <li>Come back in ~2 minutes; they'll load here automatically, every 6 hours from then on.</li></ol>
+      <div class="row"><button class="btn small" data-copy="${esc(names)}">Copy usernames</button>
+      <span class="faint">Not the site owner? Send them the usernames, or drop an export ZIP above.</span></div>`;
+  }
   $('#presentNote').textContent = fs.length ? `${pr.length} of ${fs.length} here tonight — tap a face to mark someone out.` : '';
   $('#refreshAll').classList.toggle('hidden', !fs.some(f => f.username));
   if (presetInfo) {
@@ -309,7 +326,7 @@ async function fetchFriend(f) {
     if (!wl.items.length) status[f.id] = { err: 'Watchlist empty or private' };
     else if (wl.missed) status[f.id] = { err: `${wl.missed} page${wl.missed > 1 ? 's' : ''} didn't load — hit ↻ to retry` };
   } catch (e) {
-    status[f.id] = { err: e.code === 404 ? 'User not found' : 'Letterboxd blocked the browser fetch. Add them to crew.json, or drop their export ZIP.' };
+    status[f.id] = e.code === 404 ? { err: 'User not found' } : { err: 'Blocked by Letterboxd — see above', blocked: true };
   }
   persist(); renderAll();
 }
@@ -798,6 +815,10 @@ $('#duelBtn').onclick = () => {
 };
 
 
+function workflowUrl() {
+  const owner = location.hostname.endsWith('.github.io') ? location.hostname.split('.')[0] : 'sdi2000182';
+  return `https://github.com/${owner}/${owner}.github.io/actions/workflows/letterboxd.yml`;
+}
 function ago(t) {
   const m = Math.round((Date.now() - t) / 60000);
   return m < 2 ? 'just now' : m < 60 ? m + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago';

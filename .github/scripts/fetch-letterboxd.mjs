@@ -88,7 +88,22 @@ async function watched(user) {
   return [...out.values()];
 }
 
-const crew = JSON.parse(await readFile(CREW, 'utf8')).crew || [];
+const crewFile = JSON.parse(await readFile(CREW, 'utf8'));
+const crew = crewFile.crew = crewFile.crew || [];
+// "Run workflow" on GitHub can add people: ADD_USERS="name1, name2" or "user=Display Name"
+for (const raw of (process.env.ADD_USERS || '').split(/[,\n]+/)) {
+  let [username, name] = raw.split('=').map(x => (x || '').trim());
+  username = (username.match(/letterboxd\.com\/([^/?#\s]+)/i) || [])[1] || username.replace(/^@/, '');
+  if (!/^[A-Za-z0-9_]+$/.test(username)) continue;
+  const ex = crew.find(c => c.username.toLowerCase() === username.toLowerCase());
+  if (ex) { if (name) ex.name = name; } else crew.push({ username, name: name || username });
+  console.log('Added to crew:', username);
+}
+for (const raw of (process.env.REMOVE_USERS || '').split(/[,\n]+/).map(x => x.trim().toLowerCase()).filter(Boolean)) {
+  const i = crew.findIndex(c => c.username.toLowerCase() === raw);
+  if (i >= 0) { crew.splice(i, 1); console.log('Removed from crew:', raw); }
+}
+await writeFile(CREW, JSON.stringify(crewFile, null, 2) + '\n');
 let prev = { friends: [] };
 try { prev = JSON.parse(await readFile(OUT, 'utf8')); } catch {}
 const friends = [];
