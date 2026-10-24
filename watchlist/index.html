@@ -71,6 +71,7 @@
 .bitem .bt{min-width:0;flex:1}
 .bitem .bt b{color:var(--ink);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bitem .bt small{color:var(--ink3);font-size:11px}
+.avatar.out{opacity:.35;filter:grayscale(1)}
 .vbtn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:6px 12px;background:var(--line);color:var(--ink-hi);font-weight:700;cursor:pointer;font-size:13px;flex:none}
 .vbtn:hover{background:#556677}
 .vbtn.on{background:var(--green);color:var(--bg)}
@@ -1128,26 +1129,32 @@ function ballotAdd(f) {
   publish({ op: 'add', by: myKey(), f: { k, t: f.t, y: f.y || 0, s: f.s || '', i: f.i || 0, v: f.v || '' } });
   L.toast(`Added “${f.t}” to the ballot.`);
 }
+/* only people picked as watching count; votes from people who are out stay saved, greyed out */
+function hereKeys() { return new Set(present().map(fkey)); }
+function countHere(k, here) { let n = 0; for (const v of ballot.votes.get(k) || []) if (here.has(v)) n++; return n; }
 function renderBallot() {
   if (!ballotTopic) return;
-  const me = myKey(), names = new Map(S.friends.map(f => [fkey(f), f]));
-  $('#me').innerHTML = '<option value="">— pick yourself —</option>' + S.friends.map(f => `<option value="${esc(fkey(f))}" ${fkey(f) === me ? 'selected' : ''}>${esc(f.name)}</option>`).join('');
+  const me = myKey(), names = new Map(S.friends.map(f => [fkey(f), f])), here = hereKeys();
+  const voters = S.friends.filter(f => here.has(fkey(f)) || fkey(f) === me);
+  $('#me').innerHTML = '<option value="">— pick yourself —</option>' + voters.map(f => `<option value="${esc(fkey(f))}" ${fkey(f) === me ? 'selected' : ''}>${esc(f.name)}${here.has(fkey(f)) ? '' : ' (not watching)'}</option>`).join('');
   renderBallotLive();
-  const list = [...ballot.films.values()].map(f => ({ f, v: ballot.votes.get(f.k) || new Set() }))
-    .sort((a, b) => b.v.size - a.v.size || a.f.at - b.f.at);
+  const list = [...ballot.films.values()].map(f => ({ f, v: ballot.votes.get(f.k) || new Set(), n: countHere(f.k, here) }))
+    .sort((a, b) => b.n - a.n || a.f.at - b.f.at);
   $('#ballotCount').textContent = list.length ? '· ' + list.length : '';
-  const top = list.length && list[0].v.size ? list[0].v.size : -1;
+  const top = list.length && list[0].n ? list[0].n : -1;
   const w = ballot.winner && ballot.films.get(ballot.winner);
   $('#winner').innerHTML = w ? `<div class="winner"><span data-detail="${esc(w.k)}" style="cursor:pointer">${posterHTML(w, null)}</span><div><div class="lbl">Tonight we're watching</div><h3>${esc(w.t)}</h3>
-    <div class="muted">${[w.y, (n => n + ' vote' + (n === 1 ? '' : 's'))((ballot.votes.get(w.k) || new Set()).size)].filter(Boolean).join(' · ')} · <a href="${L.filmUrl(w)}" target="_blank" rel="noopener">Letterboxd ↗</a></div></div></div>` : '';
-  $('#blist').innerHTML = list.length ? list.map(({ f, v }) => {
-    const mine = v.has(me), ppl = [...v].map(k => names.get(k)).filter(Boolean);
+    <div class="muted">${[w.y, (n => n + ' vote' + (n === 1 ? '' : 's'))(countHere(w.k, here))].filter(Boolean).join(' · ')} · <a href="${L.filmUrl(w)}" target="_blank" rel="noopener">Letterboxd ↗</a></div></div></div>` : '';
+  $('#blist').innerHTML = list.length ? list.map(({ f, v, n }) => {
+    const mine = v.has(me), ppl = [...v].map(k => names.get(k)).filter(Boolean)
+      .sort((a, b) => here.has(fkey(b)) - here.has(fkey(a)));
+    const out = ppl.filter(p => !here.has(fkey(p))).length;
     const adder = names.get(f.by);
-    return `<div class="bitem ${v.size === top ? 'lead' : ''}" data-bk="${esc(f.k)}">
+    return `<div class="bitem ${n === top ? 'lead' : ''}" data-bk="${esc(f.k)}">
       <span data-detail="${esc(f.k)}" title="Details">${posterHTML(f, null)}</span>
       <div class="bt" data-detail="${esc(f.k)}" style="cursor:pointer"><b>${esc(f.t)}</b><small>${f.y || ''}${adder ? ' · added by ' + esc(adder.name) : ''}</small>
-        <div class="stack" style="margin-top:4px">${ppl.map(p => L.avatar(p, 'xs')).join('')}</div></div>
-      <button class="vbtn ${mine ? 'on' : ''}" data-vote="${esc(f.k)}" title="${mine ? 'Take back your vote' : 'Vote for this'}">👍 ${v.size}</button>
+        <div class="stack" style="margin-top:4px">${ppl.map(p => L.avatar(p, 'xs' + (here.has(fkey(p)) ? '' : ' out'))).join('')}${out ? `<span class="faint" style="font-size:11px;margin-left:6px">${out} not watching</span>` : ''}</div></div>
+      <button class="vbtn ${mine ? 'on' : ''}" data-vote="${esc(f.k)}" title="${mine ? 'Take back your vote' : 'Vote for this'}">👍 ${n}</button>
       <button class="bx" data-unadd="${esc(f.k)}" title="Remove from ballot">✕</button>
     </div>`;
   }).join('') : `<div class="bempty">Nothing on the ballot yet. Tap <b>+</b> on any poster below, search above, or add the top 5 — then everyone votes from their own phone.</div>`;
@@ -1169,7 +1176,8 @@ $('#addTop').onclick = () => {
   picks.forEach((r, i) => setTimeout(() => publish({ op: 'add', by: myKey(), f: { k: r.f.k, t: r.f.t, y: r.f.y || 0, s: r.f.s || '', i: r.f.i || 0, v: r.f.v || '' } }), i * 250));
 };
 $('#pickWinner').onclick = () => {
-  const list = [...ballot.films.values()].map(f => ({ f, n: (ballot.votes.get(f.k) || new Set()).size }));
+  const here = hereKeys();
+  const list = [...ballot.films.values()].map(f => ({ f, n: countHere(f.k, here) }));
   if (!list.length) return L.toast('Add some films first.');
   const best = Math.max(...list.map(x => x.n)), tied = list.filter(x => x.n === best);
   const pick = tied[Math.floor(Math.random() * tied.length)].f;
