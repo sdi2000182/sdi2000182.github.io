@@ -346,8 +346,9 @@ function renderCrew() {
   renderGroups();
   $('#refreshAll').classList.toggle('hidden', !presetInfo && !fs.some(f => f.username));
   $('#missingBtn').classList.toggle('hidden', !presetInfo);
+  // with a synced crew, people are added on GitHub, so the in-page username box goes away
+  $('#addForm').classList.toggle('hidden', !!presetInfo);
   if (presetInfo) {
-    $('#addInput').placeholder = 'Add a guest by Letterboxd username…';
     $('#syncNote').textContent = presetInfo.updated ? 'Synced ' + ago(Date.parse(presetInfo.updated)) : 'Waiting for first auto-sync';
   }
   // the slider shows the effective minimum; ui.minV keeps the setting for when more people are picked
