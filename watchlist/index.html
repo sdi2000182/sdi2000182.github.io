@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Watchlist Merger</title>
+<title>kalees/malees</title>
 <meta name="description" content="Merge your friends' Letterboxd watchlists and find the film most of you want to watch.">
 <meta name="theme-color" content="#14181c">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 12'%3E%3Ccircle cx='6' cy='6' r='5.5' fill='%23ff8000'/%3E%3Ccircle cx='18' cy='6' r='5.5' fill='%2300e054'/%3E%3Ccircle cx='30' cy='6' r='5.5' fill='%2340bcf4'/%3E%3C/svg%3E">
@@ -54,6 +54,42 @@
 .gchip .gx:hover{opacity:1;background:rgba(0,0,0,.2)}
 .fchip{cursor:pointer;user-select:none}
 .fchip:not(.away){box-shadow:inset 0 0 0 1px rgba(0,224,84,.35)}
+.ballot{margin-top:34px}
+.ballot-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ballot-bar select.input{padding:6px 8px;font-size:13px;text-transform:none;letter-spacing:0}
+.addfilm{position:relative;flex:1 1 220px;min-width:0}
+.addfilm .input{width:100%}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:25;background:var(--bg-hi);border-radius:4px;box-shadow:0 12px 30px rgba(0,0,0,.5),inset 0 0 0 1px var(--line);max-height:320px;overflow:auto}
+.sugg button{display:flex;width:100%;gap:10px;align-items:center;text-align:left;padding:8px 10px;border:0;background:transparent;color:var(--ink-hi);cursor:pointer;font-size:13px}
+.sugg button:hover,.sugg button.on{background:var(--slate)}
+.sugg .faint{font-size:11px;margin-left:auto;white-space:nowrap}
+.blist{display:grid;gap:8px;margin-top:12px}
+.bitem{display:flex;gap:12px;align-items:center;background:var(--slate);border-radius:4px;padding:8px;min-width:0}
+.bitem.lead{box-shadow:inset 3px 0 0 var(--green)}
+.bitem .poster{width:42px;flex:none;cursor:pointer}
+.bitem .poster .ptitle{display:none}
+.bitem .bt{min-width:0;flex:1}
+.bitem .bt b{color:var(--ink);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bitem .bt small{color:var(--ink3);font-size:11px}
+.vbtn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:6px 12px;background:var(--line);color:var(--ink-hi);font-weight:700;cursor:pointer;font-size:13px;flex:none}
+.vbtn:hover{background:#556677}
+.vbtn.on{background:var(--green);color:var(--bg)}
+.bx{border:0;background:transparent;color:var(--ink3);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:3px;flex:none}
+.bx:hover{color:#fff;background:var(--line)}
+.bempty{color:var(--ink3);font-size:13px;padding:14px;border-radius:4px;box-shadow:inset 0 0 0 1px var(--line-lo);margin-top:12px}
+.winner{display:flex;gap:14px;align-items:center;padding:12px;border-radius:4px;background:rgba(0,224,84,.08);box-shadow:inset 0 0 0 1px rgba(0,224,84,.4);margin-bottom:12px}
+.winner .poster{width:64px;flex:none}
+.winner .poster .ptitle{display:none}
+.winner .lbl{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green)}
+.winner h3{font-family:"Source Serif 4",Georgia,serif;font-size:24px;line-height:1.1}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:1px;animation:pulse 2s infinite}
+.live-dot.off{background:var(--ink3);animation:none}
+@keyframes pulse{50%{opacity:.35}}
+.addb{position:absolute;top:5px;right:33px;z-index:2;width:24px;height:24px;border-radius:50%;border:0;background:rgba(20,24,28,.85);color:var(--ink-hi);cursor:pointer;opacity:0;transition:.12s;font-size:15px;font-weight:700;line-height:1}
+.film:hover .addb,.film:focus-within .addb,.addb.on{opacity:1}
+@media (hover:none){.addb{opacity:.9}}
+.addb:hover{background:var(--green);color:var(--bg)}
+.addb.on{background:var(--green);color:var(--bg)}
 .newb{position:absolute;left:6px;top:30px;z-index:2;background:var(--orange);color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:3px}
 
 .controls{position:sticky;top:62px;z-index:20;background:rgba(20,24,28,.96);backdrop-filter:blur(8px);padding:12px 0;margin-top:30px;border-top:1px solid var(--line-lo);border-bottom:1px solid var(--line-lo)}
@@ -154,7 +190,7 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
 
 <main class="wrap">
   <section class="hero">
-    <h1>Movie night, <em>settled.</em></h1>
+    <h1>kalees<em>/</em>malees</h1>
     <p>Everyone's Letterboxd watchlist in one place. The films the most people want rise to the top — then spin, duel or veto your way to a pick.</p>
   </section>
 
@@ -185,6 +221,22 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
         <button class="btn small" id="exportBtn">Save crew file</button>
       </div>
     </div>
+  </section>
+
+  <section class="ballot hidden" id="ballot">
+    <div class="sh"><h2>Tonight's ballot <span id="ballotCount"></span></h2><span class="aside" id="ballotLive"></span></div>
+    <div id="winner"></div>
+    <div class="ballot-bar">
+      <label class="ctl">Voting as <select class="input" id="me" aria-label="Who's voting"></select></label>
+      <div class="addfilm">
+        <input class="input" id="filmQ" placeholder="Add any film to the ballot…" autocomplete="off" aria-label="Add a film to the ballot">
+        <div class="sugg hidden" id="sugg"></div>
+      </div>
+      <button class="btn small" id="addTop" title="Add the top 5 from the merged list">+ Top 5</button>
+      <button class="btn small primary" id="pickWinner">🏆 Pick winner</button>
+      <button class="btn small ghost" id="ballotReset">Clear</button>
+    </div>
+    <div class="blist" id="blist"></div>
   </section>
 
   <section class="controls" id="controls">
@@ -642,7 +694,8 @@ function cardHTML(r, total) {
   const ppl = votes.map(friend).filter(Boolean);
   return `<article class="film ${vetoed ? 'vetoed' : ''}" data-k="${esc(f.k)}" tabindex="0">
     ${posterHTML(f, info, `<span class="votes ${votes.length === total && total > 1 ? 'all' : ''}">${votes.length}/${total}</span>${isNew ? '<span class="newb" title="Added to a watchlist this week">NEW</span>' : ''}
-    <button class="veto" data-veto="${esc(f.k)}" title="${vetoed ? 'Un-veto' : 'Veto — nobody wants this tonight'}" aria-label="Veto">${vetoed ? '↺' : '✕'}</button>`)}
+    <button class="veto" data-veto="${esc(f.k)}" title="${vetoed ? 'Un-veto' : 'Veto — nobody wants this tonight'}" aria-label="Veto">${vetoed ? '↺' : '✕'}</button>
+    <button class="addb ${onBallot(f.k) ? 'on' : ''}" data-add="${esc(f.k)}" title="${onBallot(f.k) ? 'On tonight\'s ballot' : 'Add to tonight\'s ballot'}" aria-label="Add to ballot">${onBallot(f.k) ? '✓' : '+'}</button>`)}
     <div class="meta"><div class="t">${esc(f.t)}</div><div class="y">${meta || '&nbsp;'}</div>
     <div class="stack">${ppl.slice(0, 8).map(p => L.avatar(p, 'xs')).join('')}${ppl.length > 8 ? `<span class="faint" style="font-size:11px;margin-left:4px">+${ppl.length - 8}</span>` : ''}</div>
     ${seenBy.length ? `<div class="seen">👁 seen by ${esc(seenBy.map(p => p.name).join(', '))}</div>` : ''}</div>
@@ -760,6 +813,8 @@ $('#genres').addEventListener('click', e => {
 $('#results').addEventListener('click', e => {
   const v = e.target.closest('[data-veto]');
   if (v) { e.stopPropagation(); toggleVeto(v.dataset.veto); return; }
+  const a = e.target.closest('[data-add]');
+  if (a) { e.stopPropagation(); const f = idx().films.get(a.dataset.add); if (f) ballotAdd(f); return; }
   const c = e.target.closest('.film'); if (c) openFilm(c.dataset.k);
 });
 $('#results').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList.contains('film')) openFilm(e.target.dataset.k); });
@@ -790,9 +845,11 @@ function openFilm(k) {
     ${r.seenBy.length ? `<h4>Already seen by</h4><div class="who">${r.seenBy.map(x => `<span class="pill">${L.avatar(x.p, 'xs')} ${esc(x.p.name)}${x.w.r ? ` · ${'★'.repeat(Math.floor(x.w.r))}${x.w.r % 1 ? '½' : ''}` : ''}</span>`).join('')}</div>` : ''}
     <div class="row" style="margin-top:18px">
       <a class="btn primary" href="${L.filmUrl(f)}" target="_blank" rel="noopener">Open on Letterboxd ↗</a>
+      <button class="btn" id="dAdd">${onBallot(k) ? '✓ On ballot' : '+ Add to ballot'}</button>
       <button class="btn" id="dVeto">${S.vetoes.includes(k) ? 'Un-veto' : 'Veto'}</button>
     </div>`);
   m.querySelector('#dVeto').onclick = () => { toggleVeto(k); m.close(); };
+  m.querySelector('#dAdd').onclick = () => { if (!onBallot(k)) ballotAdd(f); m.close(); };
 }
 
 /* controls */
@@ -922,6 +979,7 @@ async function loadPreset() {
   if (!list.length) return 0;
   presetInfo = { updated: data.updated };
   presetUser = crew.mutualsOf || '';
+  if (crew.ballotTopic && crew.ballotTopic !== ballotTopic) connectBallot(crew.ballotTopic);
   let fresh = 0, changed = false;
   const now = Date.now();
   const snap = new Map((data.friends || []).map(f => [f.username.toLowerCase(), f]));
@@ -966,7 +1024,160 @@ async function poll(force) {
 setInterval(() => poll(), 10 * 60e3);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
 
-function renderAll() { renderCrew(); renderResults(); }
+/* ---------------- tonight's ballot ----------------
+   GitHub Pages has no server, so the ballot is an event log on a public ntfy.sh
+   topic (named in crew.json). ntfy keeps messages ~12 hours, so each ballot lasts
+   one night. Everyone replays the log and follows it live. */
+const NTFY = 'https://ntfy.sh/';
+let ballotTopic = '', bEvents = [], bSeen = new Set(), bSource = null, bLive = false;
+let ballot = { films: new Map(), votes: new Map(), winner: null };
+function myKey() { try { return localStorage.getItem('lbxm.me') || ''; } catch (e) { return ''; } }
+function setMe(k) { try { localStorage.setItem('lbxm.me', k); } catch (e) { } }
+function onBallot(k) { return ballot.films.has(k); }
+function reduceBallot() {
+  const b = { films: new Map(), votes: new Map(), winner: null };
+  for (const ev of bEvents.slice().sort((x, y) => x.time - y.time || (x.id < y.id ? -1 : 1))) {
+    const d = ev.d;
+    if (d.op === 'reset') { b.films.clear(); b.votes.clear(); b.winner = null; }
+    else if (d.op === 'add' && d.f && !b.films.has(d.f.k)) { b.films.set(d.f.k, Object.assign({}, d.f, { by: d.by, at: ev.time })); b.votes.set(d.f.k, new Set(d.by ? [d.by] : [])); }
+    else if (d.op === 'remove') { b.films.delete(d.k); b.votes.delete(d.k); if (b.winner === d.k) b.winner = null; }
+    else if (d.op === 'vote' && b.films.has(d.k)) { const v = b.votes.get(d.k); d.on ? v.add(d.by) : v.delete(d.by); }
+    else if (d.op === 'winner' && b.films.has(d.k)) b.winner = d.k;
+  }
+  ballot = b;
+}
+function takeEvent(m) {
+  if (!m || m.event !== 'message' || bSeen.has(m.id)) return false;
+  let d; try { d = JSON.parse(m.message); } catch (e) { return false; }
+  bSeen.add(m.id); bEvents.push({ id: m.id, time: m.time, d });
+  return true;
+}
+let bRenderT;
+function ballotChanged() { clearTimeout(bRenderT); bRenderT = setTimeout(() => { reduceBallot(); renderBallot(); renderResults(); }, 60); }
+async function publish(d) {
+  if (!ballotTopic) return;
+  try {
+    const res = await fetch(NTFY + ballotTopic, { method: 'POST', body: JSON.stringify(d) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (takeEvent(await res.json())) ballotChanged();
+  } catch (e) {
+    // offline: keep it on this device so the ballot still works when passing one phone around
+    takeEvent({ event: 'message', id: 'local-' + L.uid(), time: Date.now() / 1000, message: JSON.stringify(d) }) && ballotChanged();
+    L.toast(e.message.startsWith('HTTP 429') ? 'Too many votes too fast — wait a few seconds.' : 'Couldn\'t reach the vote server — saved on this phone only.');
+  }
+}
+function connectBallot(topic) {
+  ballotTopic = topic;
+  if (bSource) bSource.close();
+  $('#ballot').classList.remove('hidden');
+  bSource = new EventSource(NTFY + topic + '/sse?since=all');
+  bSource.onopen = () => { bLive = true; renderBallotLive(); };
+  bSource.onerror = () => { bLive = false; renderBallotLive(); };
+  bSource.onmessage = e => { try { if (takeEvent(JSON.parse(e.data))) ballotChanged(); } catch (x) { } };
+  renderBallot();
+}
+function renderBallotLive() {
+  $('#ballotLive').innerHTML = bLive ? '<span class="live-dot"></span>Live' : '<span class="live-dot off"></span>Connecting…';
+}
+function needMe() {
+  if (myKey()) return true;
+  L.toast('Pick who you are first (“Voting as”).');
+  $('#me').focus(); return false;
+}
+function ballotAdd(f) {
+  if (!needMe()) return;
+  const k = f.k || L.keyOf(f);
+  if (onBallot(k)) return L.toast('Already on the ballot.');
+  publish({ op: 'add', by: myKey(), f: { k, t: f.t, y: f.y || 0, s: f.s || '', i: f.i || 0, v: f.v || '' } });
+  L.toast(`Added “${f.t}” to the ballot.`);
+}
+function renderBallot() {
+  if (!ballotTopic) return;
+  const me = myKey(), names = new Map(S.friends.map(f => [fkey(f), f]));
+  $('#me').innerHTML = '<option value="">— pick yourself —</option>' + S.friends.map(f => `<option value="${esc(fkey(f))}" ${fkey(f) === me ? 'selected' : ''}>${esc(f.name)}</option>`).join('');
+  renderBallotLive();
+  const list = [...ballot.films.values()].map(f => ({ f, v: ballot.votes.get(f.k) || new Set() }))
+    .sort((a, b) => b.v.size - a.v.size || a.f.at - b.f.at);
+  $('#ballotCount').textContent = list.length ? '· ' + list.length : '';
+  const top = list.length && list[0].v.size ? list[0].v.size : -1;
+  const w = ballot.winner && ballot.films.get(ballot.winner);
+  $('#winner').innerHTML = w ? `<div class="winner">${posterHTML(w, null)}<div><div class="lbl">Tonight we're watching</div><h3>${esc(w.t)}</h3>
+    <div class="muted">${[w.y, (n => n + ' vote' + (n === 1 ? '' : 's'))((ballot.votes.get(w.k) || new Set()).size)].filter(Boolean).join(' · ')} · <a href="${L.filmUrl(w)}" target="_blank" rel="noopener">Letterboxd ↗</a></div></div></div>` : '';
+  $('#blist').innerHTML = list.length ? list.map(({ f, v }) => {
+    const mine = v.has(me), ppl = [...v].map(k => names.get(k)).filter(Boolean);
+    const adder = names.get(f.by);
+    return `<div class="bitem ${v.size === top ? 'lead' : ''}" data-bk="${esc(f.k)}">
+      <a href="${L.filmUrl(f)}" target="_blank" rel="noopener" title="Open on Letterboxd">${posterHTML(f, null)}</a>
+      <div class="bt"><b>${esc(f.t)}</b><small>${f.y || ''}${adder ? ' · added by ' + esc(adder.name) : ''}</small>
+        <div class="stack" style="margin-top:4px">${ppl.map(p => L.avatar(p, 'xs')).join('')}</div></div>
+      <button class="vbtn ${mine ? 'on' : ''}" data-vote="${esc(f.k)}" title="${mine ? 'Take back your vote' : 'Vote for this'}">👍 ${v.size}</button>
+      <button class="bx" data-unadd="${esc(f.k)}" title="Remove from ballot">✕</button>
+    </div>`;
+  }).join('') : `<div class="bempty">Nothing on the ballot yet. Tap <b>+</b> on any poster below, search above, or add the top 5 — then everyone votes from their own phone.</div>`;
+}
+$('#me').addEventListener('change', e => { setMe(e.target.value); renderBallot(); });
+$('#blist').addEventListener('click', e => {
+  const v = e.target.closest('[data-vote]');
+  if (v) { if (!needMe()) return; const k = v.dataset.vote; publish({ op: 'vote', k, by: myKey(), on: !(ballot.votes.get(k) || new Set()).has(myKey()) }); return; }
+  const x = e.target.closest('[data-unadd]');
+  if (x) { const f = ballot.films.get(x.dataset.unadd); if (f && confirm(`Take “${f.t}” off the ballot?`)) publish({ op: 'remove', k: f.k, by: myKey() }); }
+});
+$('#addTop').onclick = () => {
+  if (!needMe()) return;
+  const picks = lastRows.filter(r => !r.vetoed && !onBallot(r.f.k)).slice(0, 5);
+  if (!picks.length) return L.toast('Nothing left to add from the list.');
+  picks.forEach((r, i) => setTimeout(() => publish({ op: 'add', by: myKey(), f: { k: r.f.k, t: r.f.t, y: r.f.y || 0, s: r.f.s || '', i: r.f.i || 0, v: r.f.v || '' } }), i * 250));
+};
+$('#pickWinner').onclick = () => {
+  const list = [...ballot.films.values()].map(f => ({ f, n: (ballot.votes.get(f.k) || new Set()).size }));
+  if (!list.length) return L.toast('Add some films first.');
+  const best = Math.max(...list.map(x => x.n)), tied = list.filter(x => x.n === best);
+  const pick = tied[Math.floor(Math.random() * tied.length)].f;
+  publish({ op: 'winner', k: pick.k, by: myKey() });
+  if (tied.length > 1) L.toast(`${tied.length}-way tie at ${best} vote${best === 1 ? '' : 's'} — picked at random.`);
+};
+$('#ballotReset').onclick = () => { if (ballot.films.size && confirm('Clear the ballot for everyone?')) publish({ op: 'reset', by: myKey() }); };
+
+/* add-a-film search: crew watchlists first, or any title typed in */
+let suggIdx = 0, suggItems = [];
+function parseTyped(q) {
+  const m = q.trim().match(/^(.*?)[\s(]*((?:18|19|20)\d{2})\)?$/);
+  return m && m[1].trim() ? { t: m[1].trim(), y: +m[2] } : { t: q.trim(), y: 0 };
+}
+function renderSugg() {
+  const q = L.norm($('#filmQ').value), box = $('#sugg');
+  if (!q) { box.classList.add('hidden'); suggItems = []; return; }
+  const hits = [];
+  for (const f of idx().films.values()) {
+    const n = L.norm(f.t);
+    if (n.includes(q)) hits.push({ f, score: (n.startsWith(q) ? 0 : 1) * 100 - f.wl.size });
+  }
+  hits.sort((a, b) => a.score - b.score);
+  const typed = parseTyped($('#filmQ').value);
+  suggItems = hits.slice(0, 7).map(h => h.f).concat([Object.assign(typed, { typed: true })]);
+  suggIdx = 0;
+  box.innerHTML = suggItems.map((f, i) => f.typed
+    ? `<button data-si="${i}" class="${i === suggIdx ? 'on' : ''}">+ Add “${esc(f.t)}”${f.y ? ' (' + f.y + ')' : ''}<span class="faint">as typed</span></button>`
+    : `<button data-si="${i}" class="${i === suggIdx ? 'on' : ''}">${esc(f.t)} <span class="faint">${f.y || ''} · on ${f.wl.size} watchlist${f.wl.size === 1 ? '' : 's'}</span></button>`).join('');
+  box.classList.remove('hidden');
+}
+function chooseSugg(i) {
+  const f = suggItems[i]; if (!f) return;
+  ballotAdd(f.typed ? { t: f.t, y: f.y } : f);
+  $('#filmQ').value = ''; renderSugg();
+}
+$('#filmQ').addEventListener('input', renderSugg);
+$('#filmQ').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); suggIdx = (suggIdx + (e.key === 'ArrowDown' ? 1 : -1) + suggItems.length) % suggItems.length;
+    $('#sugg').querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', i === suggIdx));
+  } else if (e.key === 'Enter') { e.preventDefault(); chooseSugg(suggIdx); }
+  else if (e.key === 'Escape') { $('#filmQ').value = ''; renderSugg(); }
+});
+$('#sugg').addEventListener('mousedown', e => { const b = e.target.closest('[data-si]'); if (b) { e.preventDefault(); chooseSugg(+b.dataset.si); } });
+$('#filmQ').addEventListener('blur', () => setTimeout(() => $('#sugg').classList.add('hidden'), 150));
+
+function renderAll() { renderCrew(); renderResults(); if (ballotTopic) renderBallot(); }
 renderAll();
 loadPreset().then(readHash);
 addEventListener('hashchange', readHash);
