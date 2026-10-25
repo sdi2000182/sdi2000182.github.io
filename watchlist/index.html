@@ -190,105 +190,186 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
   .stat{padding:0 14px}
   .stat .v{font-size:18px}
 }
+
+/* ---- simplified layout: who's watching, then Browse / Vote ---- */
+.hero,.foot{display:none}
+.top .wrap{gap:10px}
+.brand{font-size:19px}
+.tabs{display:flex;gap:4px;margin-left:auto;background:var(--slate);padding:4px;border-radius:999px}
+.tabs button{border:0;background:transparent;color:var(--ink2);font-weight:700;font-size:14px;padding:7px 16px;border-radius:999px;cursor:pointer}
+.tabs button.on{background:var(--ink-hi);color:var(--bg)}
+.tcount:empty{display:none}
+.tcount{display:inline-block;min-width:18px;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--green);color:var(--bg);font-size:11px;line-height:18px}
+.watching{margin-top:22px}
+.watching-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;color:var(--ink);font-size:15px}
+.watching-head .grow{flex:1}
+.watching .friends{display:flex;gap:14px;overflow-x:auto;padding:12px 2px 6px;scrollbar-width:none;grid-template-columns:none}
+.watching .friends::-webkit-scrollbar{display:none}
+.watching .fchip{flex:none;flex-direction:column;gap:6px;background:none;box-shadow:none!important;padding:0;width:62px;text-align:center}
+.watching .fchip .avatar{width:52px;height:52px;font-size:17px;box-shadow:0 0 0 3px var(--green)}
+.watching .fchip.away .avatar{box-shadow:none}
+.watching .fchip .who{display:block;width:100%}
+.watching .fchip .nm{font-size:12px;font-weight:600;text-decoration:none!important}
+.watching .fchip .sub,.watching .fchip .acts{display:none}
+.watching .picker{margin-top:6px;gap:6px}
+.chipbtn{border:0;border-radius:999px;padding:6px 12px;background:var(--slate);color:var(--ink-hi);font-weight:600;font-size:13px;cursor:pointer}
+.chipbtn:hover{background:var(--slate-hi)}
+.chipbtn.ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink2)}
+.gchip{border-radius:999px!important}
+.toolbar{display:flex;gap:8px;margin-top:22px;align-items:center}
+.toolbar .input{flex:1;min-width:0}
+.toolbar .btn{padding:10px 14px}
+.filters{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;margin-top:12px;padding:14px;border-radius:6px;background:var(--bg-hi);box-shadow:inset 0 0 0 1px var(--line-lo)}
+.filters .ctl{text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink-hi)}
+.filters select.input{padding:6px 8px;font-size:13px}
+.filters .genres{width:100%;margin-top:0}
+.film .veto{display:none}
+.tier:first-child{margin-top:22px}
+#tab-vote .ballot{margin-top:24px}
+@media (max-width:520px){.tabs button{padding:7px 12px}.brand span:last-child{display:none}}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="./"><span class="dots"><i></i><i></i><i></i></span><span>Watchlist <span class="lite">Merger</span></span></a>
-    <span style="flex:1"></span>
-    <button class="iconbtn" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
+    <a class="brand" href="./"><span class="dots"><i></i><i></i><i></i></span><span>kalees<span class="lite">/</span>malees</span></a>
+    <nav class="tabs" role="tablist">
+      <button data-tab="browse" class="on" role="tab">Browse</button>
+      <button data-tab="vote" role="tab">Vote <span class="tcount" id="ballotCount"></span></button>
+    </nav>
   </div>
 </header>
 
 <main class="wrap">
-  <section class="hero">
-    <h1>kalees<em>/</em>malees</h1>
-    <p>Everyone's Letterboxd watchlist in one place. The films the most people want rise to the top — then spin, duel or veto your way to a pick.</p>
-  </section>
-
-  <section class="crew">
-    <div class="sh"><h2>The crew <span id="crewCount"></span></h2><span class="aside" id="syncNote"></span></div>
-    <form class="addrow" id="addForm" autocomplete="off">
-      <input class="input" id="addInput" placeholder="Letterboxd usernames — e.g. dave, jay, letterboxd.com/kim" aria-label="Letterboxd usernames">
-      <button class="btn primary" type="submit">Add</button>
-    </form>
-    <label class="drop" id="drop">
-      <input type="file" id="fileInput" multiple accept=".zip,.csv,.json" hidden>
-      <b>Drop Letterboxd export ZIPs here</b> — always works, includes ratings. On letterboxd.com: Settings → Data → Export your data.
-    </label>
-    <div class="blocked hidden" id="blocked"></div>
+  <!-- 1. who's watching -->
+  <section class="watching">
+    <div class="watching-head"><b>Who's watching?</b> <span class="faint" id="presentNote"></span><span class="grow"></span><span class="aside" id="syncNote"></span></div>
     <div class="friends" id="friends"></div>
-    <div class="crewbar" id="crewbar">
-      <div class="picker">
-        <span class="pk-note" id="presentNote"></span>
-        <button class="btn small ghost" data-pick="all">Everyone</button>
-        <button class="btn small ghost" data-pick="none">No one</button>
-        <span class="groups" id="groups"></span>
-        <button class="btn small ghost" id="saveGroup">+ Save group</button>
-        <button class="btn small ghost" id="missingBtn">Missing someone?</button>
-      </div>
-      <div class="row" style="gap:8px;margin-left:auto">
-        <button class="btn small" id="refreshAll">↻ Refresh</button>
-        <button class="btn small" id="shareBtn">Share link</button>
-        <button class="btn small" id="exportBtn">Save crew file</button>
-      </div>
+    <div class="crewbar picker" id="crewbar">
+      <button class="chipbtn" data-pick="all">Everyone</button>
+      <button class="chipbtn" data-pick="none">No one</button>
+      <span class="groups" id="groups"></span>
+      <button class="chipbtn ghost" id="saveGroup">+ Save group</button>
     </div>
   </section>
 
-  <section class="ballot hidden" id="ballot">
-    <div class="sh"><h2>Tonight's ballot <span id="ballotCount"></span></h2><span class="aside" id="ballotLive"></span></div>
-    <div id="winner"></div>
-    <div class="ballot-bar">
-      <label class="ctl">Voting as <select class="input" id="me" aria-label="Who's voting"></select></label>
-      <div class="addfilm">
-        <input class="input" id="filmQ" placeholder="Add any film to the ballot…" autocomplete="off" aria-label="Add a film to the ballot">
-        <div class="sugg hidden" id="sugg"></div>
-      </div>
-      <button class="btn small" id="addTop" title="Add the top 5 from the merged list">+ Top 5</button>
-      <button class="btn small primary" id="pickWinner">🏆 Pick winner</button>
-      <button class="btn small ghost" id="ballotReset">Clear</button>
+  <!-- 2a. browse -->
+  <section id="tab-browse">
+    <div class="toolbar" id="controls">
+      <input class="input" id="q" placeholder="Search films…" aria-label="Search films">
+      <button class="btn" id="filtersBtn" aria-expanded="false">Filters <span class="tcount" id="fcount"></span></button>
+      <button class="btn primary" id="spinBtn">Pick for us</button>
     </div>
-    <div class="blist" id="blist"></div>
-  </section>
-
-  <section class="controls" id="controls">
-    <div class="row">
-      <input class="input" id="q" placeholder="Search titles…" style="flex:1 1 170px" aria-label="Search titles">
-      <label class="ctl">Min people <input type="range" id="minV" min="1" max="15" value="2"><span id="minVv">2</span></label>
+    <div class="filters hidden" id="filters">
+      <label class="ctl">At least <input type="range" id="minV" min="1" max="15" value="2"><span id="minVv">2</span> people want it</label>
+      <label class="ctl"><input type="checkbox" id="hideSeen" checked> Hide films someone here has seen</label>
+      <label class="ctl"><input type="checkbox" id="onlyNew"> Only added this week</label>
       <label class="ctl">Years <input class="input yr" id="y1" type="number" placeholder="from" min="1880" max="2100"> – <input class="input yr" id="y2" type="number" placeholder="to" min="1880" max="2100"></label>
-      <select class="input" id="sort" aria-label="Tie-break">
-        <option value="votes">Most people, then A–Z</option>
-        <option value="votes-new">Most people, then newest</option>
-        <option value="votes-old">Most people, then oldest</option>
-        <option value="votes-tmdb">Most people, then TMDB score</option>
-        <option value="votes-short">Most people, then shortest</option>
-        <option value="random">Most people, shuffled</option>
-      </select>
+      <label class="ctl">Order ties by
+        <select class="input" id="sort" aria-label="Order ties by">
+          <option value="votes">A–Z</option><option value="votes-new">newest</option><option value="votes-old">oldest</option>
+          <option value="votes-tmdb">TMDB score</option><option value="votes-short">shortest</option><option value="random">shuffle</option>
+        </select></label>
       <select class="input hidden" id="runtime" aria-label="Max runtime">
         <option value="0">Any length</option><option value="100">≤ 1h40</option><option value="120">≤ 2h</option><option value="150">≤ 2h30</option>
       </select>
-      <label class="ctl" title="Needs watched data: export ZIPs, or 'also fetch watched films' in settings"><input type="checkbox" id="hideSeen" checked> Hide films someone here has seen</label>
       <label class="ctl"><input type="checkbox" id="showVeto"> Show vetoed</label>
-      <label class="ctl" title="Films added to someone's watchlist in the last 7 days"><input type="checkbox" id="onlyNew"> Only new this week</label>
+      <button class="chipbtn ghost hidden" id="clearVeto">Clear vetoes</button>
+      <div class="genres hidden" id="genres"></div>
     </div>
-    <div class="genres hidden" id="genres"></div>
-    <div class="actions">
-      <button class="btn primary" id="spinBtn">🎲 Spin for a pick</button>
-      <button class="btn" id="duelBtn">⚔ Showdown</button>
-      <button class="btn" id="copyBtn">📋 Copy shortlist</button>
-      <button class="btn" id="csvBtn">⬇ CSV</button>
-      <button class="btn ghost hidden" id="clearVeto">Clear vetoes</button>
-    </div>
+    <section id="stats" class="hidden"></section>
+    <section id="results"></section>
   </section>
 
-  <section id="stats" class="stats"></section>
-  <section id="results"></section>
+  <!-- 2b. tonight's vote -->
+  <section id="tab-vote" class="hidden">
+    <section class="ballot hidden" id="ballot">
+      <div class="sh"><h2>Tonight's vote</h2><span class="aside" id="ballotLive"></span></div>
+      <div id="winner"></div>
+      <div class="ballot-bar">
+        <label class="ctl">I'm <select class="input" id="me" aria-label="Who's voting"></select></label>
+        <div class="addfilm">
+          <input class="input" id="filmQ" placeholder="Add a film…" autocomplete="off" aria-label="Add a film to the vote">
+          <div class="sugg hidden" id="sugg"></div>
+        </div>
+      </div>
+      <div class="blist" id="blist"></div>
+      <div class="row" style="margin-top:14px;gap:8px">
+        <button class="btn primary" id="pickWinner">Pick the winner</button>
+        <button class="btn small" id="addTop" title="Add the top 5 from Browse">+ Add the top 5</button>
+        <span class="grow"></span>
+        <button class="btn small ghost" id="ballotReset">Clear</button>
+      </div>
+    </section>
+    <div class="bempty hidden" id="noBallot">Voting needs the synced crew. Ask the site owner to set it up.</div>
+  </section>
 </main>
+
+<!-- Not shown: the crew is managed on GitHub. Kept only because the page's code looks these controls up by id. -->
+<div hidden id="more" aria-hidden="true">
+  <div class="drawer-box">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 class="serif" style="font-size:22px">More</h2><button class="iconbtn" data-close-more aria-label="Close">✕</button></div>
+    <div class="dgroup">
+      <div class="dlabel">Tonight</div>
+      <button class="dbtn" id="duelBtn">Showdown <span>top films head to head</span></button>
+      <button class="dbtn" id="copyBtn">Copy shortlist <span>for the group chat</span></button>
+      <button class="dbtn" id="shareBtn">Share link <span>opens with the same people picked</span></button>
+    </div>
+    <div class="dgroup">
+      <div class="dlabel">The crew</div>
+      <button class="dbtn" id="refreshAll">Check for new lists <span id="syncNote2"></span></button>
+      <button class="dbtn" id="missingBtn">Someone's missing <span>add a person</span></button>
+      <form class="addrow" id="addForm" autocomplete="off">
+        <input class="input" id="addInput" placeholder="Letterboxd username" aria-label="Letterboxd username">
+        <button class="btn small primary" type="submit">Add</button>
+      </form>
+      <label class="drop" id="drop">
+        <input type="file" id="fileInput" multiple accept=".zip,.csv,.json" hidden>
+        <b>Drop a Letterboxd export ZIP</b> to add someone's full history
+      </label>
+      <div class="blocked hidden" id="blocked"></div>
+    </div>
+    <div class="dgroup">
+      <div class="dlabel">Files &amp; settings</div>
+      <button class="dbtn" id="exportBtn">Save crew file</button>
+      <button class="dbtn" id="csvBtn">Download as CSV</button>
+      <button class="dbtn" id="settingsBtn">Settings <span>posters, proxies, reset</span></button>
+    </div>
+  </div>
+</div>
+
 <footer class="foot wrap">
   Not affiliated with Letterboxd. Lists come from public Letterboxd pages or your own export files and stay in this browser. Optional poster data from TMDB.
 </footer>
 
+<script>
+/* page shell: Browse / Vote tabs and the Filters panel */
+(function () {
+  const tabs = document.querySelectorAll('.tabs [data-tab]');
+  function show(t) {
+    tabs.forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+    document.getElementById('tab-browse').classList.toggle('hidden', t !== 'browse');
+    document.getElementById('tab-vote').classList.toggle('hidden', t !== 'vote');
+    try { sessionStorage.setItem('lbxm.tab', t); } catch (e) { }
+  }
+  tabs.forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
+  let start = 'browse'; try { start = sessionStorage.getItem('lbxm.tab') || 'browse'; } catch (e) { }
+  show(start);
+  window.showTab = show;
+  const fb = document.getElementById('filtersBtn'), fp = document.getElementById('filters');
+  fb.addEventListener('click', () => { const open = fp.classList.toggle('hidden') === false; fb.setAttribute('aria-expanded', open); });
+  // how many filters differ from the defaults, shown on the Filters button
+  function count() {
+    const v = id => document.getElementById(id);
+    const n = (+v('minV').value !== 2) + !v('hideSeen').checked + v('onlyNew').checked + !!(v('y1').value || v('y2').value) + (v('sort').value !== 'votes') + v('showVeto').checked;
+    document.getElementById('fcount').textContent = n || '';
+  }
+  fp.addEventListener('input', count); fp.addEventListener('change', count);
+  setTimeout(count, 300);
+  // nobody to vote with until the synced crew (and its ballot) loads
+  setTimeout(() => document.getElementById('noBallot').classList.toggle('hidden', !document.getElementById('ballot').classList.contains('hidden')), 2500);
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="core.js"></script>
 <script>
@@ -314,7 +395,6 @@ function friend(id) { return S.friends.find(f => f.id === id); }
 /* ---------------- crew ---------------- */
 function renderCrew() {
   const fs = S.friends, pr = present();
-  $('#crewCount').textContent = fs.length ? '· ' + fs.length : '';
   $('#friends').innerHTML = fs.map(f => {
     const st = status[f.id] || {};
     const wl = f.watchlist ? f.watchlist.length : 0, wd = f.watched ? f.watched.length : null;
@@ -1119,7 +1199,7 @@ function renderBallotLive() {
 }
 function needMe() {
   if (myKey()) return true;
-  L.toast('Pick who you are first (“Voting as”).');
+  L.toast('Pick who you are first, next to “I\'m”.'); if (window.showTab) showTab('vote');
   $('#me').focus(); return false;
 }
 function ballotAdd(f) {
@@ -1127,7 +1207,7 @@ function ballotAdd(f) {
   const k = f.k || L.keyOf(f);
   if (onBallot(k)) return L.toast('Already on the ballot.');
   publish({ op: 'add', by: myKey(), f: { k, t: f.t, y: f.y || 0, s: f.s || '', i: f.i || 0, v: f.v || '' } });
-  L.toast(`Added “${f.t}” to the ballot.`);
+  L.toast(`Added “${f.t}” to the Vote tab.`);
 }
 /* only people picked as watching count; votes from people who are out stay saved, greyed out */
 function hereKeys() { return new Set(present().map(fkey)); }
