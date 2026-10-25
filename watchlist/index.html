@@ -103,11 +103,6 @@
 .genres button.on{background:var(--green);color:var(--bg)}
 .actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 
-.stats{display:flex;flex-wrap:wrap;margin:26px 0 4px;border-bottom:1px solid var(--line-lo);padding-bottom:18px}
-.stat{padding:0 22px;min-width:0;max-width:100%;border-left:1px solid var(--line)}
-.stat:first-child{padding-left:0;border-left:0}
-.stat .v{font-size:22px;font-weight:700;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stat .l{font-size:10px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.1em}
 
 .tier{margin-top:30px}
 .tier h3{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--ink2);display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
@@ -183,8 +178,6 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
   .controls{position:static}
   .pickcard .poster{width:90px}
   .detail .poster{width:110px}
-  .stat{padding:0 14px}
-  .stat .v{font-size:18px}
 }
 
 /* ---- simplified layout: who's watching, then Browse / Vote ---- */
@@ -260,7 +253,6 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
       <label class="ctl">At least <input type="range" id="minV" min="1" max="15" value="2"><span id="minVv">2</span> people want it</label>
       <label class="ctl"><input type="checkbox" id="hideSeen" checked> Hide films someone here has seen</label>
       <label class="ctl"><input type="checkbox" id="onlyNew"> Only added this week</label>
-      <label class="ctl">Years <input class="input yr" id="y1" type="number" placeholder="from" min="1880" max="2100"> – <input class="input yr" id="y2" type="number" placeholder="to" min="1880" max="2100"></label>
       <label class="ctl">Order ties by
         <select class="input" id="sort" aria-label="Order ties by">
           <option value="votes">A–Z</option><option value="votes-new">newest</option><option value="votes-old">oldest</option>
@@ -273,7 +265,6 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
       <button class="chipbtn ghost hidden" id="clearVeto">Clear vetoes</button>
       <div class="genres hidden" id="genres"></div>
     </div>
-    <section id="stats" class="hidden"></section>
     <section id="results"></section>
   </section>
 
@@ -354,7 +345,7 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
   // how many filters differ from the defaults, shown on the Filters button
   function count() {
     const v = id => document.getElementById(id);
-    const n = (+v('minV').value !== 2) + !v('hideSeen').checked + v('onlyNew').checked + !!(v('y1').value || v('y2').value) + (v('sort').value !== 'votes') + v('showVeto').checked;
+    const n = (+v('minV').value !== 2) + !v('hideSeen').checked + v('onlyNew').checked + (v('sort').value !== 'votes') + v('showVeto').checked;
     document.getElementById('fcount').textContent = n || '';
   }
   fp.addEventListener('input', count); fp.addEventListener('change', count);
@@ -377,7 +368,7 @@ let shown = 120;
 let genreFilter = new Set();
 let shuffleSeed = Math.random();
 let presetInfo = null, presetUser = '';
-const ui = Object.assign({ q: '', minV: 2, y1: '', y2: '', sort: 'votes', runtime: 0, hideSeen: true, showVeto: false, onlyNew: false }, (() => { try { return JSON.parse(sessionStorage.getItem('lbxm.ui')) || {}; } catch (e) { return {}; } })());
+const ui = Object.assign({ q: '', minV: 2, sort: 'votes', runtime: 0, hideSeen: true, showVeto: false, onlyNew: false }, (() => { try { return JSON.parse(sessionStorage.getItem('lbxm.ui')) || {}; } catch (e) { return {}; } })());
 
 function persist() { L.save(S); index = null; }
 function saveUI() { try { sessionStorage.setItem('lbxm.ui', JSON.stringify(ui)); } catch (e) { } }
@@ -733,15 +724,12 @@ function compute() {
   const pr = present(), pset = new Set(pr.map(f => f.id));
   const { films, seen } = idx();
   const veto = new Set(S.vetoes), q = L.norm(ui.q);
-  const y1 = +ui.y1 || 0, y2 = +ui.y2 || 9999;
   const tm = !!S.settings.tmdbKey;
   const out = [], now = Date.now();
   for (const f of films.values()) {
     const votes = [...f.wl].filter(id => pset.has(id));
     if (votes.length < Math.min(ui.minV, Math.max(1, pr.length))) continue;
     if (q && !L.norm(f.t).includes(q)) continue;
-    if (f.y && (f.y < y1 || f.y > y2)) continue;
-    if (!f.y && (ui.y1 || ui.y2)) continue;
     const vetoed = veto.has(f.k);
     if (vetoed && !ui.showVeto) continue;
     const seenBy = pr.filter(p => { const s = seen.get(p.id); return s && s.get(f); });
@@ -802,7 +790,7 @@ function renderResults() {
   const pr = present(), total = pr.length;
   const el = $('#results');
   if (!S.friends.length) {
-    $('#controls').classList.add('hidden'); $('#stats').innerHTML = '';
+    $('#controls').classList.add('hidden');
     el.innerHTML = `<div class="empty"><h3>Who's coming to movie night?</h3>
       <p>Add 2–30 friends above. Works best with your whole group chat.</p>
       <div class="steps">
@@ -814,7 +802,6 @@ function renderResults() {
   }
   $('#controls').classList.remove('hidden');
   const rows = compute(); lastRows = rows;
-  renderStats(rows);
   $('#clearVeto').classList.toggle('hidden', !S.vetoes.length);
   if (!rows.length) {
     const anyData = S.friends.some(f => f.watchlist && f.watchlist.length);
@@ -841,37 +828,6 @@ function renderResults() {
   enrich(rows.slice(0, Math.min(shown, 90)).map(r => r.f));
 }
 
-function renderStats(rows) {
-  const pr = present(), { films } = idx();
-  if (pr.length < 2) { $('#stats').innerHTML = ''; return; }
-  const pset = new Set(pr.map(f => f.id));
-  let shared = 0, uniq = 0;
-  const only = new Map(pr.map(p => [p.id, 0]));
-  for (const f of films.values()) {
-    const v = [...f.wl].filter(id => pset.has(id));
-    if (v.length >= 2) shared++;
-    if (v.length) uniq++;
-    if (v.length === 1) only.set(v[0], only.get(v[0]) + 1);
-  }
-  // most aligned pair by watchlist Jaccard
-  let best = null;
-  const sets = pr.map(p => ({ p, s: new Set((p.watchlist || []).map(L.keyOf)) }));
-  for (let i = 0; i < sets.length; i++) for (let j = i + 1; j < sets.length; j++) {
-    const a = sets[i].s, b = sets[j].s; if (!a.size || !b.size) continue;
-    let inter = 0; for (const k of a) if (b.has(k)) inter++;
-    const jac = inter / (a.size + b.size - inter);
-    if (!best || jac > best.jac) best = { a: sets[i].p, b: sets[j].p, jac, inter };
-  }
-  const odd = [...only.entries()].sort((a, b) => b[1] - a[1])[0];
-  const oddF = odd && friend(odd[0]);
-  const top = rows.find(r => !r.vetoed);
-  $('#stats').innerHTML = `
-    <div class="stat"><div class="l">Unique films</div><div class="v">${uniq.toLocaleString()}</div></div>
-    <div class="stat"><div class="l">Wanted by 2+</div><div class="v">${shared.toLocaleString()}</div></div>
-    ${top ? `<div class="stat"><div class="l">Current #1 · ${top.votes.length}/${pr.length}</div><div class="v" title="${esc(top.f.t)}">${esc(top.f.t)}</div></div>` : ''}
-    ${best && best.inter ? `<div class="stat"><div class="l">Watchlist twins · ${best.inter} shared</div><div class="v">${esc(best.a.name)} &amp; ${esc(best.b.name)}</div></div>` : ''}
-    ${oddF && odd[1] ? `<div class="stat"><div class="l">Most niche · ${odd[1]} only they want</div><div class="v">${esc(oddF.name)}</div></div>` : ''}`;
-}
 
 /* TMDB enrichment */
 let enrichQ = [], enriching = 0, tmdbDead = false, genresShown = false;
@@ -967,7 +923,7 @@ function bindCtl(id, key, ev, fn) {
   });
 }
 bindCtl('q', 'q'); bindCtl('minV', 'minV', 'input', () => $('#minVv').textContent = ui.minV);
-bindCtl('y1', 'y1'); bindCtl('y2', 'y2'); bindCtl('sort', 'sort', 'change', () => shuffleSeed = Math.random());
+bindCtl('sort', 'sort', 'change', () => shuffleSeed = Math.random());
 bindCtl('runtime', 'runtime', 'change'); bindCtl('hideSeen', 'hideSeen', 'change'); bindCtl('showVeto', 'showVeto', 'change'); bindCtl('onlyNew', 'onlyNew', 'change');
 
 /* copy / csv */
