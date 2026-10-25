@@ -1,0 +1,25 @@
+name: Fetch course site
+on:
+  push:
+    branches: [course-fetch]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mirror the course pages (same site, two levels deep)
+        run: |
+          mkdir -p course && cd course
+          wget -q -r -l 2 -np -k -E -e robots=off --no-host-directories --cut-dirs=0 \
+            --accept html,htm,md,txt --reject '*.png,*.jpg,*.gif,*.pdf,*.zip' \
+            -U "Mozilla/5.0 (course notes for a student project)" \
+            https://sunelehmann.com/socialgraphs2026-web/ || true
+          find . -type f | head -200 > ../course-files.txt
+          # also any GitHub-hosted lecture notebooks the site links to
+          grep -rhoE 'https://github\.com/[^"'"'"' )<]+' . | sort -u > ../course-github-links.txt || true
+          cd .. && wc -l course-files.txt course-github-links.txt
+      - run: |
+          git config user.name "github-actions[bot]"; git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add course course-files.txt course-github-links.txt && git commit -m "course mirror" && git push
