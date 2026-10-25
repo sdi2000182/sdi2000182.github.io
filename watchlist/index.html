@@ -237,8 +237,6 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
     <div class="crewbar picker" id="crewbar">
       <button class="chipbtn" data-pick="all">Everyone</button>
       <button class="chipbtn" data-pick="none">No one</button>
-      <span class="groups" id="groups"></span>
-      <button class="chipbtn ghost" id="saveGroup">+ Save group</button>
     </div>
   </section>
 
@@ -283,7 +281,6 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
       <div class="blist" id="blist"></div>
       <div class="row" style="margin-top:14px;gap:8px">
         <button class="btn primary" id="pickWinner">Pick the winner</button>
-        <button class="btn small" id="addTop" title="Add the top 5 from Browse">+ Add the top 5</button>
         <span class="grow"></span>
         <button class="btn small ghost" id="ballotReset">Clear</button>
       </div>
@@ -408,7 +405,6 @@ function renderCrew() {
       <span class="faint">Not the site owner? Send them the usernames.</span></div>`;
   }
   $('#presentNote').innerHTML = fs.length ? `Watching: <b>${pr.length}</b> of ${fs.length} · tap people to pick` : '';
-  renderGroups();
   $('#refreshAll').classList.toggle('hidden', !presetInfo && !fs.some(f => f.username));
   $('#missingBtn').classList.toggle('hidden', !presetInfo);
   // with a synced crew, people are added on GitHub, so the in-page username box goes away
@@ -447,28 +443,10 @@ function setPresent(keys) {
   for (const f of S.friends) f.present = want.has(fkey(f));
   shown = 120; persist(); renderAll();
 }
-function renderGroups() {
-  const cur = present().map(fkey).sort().join(',');
-  $('#groups').innerHTML = (S.groups || []).map((g, i) =>
-    `<button class="gchip ${g.keys.slice().sort().join(',') === cur ? 'on' : ''}" data-g="${i}" title="${esc(g.keys.length + ' people')}">${esc(g.name)}<span class="gx" data-gdel="${i}" title="Delete group">✕</span></button>`).join('');
-}
 $('#crewbar').addEventListener('click', e => {
   const pick = e.target.closest('[data-pick]');
-  if (pick) return setPresent(pick.dataset.pick === 'all' ? S.friends.map(fkey) : []);
-  const del = e.target.closest('[data-gdel]');
-  if (del) { e.stopPropagation(); const g = S.groups[+del.dataset.gdel]; if (confirm(`Delete group “${g.name}”?`)) { S.groups.splice(+del.dataset.gdel, 1); L.save(S); renderGroups(); } return; }
-  const g = e.target.closest('[data-g]');
-  if (g) setPresent(S.groups[+g.dataset.g].keys);
+  if (pick) setPresent(pick.dataset.pick === 'all' ? S.friends.map(fkey) : []);
 });
-$('#saveGroup').onclick = () => {
-  const keys = present().map(fkey);
-  if (!keys.length) return L.toast('Pick some people first.');
-  const name = prompt(`Name this group of ${keys.length}:`, keys.length <= 3 ? present().map(f => f.name).join(' + ') : 'Movie night');
-  if (!name || !name.trim()) return;
-  S.groups = (S.groups || []).filter(g => g.name !== name.trim());
-  S.groups.push({ name: name.trim(), keys });
-  L.save(S); renderGroups(); L.toast('Saved. Tap it any time to pick the same people.');
-};
 
 /* Letterboxd only shows scripts the first page of follows, so missing mutuals are
    collected in the owner's own browser with a bookmarklet, then added via GitHub. */
@@ -1116,7 +1094,15 @@ function takeEvent(m) {
   return true;
 }
 let bRenderT;
-function ballotChanged() { clearTimeout(bRenderT); bRenderT = setTimeout(() => { reduceBallot(); renderBallot(); renderResults(); }, 60); }
+// only the + markers on posters change, so update those instead of rebuilding the whole film list
+function ballotChanged() { clearTimeout(bRenderT); bRenderT = setTimeout(() => { reduceBallot(); renderBallot(); markAdded(); }, 60); }
+function markAdded() {
+  document.querySelectorAll('#results [data-add]').forEach(b => {
+    const on = onBallot(b.dataset.add);
+    b.classList.toggle('on', on); b.textContent = on ? '✓' : '+';
+    b.title = on ? 'In tonight\'s vote' : 'Add to tonight\'s vote';
+  });
+}
 async function publish(d) {
   if (!ballotTopic) return;
   try {
@@ -1182,7 +1168,7 @@ function renderBallot() {
       <button class="vbtn ${mine ? 'on' : ''}" data-vote="${esc(f.k)}" title="${mine ? 'Take back your vote' : 'Vote for this'}">👍 ${n}</button>
       <button class="bx" data-unadd="${esc(f.k)}" title="Take it out of the vote">✕</button>
     </div>`;
-  }).join('') : `<div class="bempty">Nothing to vote on yet. Tap <b>+</b> on a poster in Browse, type a film above, or add the top 5. Then everyone votes from their own phone.</div>`;
+  }).join('') : `<div class="bempty">Nothing to vote on yet. Tap <b>+</b> on a poster in Browse, or type a film above. Then everyone votes from their own phone.</div>`;
 }
 $('#winner').addEventListener('click', e => { const d = e.target.closest('[data-detail]'); if (d) openFilm(d.dataset.detail, ballot.films.get(d.dataset.detail)); });
 $('#me').addEventListener('change', e => { setMe(e.target.value); renderBallot(); });
@@ -1194,12 +1180,6 @@ $('#blist').addEventListener('click', e => {
   const x = e.target.closest('[data-unadd]');
   if (x) { const f = ballot.films.get(x.dataset.unadd); if (f && confirm(`Take “${f.t}” out of the vote?`)) publish({ op: 'remove', k: f.k, by: myKey() }); }
 });
-$('#addTop').onclick = () => {
-  if (!needMe()) return;
-  const picks = lastRows.filter(r => !r.vetoed && !onBallot(r.f.k)).slice(0, 5);
-  if (!picks.length) return L.toast('Nothing left to add from the list.');
-  picks.forEach((r, i) => setTimeout(() => publish({ op: 'add', by: myKey(), f: { k: r.f.k, t: r.f.t, y: r.f.y || 0, s: r.f.s || '', i: r.f.i || 0, v: r.f.v || '' } }), i * 250));
-};
 $('#pickWinner').onclick = () => {
   const here = hereKeys();
   const list = [...ballot.films.values()].map(f => ({ f, n: countHere(f.k, here) }));
