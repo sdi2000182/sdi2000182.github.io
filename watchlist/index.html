@@ -762,7 +762,7 @@ function cardHTML(r, total) {
   </article>`;
 }
 
-let lastRows = [];
+let lastRows = [], moreObserver = null;
 function renderResults() {
   const pr = present(), total = pr.length;
   const el = $('#results');
@@ -799,9 +799,17 @@ function renderResults() {
     html += `<div class="tier"><h3>${title} <small>${n === 'veto' ? list.length : all} film${(n === 'veto' ? list.length : all) === 1 ? '' : 's'}</small></h3>
       <div class="grid">${list.map(r => cardHTML(r, total)).join('')}</div></div>`;
   }
-  if (rows.length > shown) html += `<div class="more"><button class="btn" id="moreBtn">Show more (${rows.length - shown} left)</button></div>`;
+  if (rows.length > shown) html += `<div class="more" id="moreSentinel"><span class="faint">Loading more films…</span></div>`;
   el.innerHTML = html;
-  const mb = $('#moreBtn'); if (mb) mb.onclick = () => { shown += 180; renderResults(); };
+  // load the next batch as you scroll near the end, instead of a button below the fold
+  if (moreObserver) moreObserver.disconnect();
+  const sentinel = $('#moreSentinel');
+  if (sentinel && 'IntersectionObserver' in window) {
+    moreObserver = new IntersectionObserver(es => {
+      if (es.some(x => x.isIntersecting)) { moreObserver.disconnect(); shown += 120; renderResults(); }
+    }, { rootMargin: '800px 0px' });
+    moreObserver.observe(sentinel);
+  } else if (sentinel) { shown = rows.length; renderResults(); }
   enrich(rows.slice(0, Math.min(shown, 90)).map(r => r.f));
 }
 
