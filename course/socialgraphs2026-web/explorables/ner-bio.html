@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable &middot; Named entity recognition and BIO tags</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/prediction-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/week7-explore.css">
+</head>
+<body class="ner-page">
+
+<div class="controls">
+  <label>Marvel example
+    <select id="example">
+      <option value="iron">Iron Man (Tony Stark) met Black Widow in New York.</option>
+      <option value="strange">Doctor Strange joined the Avengers in New York on 14 May.</option>
+      <option value="wolverine">Wolverine visited Stark Industries in Tokyo.</option>
+    </select>
+  </label>
+  <span class="seg" id="tag-mode">
+    <button data-mode="entity" class="on">entity labels</button>
+    <button data-mode="bio">BIO tags</button>
+  </span>
+</div>
+
+<div class="ner-stage-strip">
+  <div class="ner-stage-step">sentence</div>
+  <div class="ner-stage-arrow">→</div>
+  <div class="ner-stage-step">token labels</div>
+  <div class="ner-stage-arrow">→</div>
+  <div class="ner-stage-step">entity spans</div>
+</div>
+
+<div class="text-panels">
+  <div class="panel">
+    <h2>One prediction per token</h2>
+    <p class="note ner-note">The same sentence is shown token by token. Use the toggle to see ordinary entity labels or BIO span tags.</p>
+    <div class="ner-token-grid" id="tokens"></div>
+    <div class="legend">
+      <span class="key"><span class="swatch dot" style="background:var(--cat-1)"></span>PERSON</span>
+      <span class="key"><span class="swatch dot" style="background:var(--cat-6)"></span>ORG</span>
+      <span class="key"><span class="swatch dot" style="background:var(--cat-4)"></span>GPE</span>
+      <span class="key"><span class="swatch dot" style="background:var(--cat-7)"></span>DATE</span>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Structured output</h2>
+    <p class="note ner-note">Contiguous token labels become spans. This is already far more usable than raw prose, but alias resolution would still be a separate step.</p>
+    <table class="ner-table">
+      <thead><tr><th>span</th><th>type</th><th>tokens</th></tr></thead>
+      <tbody id="entities"></tbody>
+    </table>
+    <div class="metric-grid">
+      <div class="metric"><div class="k">tokens</div><div class="v" id="n-tokens">0</div></div>
+      <div class="metric"><div class="k">entity spans</div><div class="v" id="n-entities">0</div></div>
+      <div class="metric"><div class="k">aliases resolved?</div><div class="v"><span class="ner-not-yet">not yet</span></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/ner-bio.js"></script>
+</body>
+</html>

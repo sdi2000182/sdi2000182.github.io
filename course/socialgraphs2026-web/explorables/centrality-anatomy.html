@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · The anatomy of centrality</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  svg.net { width: 100%; height: 360px; display: block; overflow: visible; }
+  svg.chart { height: 360px; }
+  .hint { font-size: 12.5px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Measure
+    <span class="seg" id="measure">
+      <button data-m="degree" class="on">Degree</button>
+      <button data-m="closeness">Closeness</button>
+      <button data-m="betweenness">Betweenness</button>
+      <button data-m="eigenvector">Eigenvector</button>
+    </span>
+  </label>
+  <button id="reset">Reset</button>
+  <span class="hint">Click a node to remove it, click the ghost to put it back.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Krackhardt's kite, sized by the measure</h2>
+    <svg class="net" id="net"></svg>
+  </div>
+  <div class="panel">
+    <h2>Ranked, highest first</h2>
+    <svg class="chart" id="chart"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Highest degree</div><div class="value" id="r-degree">–</div></div>
+  <div class="tile"><div class="label">Highest closeness</div><div class="value" id="r-closeness">–</div></div>
+  <div class="tile"><div class="label">Highest betweenness</div><div class="value" id="r-betweenness">–</div></div>
+  <div class="tile"><div class="label">Highest eigenvector</div><div class="value" id="r-eigenvector">–</div></div>
+  <div class="tile"><div class="label">Removed</div><div class="value" id="r-removed">none</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/centrality-anatomy.js"></script>
+</body>
+</html>

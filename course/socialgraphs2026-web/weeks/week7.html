@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<!-- GENERATED from content/weeks/week7.md — edit the .md and rerun ./generate.py; do not hand-edit. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 7 · From meaning to measurement · 02805</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/site.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.css">
+<script data-goatcounter="https://suneman.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="../index.html">02805</a>
+  <a href="../the-new-way.html">The new way</a>
+  <a href="../index.html#weeks">Weeks</a>
+  <a href="../index.html#overview">Overview</a>
+  <span class="spacer"></span>
+  <a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank" rel="noopener">NLP textbook ↗</a>
+</nav>
+
+<nav class="page-toc" aria-label="On this page">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="week7.html#document-embeddings">1 · One vector for a whole text</a></li>
+    <li><a href="week7.html#corpus-atlas">2 · Walk through a corpus</a></li>
+    <li><a href="week7.html#semantic-groups">3 · Different ways to split up the same corpus</a></li>
+    <li><a href="week7.html#sentiment">4 · Sentiment as a measurement</a></li>
+    <li><a href="week7.html#entities">5 · Entities turn prose into structured data</a></li>
+    <li><a href="week7.html#semantic-search">6 · Search by meaning</a></li>
+    <li><a href="week7.html#bias">7 · Bias can enter before the model</a></li>
+    <li><a href="week7.html#next-week">8 · Next week: putting it all together</a></li>
+    <li><a href="week7.html#essentials">Essentials</a></li>
+    <li><a href="week7.html#goodies">Goodies</a></li>
+  </ol>
+</nav>
+
+<main class="wrap">
+
+  <p class="eyebrow">Week 7 of 8 · Language half</p>
+  <h1>From meaning to measurement</h1>
+  <p class="lede">Last week we created vectors from text. Today we use those vectors to explore documents, measure things in text, extract entities, and retrieve documents by meaning.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Before class</p>
+    <ul>
+    <li><strong>Bring</strong>. The same setup as the last two weeks: laptop, Python + Jupyter, an agentic coding tool, and your notebook.</li>
+    <li><strong>Tools</strong>. The same <code>marvel_pages.zip</code> from the <a href="../data/index.html#loading">course data page</a>. New this week: <code>sentence-transformers</code>, <code>transformers</code> and <code>bertopic</code>, all <code>pip install</code>-able, plus spaCy's <code>en_core_web_sm</code> from week 5. The first run of each pretrained model downloads it (between 90 MB and 440 MB each), so run the Python examples once before class.</li>
+    <li><strong>As always</strong>. Work this page from top to bottom. From this week, pretrained models become part of the analysis, and checking a model on examples you have read yourself is part of the analysis too.</li>
+  </ul>
+  </div>
+
+  <p><strong>A quick status</strong>. In week 5, we turned written language into tokens and counts. In week 6, we turned documents and words into vectors, which meant that a document or a word could be represented by a string of numbers. We then used those vectors to compare documents, find recurring topics, and represent words through the contexts in which they occur. And we ended on one limitation: every <em>bank</em> got the same vector, river or money.</p>
+
+  <p>This week we put those representations to work. We begin with modern text embeddings, which fix the <em>bank</em> problem, and use them to move around an entire corpus. Then we ask more specific questions. Can the same documents be grouped in different ways? How positive or negative is a piece of language? Which entities are mentioned? Which documents are most relevant to a query?</p>
+
+  <p>Modern NLP makes many of these analyses surprisingly easy to run. But that ease makes the checking more important, not less. A model will always give you an answer. The scientific question is whether that answer represents what you think it represents (and if it's meaningful).</p>
+
+  <p>As in weeks 5 and 6, most sections end with a short <strong>Python example</strong>. They are there to be run: put them in Jupyter, change something, and watch what the model does with it.</p>
+
+  <h2 id="document-embeddings">1 · One vector for a whole text</h2>
+
+  <p><strong>One vector per word type</strong>. Word2Vec and GloVe gave us one vector per word. These are static word embeddings, which means that each word type gets a single fixed vector. A simple way to represent a sentence would be to average the vectors of its words. That can be useful as a baseline, but it also throws away word order and gives the same word the same representation every time it appears.</p>
+
+  <p><strong>The bank problem</strong>. The problem is easy to see with <code>bank</code>. Compare these two sentences:</p>
+
+  <ul>
+    <li><code>I went to the bank to deposit money.</code></li>
+    <li><code>I sat on the river bank near the water.</code></li>
+  </ul>
+
+  <p>A static embedding means that <code>bank</code> is represented by the same vector in both sentences. A <em>contextual</em> model lets the representation depend on the surrounding words, so the two occurrences can end up with different vectors. The same idea applies more broadly, take <code>apple</code>: the fruit, Apple the company, and the Big Apple appear in different contexts and can therefore be represented differently.</p>
+
+  <p><strong>Pretrained encoders</strong>. Modern text encoders extend this idea from individual tokens to larger pieces of text. Give the encoder a sentence, paragraph or document and it returns a single dense vector intended to summarize information in that text, including context and word order. With a pretrained encoder, somebody else has already done the expensive part (training) for us. That means we can take a fancy encoder and use it on a dataset of our choosing.</p>
+
+  <p>What makes pretrained encoders so useful is that large models often transfer surprisingly well to text they were never trained specifically for. At the same time, when we use pretrained encoders, we also inherit the representations they learned from their (often large) training data. Useful linguistic regularities come with the model, but note that stereotypes and other biases can come with it too. Passing our own documents through the encoder means that we don't have to start from scratch; the new vectors are computed using what the model already learned.</p>
+
+  <p>Once we pass a document through an encoder, we are back in familiar territory from week 6. Each page is now a vector, so we can compare documents with cosine similarity, find nearest neighbors, or project a set of document vectors into two dimensions so we can explore the corpus visually.</p>
+
+  <p>Before we get started, the 3Blue1Brown video below provides a useful visual bridge from the static word vectors we used last week to the representations inside modern language models. You don't need every architectural detail. Watch for the geometry and the idea that relationships in language can be distributed across many dimensions.</p>
+
+  <iframe class="video-embed" src="https://www.youtube.com/embed/wjZofJX0v4M"
+    title="3Blue1Brown: Transformers, the tech behind LLMs (Deep Learning, Chapter 5)" loading="lazy" allowfullscreen></iframe>
+
+  <p class="explorable-caption">Focus on the geometry and on how relative positions can carry regularities in language. Do not try to give every individual dimension a human label.</p>
+
+  <p>The video moves quickly from word vectors toward much larger models. For our purposes, keep one distinction clear: a static embedding looks up one vector for a word type, while a contextual model computes a representation from the surrounding text. We will use the resulting document vectors without worrying about how to train the encoder ourselves (there's a different course for that).</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>Jurafsky & Martin, <a href="https://web.stanford.edu/~jurafsky/slp3/9.pdf" target="_blank" rel="noopener">Chapter 9, <em>Masked Language Models</em></a>, sections 9.1–9.2. Read for the idea of a bidirectional encoder: every token's vector is computed from the whole sentence around it, which is exactly what makes it contextual. Section 9.5 returns later today, when the same kind of model is used for named entities.</p>
+  </div>
+
+  <p><strong>Python example</strong>. The <code>bank</code> claim is easy to check with a pretrained encoder. BERT returns one 768-dimensional vector for every token in a sentence, so we can pull out the vector for <code>bank</code> in each of three sentences and compare them:</p>
+
+  <pre><code class="language-python">from transformers import AutoTokenizer, AutoModel
+import torch, numpy as np
+
+tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+bert = AutoModel.from_pretrained("bert-base-uncased")
+
+sentences = ["I went to the bank to deposit money.",
+             "I sat on the river bank near the water.",
+             "The bank approved the loan this morning."]
+
+def vector_of(word, sentence):
+    enc = tokenizer(sentence, return_tensors="pt")
+    with torch.no_grad():
+        hidden = bert(**enc).last_hidden_state[0]      # one vector per token
+    tokens = tokenizer.convert_ids_to_tokens(enc["input_ids"][0])
+    return hidden[tokens.index(word)].numpy()
+
+money, river, loan = (vector_of("bank", s) for s in sentences)
+cos = lambda a, b: a @ b / (np.linalg.norm(a) * np.linalg.norm(b))
+print(round(cos(money, river), 2), round(cos(money, loan), 2))
+# 0.48 0.81</code></pre>
+
+  <p>A static embedding would print <code>1.0 1.0</code>, since there is only one <em>bank</em> vector to compare with itself. Here the two money <em>bank</em>s sit at 0.81 while money and river are at 0.48: the same word, two different vectors, and the context decided which. The small sentence encoder we use below gives 0.75 and 0.82 for the same pairs, a smaller gap, because it was trained to summarize whole sentences rather than to keep single tokens apart.</p>
+
+  <p>Documentation: the <a href="https://huggingface.co/docs/transformers/quicktour" target="_blank" rel="noopener">Transformers quicktour</a>.</p>
+
+  <div class="exercise">
+    <h4>7.1 — Static and contextual representations, by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>No notebook for this one. Keep track of what object is being represented and where the context enters.</p>
+    <ol>
+    <li>Explain why a static embedding gives the two occurrences of <code>bank</code> above the same vector, while a contextual model can give them different vectors.</li>
+    <li>Write two short sentences of your own where the same word has clearly different meanings. Explain which surrounding words you would expect a contextual model to use as clues.</li>
+    <li>Suppose an encoder maps a whole Marvel page to 384 numbers. What does one row in the resulting matrix represent? What would it mean for two rows to have high cosine similarity?</li>
+    <li>A pretrained encoder was trained before you ever showed it the Marvel pages. Explain what is pretrained and what is computed only when you pass your own documents through the model.</li>
+  </ol>
+  </div>
+
+  <h2 id="corpus-atlas">2 · Walk through a corpus</h2>
+
+  <p>A document embedding contains many more dimensions than we can draw. A text encoder might, for example, represent each Marvel page using 384 numbers:</p>
+
+  <p>$$ \mathbf{x}_i = [x_1, x_2, \ldots, x_{384}] $$</p>
+
+  <p>The 303 pages then become 303 points in a 384-dimensional space. Those dimensions are not simple labels such as <code>technology</code>, <code>violence</code> or <code>friendship</code>. Information about the text is distributed across many coordinates at once, so we usually learn more by comparing whole vectors than by trying to interpret one coordinate at a time.</p>
+
+  <p>The obvious problem is that we cannot see 384 dimensions. If we want a map of the corpus, we need to turn every vector into two coordinates that can be drawn on a screen. This is dimensionality reduction. PCA, SVD, t-SNE and UMAP are all examples of ways to plot high dimensional vectors in 2D space, but they do not preserve the same things.</p>
+
+  <p><strong>Two drawings of the same vectors</strong>. Take <a href="https://setosa.io/ev/principal-component-analysis/" target="_blank" rel="noopener">PCA</a> and <a href="https://distill.pub/2016/misread-tsne/" target="_blank" rel="noopener">t-SNE</a>. PCA gives us a broad linear view of variation in the data. t-SNE focuses on getting local neighborhoods right and tries to keep points that were close in the original space close on the map. That often makes clusters easier to see, but the distance between far-away groups on a t-SNE map is much harder to interpret. The t-SNE link is Distill's interactive essay on exactly that trap; there is more in the <a href="week7.html#misread-tsne">Goodies</a>.</p>
+
+  <p>The important part is that the original document vectors haven't changed. PCA and t-SNE give us two different drawings of the same high-dimensional objects. The nearest documents by cosine similarity should therefore always be calculated in the original embedding space, not read off the 2D map.</p>
+
+  <p>I plotted the corpus atlas below so you can see that distinction directly. It runs on the full 303 Wikipedia pages, embedded with the same encoder you will use in your notebook, called <code>all-MiniLM-L6-v2</code>. Search for a character, inspect its nearest neighbors in the original 384-dimensional space, and then switch the 2D projection. The map moves, while the underlying document representation stays fixed.</p>
+
+  <iframe class="explorable-frame" src="../explorables/corpus-atlas.html" height="940"
+    title="Explorable: the Marvel corpus atlas" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Search for a character and compare its nearest neighbors in the original representation with the nearest dots on the 2D map. Then switch between PCA and t-SNE and watch the drawing change. Finally color the points by network community and ask whether the communities from the first half of the course live in different parts of the map.</p>
+
+  <p><strong>Python example</strong>. Once you have document embeddings, making the two projections is only a few lines of code. One thing to check first is the encoder's maximum input length.</p>
+
+  <pre><code class="language-python">from sentence_transformers import SentenceTransformer
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+names = list(marvel_pages)
+texts = [marvel_pages[n] for n in names]          # one string per document
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+print(model.max_seq_length)
+# 256
+
+embeddings = model.encode(texts, normalize_embeddings=True)   # 303 × 384
+
+pca_xy = PCA(n_components=2, random_state=42).fit_transform(embeddings)
+tsne_xy = TSNE(n_components=2, perplexity=30, init="pca",
+               learning_rate="auto", random_state=42).fit_transform(embeddings)</code></pre>
+
+  <p>That <code>256</code> matters. The encoder reads at most 256 word pieces, and 302 of the 303 Marvel pages are longer than that, the median page by a factor of six. So <code>model.encode(texts)</code> quietly embeds the first paragraph or two of each page and throws the rest away, without a warning. This is an important modeling choice! When you work with these methods, you should always either 1) document that truncation or 2) choose a chunking rule and combine the chunk embeddings in a way you can explain. The corpus atlas above uses the second option: each page is cut into passages of at most 180 words along sentence boundaries, every passage is embedded, and the page's vector is the mean of its passage vectors.</p>
+
+  <pre><code class="language-python">import re
+import numpy as np
+
+def passages(text, max_words=180):
+    out, current, n = [], [], 0
+    for sentence in re.split(r"(?&lt;=[.!?])\s+", text):
+        words = len(sentence.split())
+        if current and n + words &gt; max_words:
+            out.append(" ".join(current)); current, n = [], 0
+        current.append(sentence); n += words
+    if current:
+        out.append(" ".join(current))
+    return out
+
+doc_vectors = []
+for text in texts:
+    chunk_vectors = model.encode(passages(text), normalize_embeddings=True)
+    v = chunk_vectors.mean(axis=0)
+    doc_vectors.append(v / np.linalg.norm(v))
+embeddings = np.array(doc_vectors)                # 4,473 passages → 303 vectors</code></pre>
+
+  <p>Two notes on the projections. PCA is the SVD of the <em>centered</em> vectors; <code>TruncatedSVD</code> skips the centering, and on unit-length embeddings its first axis then just points at the average vector and explains 0.9% of the variance, so the map collapses toward a line. And on these pages PCA's two axes together explain about 10% of the variance, so the 2D picture is a very rough summary of the 384 dimensions, which is the whole reason the nearest-neighbor list is computed in the original space.</p>
+
+  <p>Documentation: <a href="https://sbert.net/docs/sentence_transformer/usage/usage.html" target="_blank" rel="noopener">Sentence Transformers</a>, <a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html" target="_blank" rel="noopener">scikit-learn PCA</a>, and <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html" target="_blank" rel="noopener">scikit-learn t-SNE</a>.</p>
+
+  <p><strong>Compared to what?</strong> Last week we scored each representation by how many of a page's ten closest textual neighbors are also its neighbors in the link network: 4.0 for TF-IDF, 2.8 with stopwords removed, 1.9 for raw counts, 0.3 for ten random pages. The pretrained encoder gets 2.5 with the passage rule and 2.1 with plain truncation. Lower than TF-IDF. That is not a failure of the encoder; it is a reminder of what each representation sees. TF-IDF rewards rare words, and in this corpus the rare words are names, which is exactly what Wikipedia links on. The encoder was built to summarize what a text is about, and <em>about-ness</em> is a different thing from <em>who links to whom</em>. The page for Storm shows the difference: under TF-IDF her closest page was the Human Torch, through the surname <em>Storm</em>; under the encoder it is Emma Frost, then Jean Grey, Surge, Jubilee and Cyclops, the X-Men women and teammates, and the surname trap is gone. Doctor Strange's neighbors are Doctor Druid and Jericho Drumm, the corpus's other sorcerers.</p>
+
+  <p>Now look back. I'd argue that the fun part of the explorable above is not the scatterplot. It is clicking strange neighbors and going back to the text to work out why the model placed them together.</p>
+
+  <div class="exercise">
+    <h4>7.2 — Build a corpus atlas <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Now make the high-dimensional representation and the 2D picture separately, so you never confuse one with the other.</p>
+    <ol>
+    <li>Use a pretrained sentence or document encoder to embed the 303 raw Marvel pages. Record the exact model and inspect its maximum input length. State the truncation or chunking rule you use for long pages.</li>
+    <li>Pick three characters and calculate their five nearest neighbors by cosine similarity in the original embedding space. Read the relevant pages before you explain why the pairs are close.</li>
+    <li>Project the same embeddings with PCA and either t-SNE or UMAP. Keep the original embeddings untouched.</li>
+    <li>Build a plot where you can hover over a point to see the character name and click it to list the five cosine-nearest documents from the original space.</li>
+    <li>Compare the nearest dots on the 2D map with the cosine-nearest documents for three characters. Find at least one case where the projection gives a misleading visual impression and explain what happened.</li>
+    <li>Color the same 2D coordinates by a structural community from the network half of the course. Do not recompute the coordinates when you change the color.</li>
+  </ol>
+  </div>
+
+  <h2 id="semantic-groups">3 · Different ways to split up the same corpus</h2>
+
+  <p>Last week we used LDA to find recurring topics from patterns of word use. LDA represents a document through word counts, so if you randomly shuffled every word inside the document, the model would see the same Bag-of-Words.</p>
+
+  <p>Document embeddings give us another way to represent the same 303 pages. Because these models use a pretrained language model to produce dense vectors from the text, two documents can end up close even if they do not share exactly the same vocabulary. Once the pages are represented in that vector space, we can cluster nearby documents and ask what those groups are about.</p>
+
+  <p>Thus, a very direct way to use document embeddings for finding groups of related pages is to simply cluster pages that are close in embedding space ... and then inspect the words and documents that characterize each cluster.</p>
+
+  <p><strong>BERTopic</strong>. BERTopic is a popular tool that does this. Its default setup combines document embeddings, dimensionality reduction, clustering, and a class-based TF-IDF representation to describe the resulting groups. (You do not need to memorize every internal step of this thing for Test 2. The important idea is that the grouping is based on a different representation from LDA, and both are different again from the network communities you built from hyperlinks.)</p>
+
+  <p>One useful BERTopic visualization is an intertopic map. Each circle represents a topic, circle size reflects how many documents are assigned to it, and nearby topics have similar topic representations. The map itself is still a two-dimensional projection, so the warning from the corpus atlas applies here as well.</p>
+
+  <p>On our corpus, though, that map has four circles, which is not much of a map. Instead, scroll back up to the corpus atlas and set <strong>Color</strong> to <em>BERTopic topic</em>. Every page is now colored by the topic that the run below assigned it, the 110 outliers are gray, and the legend shows each topic's top words. The symbiote topic sits in Spider-Man's corner of the map, the mutants topic in the X-Men's, and the two generic piles and the outliers fill the middle. Treat the topic words as summaries that need to be checked against the documents, not as ground truth, and click a few gray points to see what the clusterer could not place.</p>
+
+  <p><strong>Python example</strong>. BERTopic takes the document embeddings from the atlas and does the rest. Reuse the <code>embeddings</code> you already computed, so the grouping runs on exactly the same vectors as the map, and reuse week 6's name filter for the topic words, or every topic will be a list of character names again.</p>
+
+  <pre><code class="language-python">from bertopic import BERTopic
+from umap import UMAP
+from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
+
+topic_model = BERTopic(
+    embedding_model=model,
+    umap_model=UMAP(n_neighbors=15, n_components=5, min_dist=0.0,
+                    metric="cosine", random_state=42),      # seeded, so the run repeats
+    vectorizer_model=CountVectorizer(stop_words=list(ENGLISH_STOP_WORDS | proper)),
+    min_topic_size=10,
+)
+topics, probs = topic_model.fit_transform(texts, embeddings=embeddings)
+topic_model.get_topic_info()</code></pre>
+
+  <p>Here <code>proper</code> is the set of mostly-capitalized words from week 6's <em>Take the names out</em>. When we ran this, BERTopic found four topics and left 110 of the 303 pages as outliers, topic <code>-1</code>, which is what a density-based clusterer does with a corpus this small. <code>topic_model.reduce_outliers(texts, topics, strategy="embeddings", embeddings=embeddings)</code> assigns those pages to their nearest topic, and after that the four topics hold 166, 62, 44 and 31 pages. Two of them are easy to name: the one whose distinctive word is <em>symbiote</em> is the Spider-Man family, and <em>mutants, mutant, team, powers</em> is the X-Men. The other two are generic piles whose top words are <em>character, series, appears, new</em>. And 35 of the 44 pages in one network community land in the mutants topic, so the embedding-based grouping rediscovers part of the link structure with no links in sight. Run BERTopic with its defaults instead, no name filter and no stopword list, and the topics come back as <em>the, and, of, to</em>: week 5's lesson, one more time.</p>
+
+  <p>Documentation: <a href="https://maartengr.github.io/BERTopic/" target="_blank" rel="noopener">BERTopic</a>.</p>
+
+  <p><strong>Three ways to group the same pages</strong>. We now have at least three different ways of grouping the same objects. LDA groups documents through word-count patterns, BERTopic groups them with an embedding-based method, and a network community groups pages through hyperlinks. There is no reason they have to agree. Agreement can be interesting, and disagreement can be even more informative if you return to the documents and links to understand it. Comparing and contrasting clusterings can be a key tool for you to use in your final project.</p>
+
+  <div class="exercise">
+    <h4>7.3 — Same documents, different groupings <span class="mode learn">🧠 Learn</span></h4>
+    <p>Keep the 303 pages fixed and change only the information used to group them.</p>
+    <ol>
+    <li>In one sentence each, explain what information an LDA topic, an embedding-based text cluster, and a structural network community use to place two Marvel pages together.</li>
+    <li>LDA gives a document a mixture over topics, while a clustering algorithm may assign it to one group. Explain why those are different kinds of outputs.</li>
+    <li>Suppose an LDA topic and a BERTopic cluster contain many of the same pages. Give one reason that agreement is interesting and one reason it is not proof that either model found the "true" topic.</li>
+    <li>Explain why two circles appearing close on an intertopic map is weaker evidence than a similarity calculated in the original representation.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>7.4 — Compare groupings on Marvel, as code <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Use the same documents throughout so the comparison is actually about the representation and grouping method.</p>
+    <ol>
+    <li>Take your LDA model from week 6 and keep both each page's full topic mixture and its highest-weight topic.</li>
+    <li>Run BERTopic on the Marvel pages. Record the embedding model and the main settings you changed from the defaults. Inspect representative words and documents before you give a cluster a human-readable label.</li>
+    <li>Make one compact view that compares <code>LDA topic</code>, <code>BERTopic topic</code>, and <code>network community</code> for the same pages. A contingency table, heatmap or color toggle on your corpus map is enough.</li>
+    <li>Find one place where two groupings agree and one where they disagree. Read the relevant pages and inspect the network links before you explain either case.</li>
+    <li>Change one reasonable BERTopic choice, such as the minimum cluster size or embedding model. Which groups survive the change and which do not?</li>
+  </ol>
+  </div>
+
+  <h2 id="sentiment">4 · Sentiment as a measurement</h2>
+
+  <p>Topic modeling and clustering help us ask what text is about. Another very common question is how positive or negative the language is. We call that the <em>sentiment</em>.</p>
+
+  <p>Sentiment becomes interesting when we want to make claims about change. It is common to hear that public discourse has become more negative, that news has become more depressing, or that social media has become more hostile. Our own memories are a pretty poor baseline for claims like these. Text gives us the possibility of defining a measurement and applying it repeatedly across a large corpus.</p>
+
+  <p>The difficulty is deciding what the measurement actually captures.</p>
+
+  <p><strong>The simplest instrument is a lookup table</strong>. The simplest sentiment system is a lookup table. Give words scores, find those words in a document, and combine the scores. A toy lexicon might contain:</p>
+
+  <table class="plain">
+    <tr><th>word</th><th>score</th></tr>
+    <tr><td>wonderful</td><td>+2</td></tr>
+    <tr><td>good</td><td>+1</td></tr>
+    <tr><td>bad</td><td>-1</td></tr>
+    <tr><td>terrible</td><td>-2</td></tr>
+  </table>
+
+  <p>This is easy to inspect because every part of the final score is visible. Context causes trouble quickly. <code>good</code> is positive in the table, while <code>not good</code> is usually not a positive expression. <code>I just love being stuck in traffic</code> contains a strong positive word even though many readers would understand the sentence negatively. I worked a lot with sentiment detection from word lists back in the day. Check out the <a href="week7.html#pulse-of-the-nation">goodies</a> for more info if you want to learn more and hear the stories.</p>
+
+  <p><strong>Learn the rule instead</strong>. A supervised classifier learns how to measure sentiment from labeled examples instead. One classical way to do this is to represent the labeled texts with TF-IDF and train logistic regression to predict their labels. The input is still a Bag-of-Words style representation, but the feature weights are learned from examples rather than written by hand. A contextual sentiment classifier changes the representation too, allowing the contribution of a token to depend on the rest of the sentence.</p>
+
+  <p>If you want to fully understand the underlying classification setup, read the sentiment example in Chapter 4. The second reading shows the longer tradition of constructing affective lexicons from human judgments.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>Read the sentiment-classification section of Jurafsky & Martin, <a href="https://web.stanford.edu/~jurafsky/slp3/4.pdf" target="_blank" rel="noopener">Chapter 4, <em>Logistic Regression and Text Classification</em></a>. Then skim the opening of <a href="https://web.stanford.edu/~jurafsky/slp3/23.pdf" target="_blank" rel="noopener">Chapter 23, <em>Lexicons for Sentiment, Affect, and Connotation</em></a>. For a computational-social-science example of aggregating human word ratings, <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0026752" target="_blank" rel="noopener">Dodds et al.</a> is also worth a look; the <a href="week7.html#hedonometer">Goodies</a> have a box on it and on its predecessor.</p>
+  </div>
+
+  <p>The explorable below sends the same sentence through three measurement ideas so you can compare what information each one uses. Start with <code>not good</code>, then try the traffic example. The contextual column shows the real output of the classifier you will run below, rounded to three decimals. In your notebook you will run the model yourself and inspect its predictions on sentences of your own.</p>
+
+  <iframe class="explorable-frame" src="../explorables/sentiment-lab.html" height="560"
+    title="Explorable: three ways to measure sentiment" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Use the same sentence in all three columns. Compare a fixed lexicon, a TF-IDF classifier, and the output of a contextual model. Pay special attention to the examples where the systems disagree.</p>
+
+  <p><strong>Marvel has no ground truth</strong>. The Marvel pages do not come with an obvious sentiment ground truth, and Wikipedia is written to be neutral on purpose, so a sentiment score on an encyclopedia page is a strange object from the start. A model can still assign every page a positive or negative score, but that does not tell us whether the number is a useful measurement of anything we care about. On an encyclopedic character page, a negative prediction might reflect a villain, a tragic plot, words such as <code>death</code>, or simply a mismatch between the model's training data and Wikipedia prose.</p>
+
+  <p><strong>Python example</strong>. You can run a pretrained classifier in a few lines:</p>
+
+  <pre><code class="language-python">from transformers import pipeline
+
+sentiment = pipeline(
+    "sentiment-analysis",
+    model="distilbert-base-uncased-finetuned-sst-2-english"
+)
+
+sentiment([
+    "The movie was good.",
+    "The movie was not good.",
+    "I just love being stuck in traffic.",
+    "The hero died, but saved everyone in the city.",
+])
+# [{'label': 'POSITIVE', 'score': 1.000}, {'label': 'NEGATIVE', 'score': 1.000},
+#  {'label': 'POSITIVE', 'score': 0.998}, {'label': 'POSITIVE', 'score': 0.999}]</code></pre>
+
+  <p>The model handles the negation, and then it calls the traffic sarcasm POSITIVE at 0.998 and the hero's death POSITIVE at 0.999, each time with near-total confidence. Point it at the Marvel pages themselves (it reads at most 512 word pieces, so pass <code>truncation=True</code>) and 179 of the 303 pages come back NEGATIVE: Jubilee at 0.987 and Doctor Strange at 0.931, while Storm is POSITIVE at 1.000. Nothing in those numbers tells you what was measured.</p>
+
+  <p>Documentation: the <a href="https://huggingface.co/docs/transformers/pipeline_tutorial" target="_blank" rel="noopener">Transformers pipeline tutorial</a>.</p>
+
+  <p>That particular model was fine-tuned on movie-review sentiment. If we apply it to political news, Reddit posts or Wikipedia biographies, we are assuming that what it learned as positive and negative transfers to another kind of text. That's an assumption that needs checking.</p>
+
+  <p><strong>Sentiment is built for text that feels something</strong>. I mentioned that sentiment is about change over time, so stories are the natural home of this measurement. A narrative moves: things go well, then badly, then the ending lands, and a sentence-by-sentence score through the text should show that movement. Vonnegut drew the shapes of stories on a blackboard (<a href="https://www.youtube.com/watch?v=oP3c1h8v2ZQ" target="_blank" rel="noopener">the lecture is on YouTube</a>); Reagan et al. measured them across 1,327 stories from Project Gutenberg and found <a href="https://epjdatascience.springeropen.com/articles/10.1140/epjds/s13688-016-0093-1" target="_blank" rel="noopener">six recurring arcs</a>. Wikipedia does not contain stories, so we have to move beyond our trusted dataset to really get into sentiment detection (it's even worse with Wikipedia because (as mentioned above) the text is written to be neutral — so it's hard to get sentiment out of it). Thus, I've been online to find a Marvel fan-fiction novel, <em>Dark Matter</em> by mysterycyclone for our sinister purposes. In the book, Peter Parker lands in Gotham instead of turning to dust: 46 chapters, 240,000 words, and, unlike Wikipedia, written to make you feel something. Every one of its 21,748 sentences is scored by the movie-review classifier from the Python example and by VADER, a lexicon built for social-media text. The top panel shows the whole novel chapter by chapter; click a chapter to see its sentences, and choose how many of them to average over.</p>
+
+  <iframe class="explorable-frame" src="../explorables/story-sentiment.html" height="820"
+    title="Explorable: two sentiment instruments through a novel" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Open chapter 22 and slide the smoothing from none to forty sentences: a square wave becomes an arc. Then read the list at the bottom: the sentences where the lexicon and the classifier point in opposite directions are the ones to read closely. The first one is about the King of Wakanda: the classifier says +0.96, the lexicon −0.96. Hover either panel for the sentence and what each instrument made of it. Across the novel, the two instruments agree on the sign of only 36% of the sentences.</p>
+
+  <p>Note how the two approaches don't align. That is both a challenge and an opportunity come project time. You need to be aware that the tool you choose influences the results. And sometimes, the disagreement between tools is information to be mined and used.</p>
+
+  <p><strong>Beyond positive and negative: DeepMoji</strong>. A one-dimensional score throws away most of what a sentence does. Anger and grief are both "negative"; relief and sarcasm are hard to place at all. In DeepMoji, a model from my own group (Felbo et al., 2017), we took a different route. We trained the model on 1.2 billion tweets <em>to predict which of 64 emoji the author used</em>. So we used the emoji as labels! Nobody had to annotate anything, the labels were already there. Pretty clever if I have to say so myself. The result is a model that answers with a distribution over emoji instead of a number. <code>I just love being stuck in traffic</code> comes back as 🔫 😡 😑 😠, where the movie-review classifier said POSITIVE at 0.998, and the King of Wakanda sentence comes back as 👿 😡 😠. The explorable below runs DeepMoji through the same novel. The emoji strip shows the most likely emoji in each slice of a chapter, and the emotion track sums the probability of a group of emoji, so anger, sadness, love or joy can be followed separately through the story. One more thing about DeepMoji: predicting emoji turned out to be a good way to learn about text in general. Fine-tune the pretrained model on a small set of human-labeled sentences and it becomes a sentiment classifier, and in the paper that recipe beat the state of the art at the time on all eight benchmarks we tried across sentiment, emotion and sarcasm, the same pretrain-then-fine-tune pattern behind the movie-review classifier earlier in this section. The Goodies have the paper and how to run the model yourself.</p>
+
+  <iframe class="explorable-frame" src="../explorables/story-emotion.html" height="920"
+    title="Explorable: DeepMoji through a novel" loading="lazy"></iframe>
+
+  <p class="explorable-caption">The two explorables stay on the same chapter, so if you opened chapter 22 above it is open here too. It is the angriest chapter of the novel, and the list at the bottom shows why: <code>The Joker takes a few steps towards Peter, raising his crowbar</code> comes back as 👿 😉 👊, a sentence both sentiment instruments called mildly positive. Switch the emotion to sadness or joy and watch the chapter overview change shape.</p>
+
+  <p>Producing a score is the easy part. Showing that the score behaves like the thing you wanted to measure is where the scientific work begins.</p>
+
+  <div class="exercise">
+    <h4>7.5 — Sentiment, by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>Start with transparent measurements before letting a model return a probability.</p>
+    <ol>
+    <li>Using the toy lexicon above, calculate the sentiment score of <code>good but terrible</code>. Then explain why a pure lookup system mishandles <code>not good</code>.</li>
+    <li>In a TF-IDF + logistic-regression classifier, what does a positive coefficient for a feature mean? What does a negative coefficient mean? Explain without using the word "important" by itself.</li>
+    <li>A contextual model returns <code>POSITIVE, 0.97</code>. Give two reasons why the confidence score is not the same thing as evidence that sentiment has been measured validly.</li>
+    <li>The model above was trained on movie reviews. Name one piece of Marvel or Wikipedia language that might behave differently from movie-review language and explain how you would test it.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>7.6 — Validate a sentiment instrument <span class="mode instrument">🔬 Tool</span> + <span class="mode builder">🚀 Builder</span></h4>
+    <p>Here the model is a measurement instrument. Do not scale it up until you know something about its errors.</p>
+    <ol>
+    <li>Choose a manageable labeled sentiment dataset and create a held-out test set. Keep the same test examples for every method you compare.</li>
+    <li>Compare a lexicon baseline, a TF-IDF + logistic-regression classifier, and one pretrained contextual sentiment model. Record the dataset, split, exact pretrained model and preprocessing choices.</li>
+    <li>Before looking at one overall accuracy number, read a random set of examples yourself. Make a small error table from patterns you actually see, such as negation, sarcasm, mixed sentiment, domain language or ambiguous wording.</li>
+    <li>Create at least three small stress tests by changing one sentence in a controlled way, for example adding <code>not</code>, swapping one sentiment word, or turning a literal sentence into sarcasm. Record how all three systems react.</li>
+    <li>Pick a narrative text you know well, such as a short story, a fan-fiction chapter or a long Wikipedia plot summary, and score it sentence by sentence with the lexicon and the contextual model. Plot both arcs with a moving average and find the three sentences where the two instruments disagree most. Read them, decide which instrument you side with, and say what that tells you about what each one measures.</li>
+    <li>Only after that, run the systems on a small sample of Marvel pages. State what you think a page-level sentiment score represents there and one reason you would be cautious about comparing that score across network communities.</li>
+  </ol>
+  </div>
+
+  <h2 id="entities">5 · Entities turn prose into structured data</h2>
+
+  <p>Sometimes the output we want is not one number for a whole document. We want to find particular things inside the text. If a sentence says</p>
+
+  <p><code>Iron Man (Tony Stark) met Black Widow in New York.</code></p>
+
+  <p>then a named entity recognizer can turn the prose into structured <em>spans</em>:</p>
+
+  <table class="plain">
+    <tr><th>span</th><th>type</th></tr>
+    <tr><td>Iron Man</td><td>PERSON</td></tr>
+    <tr><td>Tony Stark</td><td>PERSON</td></tr>
+    <tr><td>Black Widow</td><td>PERSON</td></tr>
+    <tr><td>New York</td><td>GPE</td></tr>
+  </table>
+
+  <p>Named entity recognition, NER, asks which spans in a piece of text refer to named things such as people, organizations, places or dates, and which type each span belongs to. In the sentence above, for example, the useful output is not simply that <code>Iron</code> looks like a person word. We want the complete span <code>Iron Man</code>, and we want to know that <code>New York</code> is one place rather than two unrelated tokens.</p>
+
+  <p><strong>From tokens to spans</strong>. NER is therefore often framed as a sequence-labeling problem. The model gives a label to each token and neighboring labels are then combined into entity spans. Something we call the <em>BIO notation</em> makes those boundaries explicit: <code>B-PER</code> begins a person span, <code>I-PER</code> continues it, and <code>O</code> means that the token is outside an entity. Don't spend any energy worrying about the type names changing between <code>PERSON</code> in the table above and <code>PER</code> here — different annotation standards abbreviate the same categories differently, and a model reports whichever set it was trained on. What matters is the structure: one label per token, and <em>B</em> versus <em>I</em> telling you where a span starts rather than continues. The result is structured text we can count and connect later, but it still does not tell us whether two different names refer to the same underlying entity.</p>
+
+  <p>The explorable below shows those two levels one after the other. In the first row, inspect the model output token by token and switch between entity labels and BIO tags. In the second row, see how those token labels become structured entity spans. Notice what is still missing: recognizing <code>Iron Man</code> and <code>Tony Stark</code> does not tell us that they refer to the same character.</p>
+
+  <iframe class="explorable-frame" src="../explorables/ner-bio.html" height="570"
+    title="Explorable: from token labels to entity spans" loading="lazy"></iframe>
+
+  <p class="explorable-caption">First inspect one prediction per token, then the structured spans created from those labels. Switch to BIO tags and pay attention to where multi-token entities begin and continue.</p>
+
+  <p>If BIO tags are new to you, the NLP textbook gives the standard sequence-labeling view and shows how named entities are represented as spans.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>Jurafsky & Martin, <a href="https://web.stanford.edu/~jurafsky/slp3/18.pdf" target="_blank" rel="noopener">Chapter 18, <em>Sequence Labeling for Parts of Speech and Named Entities</em></a>, section 18.3 and the evaluation in 18.6. Focus on named entities, span boundaries and BIO-style labels; the HMM and CRF machinery in between can wait. Section 9.5 of <a href="https://web.stanford.edu/~jurafsky/slp3/9.pdf" target="_blank" rel="noopener">Chapter 9</a> shows the modern version: the same tags, predicted by a fine-tuned pretrained encoder.</p>
+  </div>
+
+  <p><strong>Python example</strong>. spaCy's small English pipeline from week 5 includes a named entity recognizer, and every token carries its BIO tag and entity type:</p>
+
+  <pre><code class="language-python">import spacy
+
+nlp = spacy.load("en_core_web_sm")
+doc = nlp("Iron Man (Tony Stark) met Black Widow in New York.")
+
+[(t.text, t.ent_iob_, t.ent_type_) for t in doc]
+# [('Iron', 'O', ''), ('Man', 'O', ''), ('(', 'O', ''),
+#  ('Tony', 'B', 'PERSON'), ('Stark', 'I', 'PERSON'), (')', 'O', ''),
+#  ('met', 'O', ''), ('Black', 'B', 'ORG'), ('Widow', 'I', 'ORG'),
+#  ('in', 'O', ''), ('New', 'B', 'GPE'), ('York', 'I', 'GPE'), ('.', 'O', '')]
+
+[(e.text, e.label_) for e in doc.ents]
+# [('Tony Stark', 'PERSON'), ('Black Widow', 'ORG'), ('New York', 'GPE')]</code></pre>
+
+  <p>Compare that with the explorable, which shows what a tagger <em>should</em> do with the sentence. The real small model never sees <em>Iron Man</em> as an entity at all, and it files <em>Black Widow</em> as an organization. Neither mistake is strange: superhero names are rare in the news text the model was trained on, and <em>Black Widow</em> could totally look like a company name. But both would silently shape any network built from this output, which is why exercise 7.8 starts with hand-labeled sentences.</p>
+
+  <p>The same tags turn a whole page into a co-mention network in a dozen lines:</p>
+
+  <pre><code class="language-python">from collections import Counter
+import networkx as nx
+
+page = nlp(marvel_pages["Spider-Man"])
+pairs = Counter()
+for sentence in page.sents:
+    people = sorted({e.text for e in sentence.ents if e.label_ == "PERSON"})
+    for i in range(len(people)):
+        for j in range(i + 1, len(people)):
+            pairs[(people[i], people[j])] += 1
+
+G = nx.Graph()
+for (a, b), weight in pairs.items():
+    G.add_edge(a, b, weight=weight)
+pairs.most_common(4)
+# [(('Mary Jane', 'Peter'), 15), (('Peter Parker', 'Spider-Man'), 14),
+#  (('Peter', 'Spider-Man'), 9), (('Ditko', 'Lee'), 8)]</code></pre>
+
+  <p>The Spider-Man page has 445 sentences and 635 PERSON spans, 179 of them distinct, and the network has 146 nodes and 293 edges. Look at the top pairs before you trust either number. <em>Peter</em>, <em>Peter Parker</em> and <em>Spider-Man</em> are three nodes for one character, so the second- and third-strongest edges in the network connect a man to himself. <em>Ditko</em> and <em>Lee</em> are Steve Ditko and Stan Lee, who created the character and are not in the story at all. Resolving the aliases and deciding who counts as a character are modeling decisions, and the tagger made neither of them.</p>
+
+  <p>Documentation: <a href="https://spacy.io/usage/linguistic-features#named-entities" target="_blank" rel="noopener">spaCy named entities</a>.</p>
+
+  <p><strong>Extraction is only the first step</strong>. If we want to count actors or build a network, we often need entity resolution as well. <code>Iron Man</code>, <code>Tony Stark</code> and sometimes simply <code>Stark</code> may all refer to the same character. Whether they should be merged is a separate decision from detecting the spans in the first place.</p>
+
+  <p><strong>From entities to a network</strong>. Once entities have been extracted and resolved, we can turn them into a network. A nice example comes from <a href="https://doi.org/10.1093/llc/fqac047" target="_blank" rel="noopener">Fields et al. (2023)</a>, who combine NER and social network analysis to study nineteenth-century Ottoman-Iraqi diaries. They identify person mentions, resolve them to individuals, and connect people who occur in the same dated diary entry.</p>
+
+  <p>We can do the same kind of construction with Marvel text. First we extract the entity spans, then decide which aliases refer to the same character, and finally choose what it means for two entities to co-occur before we draw an edge between them. That last choice is doing a lot of work. Two characters could be connected when they appear in the same sentence, paragraph or page. Those choices create different networks and imply different meanings for an edge.</p>
+
+  <p>The next explorable lets you watch this construction happen. Follow the text through entity extraction and alias resolution, then change the unit of co-occurrence and watch which edges appear or become stronger.</p>
+
+  <iframe class="explorable-frame" src="../explorables/entity-network.html" height="650"
+    title="Explorable: from NER to a text-derived network" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Follow the path from prose to extracted entities to resolved names to a network. Change the co-occurrence unit and ask what the resulting edge actually means.</p>
+
+  <p><strong>What does an edge mean?</strong> Before interpreting the graph, ask the same question we asked about hyperlink networks: what relationship have we actually measured? Co-mention is not the same thing as interaction. Two characters can be mentioned together without meeting, and two characters can interact without being named in the same sentence. Fields et al. make the same point when they discuss co-mention in a diary entry as a proxy for a social relationship.</p>
+
+  <div class="callout">
+    <p class="eyebrow">From an AI-drafted report</p>
+    <p>"We scored every Marvel page with a DistilBERT sentiment classifier that reports 96% accuracy, so the measurements are reliable. Villain pages are significantly more negative than hero pages (−0.42 against +0.11). The NER model found 1,847 distinct characters, and the co-occurrence network built from them shows clear community structure." There are three flaws. Find them. Sections 4 and 5 give you everything you need, and in <a href="week7.html#bio-by-hand">exercise 7.7</a>, item 6, you will rewrite the report yourself.</p>
+  </div>
+
+  <div class="exercise" id="bio-by-hand">
+    <h4>7.7 — BIO tags, entities, and edges, by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>Go from prose to a network on paper before a tagger does it for thousands of sentences.</p>
+    <ol>
+    <li>Write BIO tags for <code>Iron Man (Tony Stark) met Black Widow in New York.</code> Choose sensible entity classes and state one annotation decision another scheme could reasonably make differently.</li>
+    <li>Explain the difference between entity extraction and entity resolution using <code>Iron Man</code>, <code>Tony Stark</code> and <code>Stark</code>.</li>
+    <li>Take two short sentences containing three named characters and draw the co-occurrence network you would get from sentence-level edges. Then combine the same sentences into one paragraph and draw the paragraph-level network.</li>
+    <li>Give one example where a co-occurrence edge would suggest a relationship that the underlying text does not actually support.</li>
+    <li>Explain why changing the unit of co-occurrence is a modeling decision rather than a plotting decision.</li>
+    <li>🧠 Rewrite the AI-drafted report above in three honest sentences: what was actually measured, what would have to be checked before believing it, and what the entity count really counts.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>7.8 — Tag, check, resolve, connect <span class="mode instrument">🔬 Tool</span> + <span class="mode builder">🚀 Builder</span></h4>
+    <p>Now use a pretrained NER model as a measurement instrument and carry its output all the way into a network.</p>
+    <ol>
+    <li>Hand-label a manageable random sample of Marvel text before you run the model. Keep those labels as a small reference set.</li>
+    <li>Run a pretrained NER model and compare its spans with your reference labels. Report at least span-level precision and recall, then inspect the mistakes and describe recurring errors.</li>
+    <li>Make a short alias-resolution table for names you can justify merging. Keep the original model output so the resolution decisions remain inspectable.</li>
+    <li>Build an entity co-occurrence network using at least two units, for example sentence and paragraph. Compare node counts, edge counts, degree distributions, communities and several concrete edges.</li>
+    <li>Find one edge that looks convincing and one that becomes questionable when you read the underlying text. Explain what created each one.</li>
+    <li>Combine methods from the course in one small analysis. Ask a question where the entity network becomes more useful when paired with topic modeling or sentiment, and state what each method contributes to the answer.</li>
+  </ol>
+  </div>
+
+  <h2 id="semantic-search">6 · Search by meaning</h2>
+
+  <p>Week 5 asked you to build a Marvel search engine in 20 lines, and week 6 gave it TF-IDF. Represent a query and every document with TF-IDF, calculate cosine similarity, and rank the documents. This works especially well when the query and the useful document share vocabulary.</p>
+
+  <p><strong>Vocabulary mismatch</strong>. The weakness is vocabulary mismatch. A user might search for <code>automobile repair</code> while the relevant document repeatedly says <code>fixing cars</code>. Sparse TF-IDF vectors see different words. A dense retriever instead encodes the query and documents into a shared vector space where similar meanings can be close even without exact word overlap.</p>
+
+  <p>The reading below gives the dense-retrieval setup and then shows how retrieval becomes the first stage of RAG. The name and the recipe come from Lewis et al. (2020), <a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener"><em>Retrieval-augmented generation for knowledge-intensive NLP tasks</em></a>. If you have followed the earlier readings, section 11.3 will already be familiar. One note that helped me: Keep the concepts of <em>retrieval</em> and <em>generation</em> separate when you read.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>Continue Jurafsky & Martin, <a href="https://web.stanford.edu/~jurafsky/slp3/11.pdf" target="_blank" rel="noopener">Chapter 11, sections 11.3–11.4</a>. Section 11.3 introduces dense retrieval. Section 11.4 adds generation after retrieval.</p>
+  </div>
+
+  <p>Now try the same query under two representations. The explorable below places sparse and dense retrieval side by side so you can look for cases where exact vocabulary helps and cases where semantic similarity helps. The dense column uses the same pretrained encoder as the corpus atlas, over the full Wikipedia pages, which is what you will use in your notebook.</p>
+
+  <iframe class="explorable-frame" src="../explorables/semantic-search.html" height="820"
+    title="Explorable: sparse and dense retrieval" loading="lazy"></iframe>
+
+  <p class="explorable-caption">The preset queries were run offline over the full pages, so both columns are the real thing: TF-IDF on the left, MiniLM on the right, and each preset knows which page it is about, so the line under the menu keeps score. The first six are paraphrases that share few words with the page they describe, and the dense column wins them; <code>a deaf archer who never misses</code> is the other way around, because <code>deaf</code> and <code>archer</code> are literally on Hawkeye's page. The dense column has two versions, the page's best short passage or one mean vector per page: switch to the page mean on the Russian-spy query and watch Black Widow drop from rank 2 to rank 20, because her whole biography is about more than being a spy. The last preset asks for the Norse god of thunder, and Thor is not in the corpus: look at what each retriever returns when the answer does not exist. Type your own words and only the sparse column can answer, live, over the one-line descriptions, because a text encoder does not run inside a web page.</p>
+
+  <p><strong>Python example</strong>. Both retrievers are a few lines once the representations exist. Sparse retrieval is basically week 6's TF-IDF with the query treated as just one more document. Dense retrieval encodes the query using the same model as the pages and then simply ranks by dot product (which for unit-length vectors becomes the cosine similarity).</p>
+
+  <pre><code class="language-python">from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+
+query = "a Russian spy who became an Avenger"
+
+tfidf = TfidfVectorizer()
+X = tfidf.fit_transform(texts)
+sparse = (X @ tfidf.transform([query]).T).toarray().ravel()
+
+q = model.encode(query, normalize_embeddings=True)
+dense = embeddings @ q
+
+for scores in (sparse, dense):
+    top = np.argsort(-scores)[:4]
+    print([(names[i], round(float(scores[i]), 2)) for i in top])
+# [('Ursa Major (character)', 0.07), ('Black Widow (Natasha Romanova)', 0.06), ('Red Guardian', 0.05), ('Yelena Belova', 0.05)]
+# [('Red Guardian', 0.61), ('U.S. Agent', 0.49), ('Ursa Major (character)', 0.47), ('Quicksilver (Marvel Comics)', 0.47)]</code></pre>
+
+  <p>The obvious answer is Black Widow, and here sparse retrieval finds her and dense retrieval does not. TF-IDF matches <em>Russian</em>, <em>spy</em> and <em>Avenger</em> literally, and her page uses all three. The dense query lands nearest Red Guardian, the Soviet answer to Captain America, because the page-level embeddings summarize whole biographies, and hers is about much more than being a Russian spy. Cut the pages into short passages of two or three sentences (14,976 of them), score those instead of the 303 page means, give each page its best passage, and Black Widow is back at rank 2, behind Red Guardian. Over a larger set of test queries the same encoder puts the right page in the top 3 for 33% of them as page means, 72% with 180-word passages and 89% with 60-word passages, against 67% for TF-IDF. As always preprocessing matters for the outcome! How you cut the documents is part of the retriever, which is why exercise 7.10 asks you to change the chunk size and watch the rankings move.</p>
+
+  <p>Documentation: the <a href="https://sbert.net/examples/sentence_transformer/applications/semantic-search/README.html" target="_blank" rel="noopener">Sentence Transformers semantic-search guide</a>.</p>
+
+  <p><strong>Then generate</strong>. Retrieval-augmented generation, RAG, adds a language model after retrieval. You ask a question. Then, the system first finds passages that appear relevant to the question (retrieval) and then gives those passages to the language model when it generates an answer.</p>
+
+  <p>But an important point here is that there are more things that can go wrong. A retrieval error and a generation error are different failures. If the retriever brings back the wrong passage, the generator never had the right evidence. If the retriever brings back the right passage and the answer is still wrong, the problem happened later. When you work with this kind of system, keeping the retrieved evidence visible makes it much easier to inspect and interpret where things could have gone wrong.</p>
+
+  <div class="exercise">
+    <h4>7.9 — Sparse and dense retrieval, by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>Think about what each representation can see before you build a search interface.</p>
+    <ol>
+    <li>Explain why <code>automobile repair</code> and <code>fixing cars</code> create vocabulary mismatch for a word-count representation. What information would a dense representation need to place them close anyway?</li>
+    <li>Suppose two document vectors are already normalized. Explain why ranking them by cosine similarity to a normalized query is equivalent to ranking them by dot product.</li>
+    <li>Write one query where you expect TF-IDF retrieval to work especially well and one where you expect dense retrieval to have an advantage. Explain your prediction before you run either system.</li>
+    <li>A RAG system gives a wrong answer. Write one example of a retrieval failure and one example of a generation failure. What would you need to inspect to tell them apart?</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>7.10 — Search the Marvel corpus <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Use queries where you can read the returned pages and judge relevance yourself.</p>
+    <ol>
+    <li>Reuse your week 6 TF-IDF representation for sparse retrieval and the pretrained encoder from exercise 7.2 for dense retrieval.</li>
+    <li>Write at least six queries before looking at the rankings. Include some with obvious vocabulary overlap and some paraphrases. Save the top five results from both methods for every query.</li>
+    <li>Read the returned pages and make your own relevance judgments. Find at least one query where sparse retrieval is more useful and one where dense retrieval is more useful. Keep a failure from each system too.</li>
+    <li>Build a side-by-side search interface where the query, similarity score and returned text are visible rather than showing only character names.</li>
+    <li>Change one modeling choice, such as the encoder, chunk size or TF-IDF preprocessing, and rerun two queries. Which conclusions survive?</li>
+    <li>If you add an LLM answer on top, keep the retrieved passages visible and report retrieval errors separately from generation errors.</li>
+  </ol>
+  </div>
+
+  <h2 id="bias">7 · Bias can enter before the model</h2>
+
+  <div class="callout">
+    <p class="eyebrow">Optional · not on Test 2</p>
+    <p>This final section is an extension for anyone who wants to follow the measurement problem one step further. The ideas are useful, but this section is not part of the week 7 material assessed on Test 2.</p>
+  </div>
+
+  <p>By this point, the analyses can start to look very technical. We have vectors, clusters, sentiment scores, entity spans and ranked documents. It is easy to focus on bias in the final model, even though the model is really just a part of a much longer process of handling data. Bias can already enter through who appears in the data, which platform was available to collect from, what was labeled, what was discarded during preprocessing, and what outcome we decided to predict.</p>
+
+  <p>Bias can also be learned as an association in the representation itself. Imagine training on text from a society where women are repeatedly described near words such as <code>nurse</code>, while men are more often described near <code>engineer</code>. An embedding model can learn part of that pattern as geometry in its vector space. Reusing the model years later does not make the association disappear simply because the new application is more modern. Those learned relationships can still influence which texts look similar, how examples are classified, or what gets ranked.</p>
+
+  <p>In a text project there are sooo many sources of bias (all easy to forget and ignore). Some people post much more than others. Some languages and dialects are easier for our tools to process. A corpus may overrepresent people who are already visible online. We might remove short texts, keep only English documents, or force ambiguous examples into a fixed set of labels. The model then learns from the result of all those earlier choices.</p>
+
+  <p>If you want the framework behind the figure below, the following optional reading is from public and population health, but the same sequence of choices transfers very naturally to text analysis.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Optional reading</p>
+    <p>Read Vishwali Mhasawade, Yuan Zhao and Rumi Chunara, <a href="https://www.nature.com/articles/s42256-021-00373-4" target="_blank" rel="noopener"><em>Machine learning and algorithmic fairness in public and population health</em></a>, especially Figure 2 and the surrounding discussion.</p>
+  </div>
+
+  <p>The visual below adapts the logic of Mhasawade <em>et al.</em>'s Figure 2. Read it from top to bottom. At every step, one version of the world is translated into another, which means something can be selected, lost or changed before the final model ever sees the data.</p>
+
+  <iframe class="explorable-frame" src="../explorables/bias-flow.html" height="600"
+    title="Visual: where bias can enter an analysis" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Read from the social world toward the model. At each step, ask what entered the data, what was left out, and which choices could change the final output.</p>
+
+  <div class="exercise">
+    <h4>7.11 — Trace bias through one NLP analysis <span class="mode learn">🧠 Learn</span> + <span class="mode instrument">🔬 Tool</span> · optional</h4>
+    <p>Pick one route from this week and trace one plausible distortion from the social process to the final output.</p>
+    <ol>
+    <li>State the social process behind the text and who is likely to be present or absent from the corpus.</li>
+    <li>Describe one way the move from the world to the data could distort what you observe.</li>
+    <li>Describe one way preprocessing, labels, representation or model choice could preserve or amplify that distortion.</li>
+    <li>Propose one check you could actually run on the data or model output.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>7.12 — Ship an explorable <span class="mode builder">🚀 Builder</span> · stretch, optional</h4>
+    <p>Pick one idea from the week that became clearer when you could see it and build the version you wish had been on this page. Agents encouraged; the explanation still has to be yours.</p>
+    <p>Some ideas to explore: let a user move between a high-dimensional nearest-neighbor list and a 2D projection; compare LDA, BERTopic and network communities with one color switch; build a sentiment stress-test playground; show BIO tags becoming entity spans and then a network; or build a search box that compares sparse and dense retrieval. The best ones get embedded on the page with credit.</p>
+  </div>
+
+  <div class="exercise" id="go-nuts">
+    <h4>7.13 — Go nuts with your LLM <span class="mode builder">🚀 Builder</span> · every week</h4>
+    <p>The standing rules live in <a href="week1.html#go-nuts">week 1, exercise 1.8</a>: one free-form post on your group's site, link in this week's Teams channel by Monday evening, friendly criticism for at least one other group. Winner announced at the start of the next session.</p>
+    <p>This is the last week of the language block, so use the Marvel text and network to ask one question that genuinely interests you. <strong>One good question and one convincing figure beats five methods thrown together.</strong> Whatever model you use, keep enough of the underlying text visible that you can check what produced the pattern.</p>
+    <p>Some openers, if you want them:</p>
+    <ul>
+    <li><strong>Who is semantically close but structurally far away?</strong> Find characters whose pages are close in embedding space but far apart in the hyperlink network, then read the pages and work out why.</li>
+    <li><strong>How much does the grouping method change the story?</strong> Compare LDA topics, embedding-based clusters and network communities for the same characters. Focus on the cases where they disagree.</li>
+    <li><strong>Can you break a sentiment model?</strong> Design a small set of examples that isolate negation, mixed sentiment, sarcasm or Marvel-specific language, then compare several sentiment measurements.</li>
+    <li><strong>Six shapes?</strong> Score a few dozen fan-fiction stories sentence by sentence, smooth, and cluster the arcs. Do Reagan et al.'s six shapes show up, and does DeepMoji's anger follow the same shape as the classifier's negativity?</li>
+    <li><strong>Can text build a useful network?</strong> Construct an entity co-occurrence network and compare it with the Wikipedia hyperlink network. Investigate the edges that exist in only one of them.</li>
+    <li><strong>When does semantic search beat keyword search?</strong> Design queries where sparse and dense retrieval disagree and read the returned pages to decide which representation helped.</li>
+    <li>Or ignore every suggestion and chase something one of the explorables made you wonder about. The winner is rarely the group that played it safe.</li>
+  </ul>
+    <p>Write the post around the question rather than the software package you used: what you asked, what representation or measurement you chose, one strong figure or table, what surprised you, what you checked in the underlying text, and one limitation.</p>
+  </div>
+
+  <h2 id="next-week">8 · Next week: putting it all together</h2>
+
+  <p>Across the three language weeks, we have moved from raw text to representations and then from representations to measurements and tools. The recurring habit should be the same one we used for networks: know what the object is, know how it was constructed, and inspect the data underneath a result before you believe the story it seems to tell.</p>
+
+  <p>Next week there is no new method. Instead we work on the hard part: choosing the right dataset and the right question, so that seven weeks of tools have something worth doing. The final project starts the week after, and it runs on a dataset you pick, so bring your group and a first idea.</p>
+
+  <section class="band band-essentials">
+
+  <h2 id="essentials" class="essentials">Essentials</h2>
+
+  <p>This is the 🧠 Learn core of the week in one place. If you can explain what is being represented, what information each model uses, and what you would check before interpreting its output, you are ready for this week's share of Test 2.</p>
+
+  <dl class="defs">
+    <dt>Static word embedding</dt>
+    <dd>one fixed vector for each word type, regardless of the sentence in which it occurs.</dd>
+    <dt>Contextual representation</dt>
+    <dd>a representation that depends on the surrounding text, so the same word can receive different vectors in different contexts.</dd>
+    <dt>Document embedding</dt>
+    <dd>one dense vector representing a sentence, paragraph or document so texts can be compared geometrically.</dd>
+    <dt>Pretrained encoder</dt>
+    <dd>a model trained on another corpus before we apply it to our own text to produce representations.</dd>
+    <dt>Chunking</dt>
+    <dd>cutting a long document into passages before embedding it; the cutting rule is part of the representation, and an encoder's input limit silently truncates what you do not cut.</dd>
+    <dt>Dimensionality reduction</dt>
+    <dd>mapping high-dimensional vectors into fewer dimensions, often two for visualization. The projection is a simplified view of the original representation.</dd>
+    <dt>t-SNE</dt>
+    <dd>a nonlinear dimensionality-reduction method that emphasizes local neighborhoods. Nearby points can be informative, while global distances and cluster shapes require caution.</dd>
+    <dt>Embedding-based text cluster</dt>
+    <dd>a group of documents placed together because their dense representations are close under a clustering procedure. This is a different object from an LDA topic or a network community.</dd>
+    <dt>Sentiment lexicon</dt>
+    <dd>a list of words with sentiment or affect scores that can be combined into a transparent text-level measure.</dd>
+    <dt>Emotional arc</dt>
+    <dd>a sentence-level sentiment score smoothed along a narrative; the shape, not the level, is the thing being measured.</dd>
+    <dt>Text classifier</dt>
+    <dd>a model learned from labeled examples that maps a text representation to a label or probability.</dd>
+    <dt>Validation</dt>
+    <dd>checking a measurement or model output against examples, labels or behaviors that let you judge whether it works for the intended task and domain.</dd>
+    <dt>Named entity recognition, NER</dt>
+    <dd>finding spans in text that refer to entities such as people, organizations or places and assigning them entity types.</dd>
+    <dt>BIO tags</dt>
+    <dd>sequence labels in which B begins an entity span, I continues it and O marks a token outside an entity.</dd>
+    <dt>Entity resolution</dt>
+    <dd>deciding when different mentions or names refer to the same underlying entity.</dd>
+    <dt>Entity co-occurrence network</dt>
+    <dd>a network in which entities become nodes and an edge is created when two entities appear within a researcher-defined unit of text.</dd>
+    <dt>Sparse retrieval</dt>
+    <dd>retrieval based on sparse lexical representations such as TF-IDF, where shared vocabulary contributes directly to similarity.</dd>
+    <dt>Dense retrieval</dt>
+    <dd>retrieval in which queries and documents are encoded as dense vectors and ranked by vector similarity.</dd>
+    <dt>Vocabulary mismatch</dt>
+    <dd>the retrieval problem that occurs when a relevant document expresses the right idea using different words from the query.</dd>
+    <dt>Retrieval-augmented generation, RAG</dt>
+    <dd>a two-stage setup in which relevant passages are first retrieved and then supplied to a language model for generation.</dd>
+  </dl>
+
+  <div class="on-the-test">
+    <p class="eyebrow">On Test 2</p>
+    <p>From this week, you should be able to do the following <strong>on paper, closed book</strong>. Any formula you need is printed on the test paper — you are never asked to write one from memory:</p>
+    <ul>
+    <li>distinguish a static word embedding from a contextual representation using an ambiguous word such as <code>bank</code>;</li>
+    <li>explain what a document embedding represents, and distinguish the original vector space from a two-dimensional projection of it;</li>
+    <li>explain why nearest neighbors in a 2D map can differ from nearest neighbors by cosine similarity in the original space;</li>
+    <li>distinguish topic-model topics, embedding-based text clusters and structural network communities as three different ways of grouping the same documents;</li>
+    <li>calculate a simple lexicon sentiment score and explain why negation, mixed sentiment or sarcasm can break word lookup;</li>
+    <li>explain how a TF-IDF representation can enter a logistic-regression text classifier, and interpret the sign of a feature weight;</li>
+    <li>explain why a model confidence score is not by itself evidence that a text measurement is valid for a new domain;</li>
+    <li>read and construct simple BIO tags — B begins an entity span, I continues it, O marks a token outside one — and distinguish finding an entity from deciding that two mentions are the same entity;</li>
+    <li>explain how the chosen unit of co-occurrence changes the meaning and structure of a text-derived entity network;</li>
+    <li>distinguish sparse TF-IDF retrieval from dense retrieval and explain the vocabulary-mismatch problem;</li>
+    <li>explain the two stages of retrieval-augmented generation (RAG) separately, and distinguish a retrieval error from a generation error;</li>
+    <li>give a concrete validation check for a pretrained model used as a measurement instrument;</li>
+    <li>spot the flaw in a short (possibly AI-written) claim built on a model's output: an accuracy borrowed from another domain presented as validation, a score reported without saying what it measures, or an entity count that skipped resolution.</li>
+  </ul>
+  </div>
+
+  </section>
+
+  <h2 id="goodies">Goodies</h2>
+
+  <p>Everything above is the course. Everything below is for the student who finished the page and wants more. Nothing here is on the test; all of it is worth your time.</p>
+
+  <div class="callout" id="misread-tsne">
+    <p class="eyebrow">How not to fool yourself with t-SNE</p>
+    <p>Wattenberg, Viégas and Johnson's interactive essay <a href="https://distill.pub/2016/misread-tsne/" target="_blank" rel="noopener"><em>How to Use t-SNE Effectively</em></a> is still one of the best ways to understand why a beautiful 2D map can be misleading. Change the perplexity and watch familiar high-dimensional structures turn into very different pictures.</p>
+  </div>
+
+  <div class="callout" id="sbert-search">
+    <p class="eyebrow">Semantic search with Sentence Transformers</p>
+    <p>The <a href="https://www.sbert.net/examples/sentence_transformer/applications/semantic-search/README.html" target="_blank" rel="noopener">Sentence Transformers semantic-search guide</a> goes beyond the tiny Marvel search engine and explains symmetric versus asymmetric search, cosine scoring and efficient retrieval over larger corpora.</p>
+  </div>
+
+  <div class="callout" id="bertopic-more">
+    <p class="eyebrow">Go deeper into BERTopic</p>
+    <p>The <a href="https://maartengr.github.io/BERTopic/" target="_blank" rel="noopener">BERTopic documentation</a> makes the different steps unusually transparent. You can inspect the embedding, dimensionality-reduction, clustering and topic-representation steps separately and replace them one at a time. That is much more useful than treating <code>fit_transform()</code> as magic.</p>
+  </div>
+
+  <div class="callout" id="pulse-of-the-nation">
+    <p class="eyebrow">Pulse of the Nation: a word list meets 300 million tweets</p>
+    <p>In 2010 Alan Mislove, Yong-Yeol Ahn, Jukka-Pekka Onnela, Niels Rosenquist and I scored 300 million tweets, September 2006 to August 2009, with a word list and drew the result as a time-lapse map of the United States: <a href="https://www.ccs.neu.edu/home/amislove/twittermood/" target="_blank" rel="noopener"><em>Pulse of the Nation</em></a>. The list was ANEW, the Affective Norms for English Words (Bradley and Lang, 1999): about a thousand words rated by volunteers on a nine-point scale from unhappy to happy, and a tweet's mood is the average rating of the ANEW words it contains. That is all the NLP there is, and it was enough to see the day (happiest early in the morning and late at night, the afternoon at work the low point), the week (a Sunday-morning peak, a Thursday-evening trough), and the West Coast running three hours behind the East. As far as I know it was the first large-scale analysis of Twitter anyone had done, and it went around the world: the CBS Evening News, the New York Times, the BBC, and a long tail of "Twitter proves California is happier" headlines. Two things from it are worth keeping. The maps are cartograms, with each county scaled to its number of tweets, which is the first question to ask of any such map: who is tweeting? And the list measures whether people <em>use happy words</em>, not whether they are happy; that gap is what §4 is about.</p>
+  </div>
+
+  <div class="callout" id="hedonometer">
+    <p class="eyebrow">The hedonometer and the labMT word list</p>
+    <p>Peter Dodds, Chris Danforth and their group in Vermont built a word list by asking a different question: not which words psychologists chose, but which words people actually use. They took the 5,000 most frequent words from each of four sources (Twitter, Google Books, the New York Times and song lyrics), merged them into 10,222 words, and had Mechanical Turk workers rate each on the same 1-to-9 happiness scale as ANEW; the result is labMT, <em>language assessment by Mechanical Turk</em> (Dodds et al., <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0026752" target="_blank" rel="noopener"><em>Temporal patterns of happiness and information in a global social network: Hedonometrics and Twitter</em></a>, PLoS ONE 2011). One detail in the paper is worth stealing: before scoring a text they drop the neutral middle of the scale, every word rated between 4 and 6, because <code>the</code> and <code>of</code> carry no mood but dominate every text. The <a href="https://hedonometer.org/" target="_blank" rel="noopener">hedonometer</a> has applied the list to a daily sample of Twitter since 2008, and a decade of history is readable off the curve: the Christmas peaks, the dips after attacks and shootings, the long low of spring 2020. The list itself is <a href="https://hedonometer.org/words/labMT-en-v2/" target="_blank" rel="noopener">downloadable</a> and runs in three lines of pandas, which makes it a good first instrument for exercise 7.6.</p>
+  </div>
+
+  <div class="callout" id="sentiment-video">
+    <p class="eyebrow">Video: word lists, at length</p>
+    <iframe class="video-embed" src="https://www.youtube.com/embed/JuYcaYYlfrI"
+    title="Video lecture: sentiment from word lists" loading="lazy" allowfullscreen></iframe>
+    <p>Twenty-four minutes from an earlier year of this course, where I go deeper into word-list sentiment than this page does: where the lists come from, what the ratings mean, and the stories behind the two projects above.</p>
+  </div>
+
+  <div class="callout" id="checklist">
+    <p class="eyebrow">Test behaviors, not only accuracy</p>
+    <p>Ribeiro et al.'s <a href="https://aclanthology.org/2020.acl-main.442/" target="_blank" rel="noopener"><em>Beyond Accuracy: Behavioral Testing of NLP Models with CheckList</em></a> is a great continuation of the sentiment section. The paper asks what happens when we deliberately test capabilities such as negation and invariance instead of relying on one held-out accuracy number.</p>
+  </div>
+
+  <div class="callout" id="deepmoji">
+    <p class="eyebrow">DeepMoji: emoji as labels</p>
+    <p>Felbo, Mislove, Søgaard, Rahwan and Lehmann, <a href="https://aclanthology.org/D17-1169/" target="_blank" rel="noopener"><em>Using millions of emoji occurrences to learn any-domain representations for detecting sentiment, emotion and sarcasm</em></a> (EMNLP 2017). The trick is distant supervision: 1.2 billion tweets already carried their own labels, the 64 most common emoji, so a bidirectional LSTM with attention could be trained to predict them and then transferred layer by layer (the paper's "chain-thaw" recipe) to small human-labeled datasets for sentiment, emotion and sarcasm, where it set the state of the art at the time. To run it yourself, use the PyTorch port <a href="https://github.com/huggingface/torchMoji" target="_blank" rel="noopener">torchMoji</a> with the weights mirrored on <a href="https://huggingface.co/Uberduck/torchmoji" target="_blank" rel="noopener">Hugging Face</a>; it predates Python 3.11 and PyTorch 2 and needs two one-line patches: in <code>torchmoji/tokenizer.py</code> make the title regex <code>RE_TITLES = r'|'.join([r'(?i:' + t + r')' for t in TITLES])</code>, and in <code>torchmoji/lstm.py</code> unpack the packed sequence as <code>input, batch_sizes = input.data, input.batch_sizes</code>. For the shapes of stories, Reagan et al., <a href="https://epjdatascience.springeropen.com/articles/10.1140/epjds/s13688-016-0093-1" target="_blank" rel="noopener"><em>The emotional arcs of stories are dominated by six basic shapes</em></a> (EPJ Data Science, 2016), is the paper behind the sentiment explorable; its instrument is the labMT list from the hedonometer box above.</p>
+  </div>
+
+  <div class="callout" id="entity-networks">
+    <p class="eyebrow">From entities back to networks</p>
+    <p>Fields et al.'s <a href="https://doi.org/10.1093/llc/fqac047" target="_blank" rel="noopener">study of Ottoman-Iraqi diaries</a> is a real example of the full route from named-entity recognition to social network analysis. It is especially useful because the authors keep returning to the source text when interpreting what a co-occurrence edge means.</p>
+  </div>
+
+  <div class="callout" id="bias-upstream">
+    <p class="eyebrow">Bias can enter long before training</p>
+    <p>If the optional final section caught your interest, Mhasawade, Zhao and Chunara's <a href="https://www.nature.com/articles/s42256-021-00373-4" target="_blank" rel="noopener"><em>Machine learning and algorithmic fairness in public and population health</em></a> gives the original figure used there. The domain is health rather than NLP, but the distinction between the social world, observed data, measurement and model output transfers directly.</p>
+  </div>
+
+  <p><a href="../index.html#weeks">← All weeks</a></p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>02805 · Technical University of Denmark</span>
+    <span>Sune Lehmann · <a href="mailto:sljo@dtu.dk">sljo@dtu.dk</a></span>
+    <span>Content <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="license noopener">CC BY-SA 4.0</a></span>
+  </div>
+</footer>
+
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/js/toc.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false}], throwOnError: false});"></script>
+</body>
+</html>

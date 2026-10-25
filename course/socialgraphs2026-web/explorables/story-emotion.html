@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · DeepMoji through a novel</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/week7-explore.css">
+</head>
+<body>
+<div class="controls">
+  <label>Emotion
+    <select id="emotion"></select>
+  </label>
+  <span class="legend"><span class="key" id="emotion-key"></span></span>
+  <label>Smoothing <input id="window" type="range" min="1" max="41" step="2" value="11"> <span class="val" id="window-val">11 sentences</span></label>
+</div>
+
+<div class="arc-wrap">
+  <div class="arc-panel">
+    <h2>The whole novel, chapter by chapter
+      <span class="legend"><span class="key">under each chapter, its most likely emoji (🎶 🎧 left out)</span></span>
+    </h2>
+    <svg id="novel" class="arc arc-novel" role="img" aria-label="Mean probability of one emotion per chapter, with the most likely emoji under each chapter"></svg>
+  </div>
+  <div class="arc-panel">
+    <h2><span id="chapter-title">Inside chapter 1</span>
+      <span class="chapter-nav"><button id="prev" title="previous chapter">‹</button><button id="next" title="next chapter">›</button></span>
+      <span class="legend"><span class="key">the most likely emoji in each slice (🎶 🎧 left out)</span></span>
+    </h2>
+    <svg id="emoji" class="arc arc-emoji" role="img" aria-label="Most likely emoji per slice of the chapter"></svg>
+    <h2><span id="emo-title">one emotion, sentence by sentence</span></h2>
+    <svg id="emo" class="arc arc-emo" role="img" aria-label="Probability mass of one emotion per sentence through the chapter"></svg>
+  </div>
+  <div class="tooltip wide" id="tip"></div>
+</div>
+
+<div class="arc-list cols-3">
+  <div class="mini-k" id="top-title">the sentences with the most anger in this chapter</div>
+  <ol id="top-list"></ol>
+</div>
+<div class="arc-foot" id="foot"></div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/story-emotion.js"></script>
+</body>
+</html>

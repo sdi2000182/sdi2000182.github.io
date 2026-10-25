@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Link communities, cut one way or the other</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  canvas.net { height: 330px; cursor: pointer; }
+  .status { font-size: 13.5px; line-height: 1.5; margin: 6px 0 0; min-height: 4.5em; color: var(--text-secondary); }
+  .status b { color: var(--text-primary); font-weight: 600; }
+  .hint { font-size: 12.5px; color: var(--text-muted); }
+  .readout .tile .value.small { font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <span class="seg" id="dataset">
+    <button data-v="philosophers">Philosophers</button>
+    <button data-v="marvel" class="on">Marvel</button>
+  </span>
+  <span class="seg" id="mode">
+    <button data-v="single">One cut, at the best D</button>
+    <button data-v="adaptive" class="on">Adaptive cut</button>
+  </span>
+  <button id="next">Next community</button>
+  <span class="hint">Click a block in the dendrogram to see that link community on the network.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2 id="dtitle">The link dendrogram, cut at one height</h2>
+    <canvas class="net" id="dendro"></canvas>
+  </div>
+  <div class="panel">
+    <h2 id="ntitle">The philosophers, links colored by community</h2>
+    <canvas class="net" id="net"></canvas>
+  </div>
+</div>
+<div class="status" id="status"></div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Partition density D</div><div class="value" id="r-d">–</div></div>
+  <div class="tile"><div class="label">Communities (≥ 3 links)</div><div class="value" id="r-comms">–</div></div>
+  <div class="tile"><div class="label" id="l-in">Philosophers in one</div><div class="value" id="r-in">–</div></div>
+  <div class="tile"><div class="label">In two or more</div><div class="value" id="r-multi">–</div></div>
+  <div class="tile"><div class="label">Cut heights used</div><div class="value" id="r-heights">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/adaptive-cut.js"></script>
+</body>
+</html>

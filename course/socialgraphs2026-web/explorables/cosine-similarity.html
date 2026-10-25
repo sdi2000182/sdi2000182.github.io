@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Explorable · Cosine similarity</title>
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/document-vector-explore.css">
+</head>
+<body class="cosine-page-clean">
+  <div class="cosine-clean-toolbar">
+    <div class="preset-row" aria-label="Cosine presets">
+      <button type="button" data-preset="similar" class="primary">D1 vs D2</button>
+      <button type="button" data-preset="different">D1 vs D3</button>
+      <button type="button" data-preset="same">same direction, longer</button>
+    </div>
+    <div class="controls cosine-clean-controls">
+      <label>A <select id="doc-a"></select></label>
+      <label>B <select id="doc-b"></select></label>
+      <label>Scale B <input id="scale-b" type="range" min="0.5" max="2.5" step="0.1" value="1"><span class="val" id="scale-val">1.0×</span></label>
+    </div>
+  </div>
+
+  <div class="cosine-clean-stage">
+    <svg id="plot" viewBox="0 0 900 360" role="img" aria-label="Two vectors and the angle between them"></svg>
+  </div>
+
+  <div class="cosine-clean-bottom">
+    <div class="cosine-clean-metrics">
+      <div class="cosine-big compact"><div class="label">cosine similarity</div><div class="value" id="cosine">0.000</div></div>
+      <div class="cosine-big compact"><div class="label">angle</div><div class="value" id="angle">90.0°</div></div>
+    </div>
+    <div class="cosine-clean-sentences">
+      <div class="simple-sentence a"><span>A</span><p id="sentence-a"></p></div>
+      <div class="simple-sentence b"><span>B</span><p id="sentence-b"></p></div>
+    </div>
+  </div>
+
+  <script src="https://sunelehmann.com/socialgraphs2026-web/explorables/cosine-similarity.js"></script>
+</body>
+</html>

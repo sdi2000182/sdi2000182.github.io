@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Explorable · Compare two corpora</title>
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/scattertext-explore.css">
+</head>
+<body class="scatter-clean-page">
+  <div class="scatter-toolbar">
+    <div>
+      <div class="scatter-kicker">2012 US convention speeches</div>
+      <div class="scatter-legend">
+        <span><i class="dem"></i> relatively more Democratic</span>
+        <span><i class="rep"></i> relatively more Republican</span>
+        <span><i class="shared"></i> similar use</span>
+      </div>
+    </div>
+    <label class="scatter-search">Find a term
+      <input id="term-search" type="search" list="term-list" placeholder="e.g. jobs, obama, america" autocomplete="off">
+      <datalist id="term-list"></datalist>
+    </label>
+  </div>
+
+  <div class="scatter-chart-wrap">
+    <svg id="scatter-chart" viewBox="0 0 900 560" role="img" aria-label="Term usage in Republican and Democratic convention speeches"></svg>
+  </div>
+
+  <div class="scatter-detail" id="scatter-detail">
+    <div class="detail-term"><span id="detail-word">Select a term</span><small id="detail-association">click a point or search above</small></div>
+    <div class="detail-rate dem-rate"><span>Democratic</span><strong id="detail-dem">—</strong><small>uses per 10,000 words</small></div>
+    <div class="detail-rate rep-rate"><span>Republican</span><strong id="detail-rep">—</strong><small>uses per 10,000 words</small></div>
+    <div class="detail-snippets" id="detail-snippets"></div>
+  </div>
+
+  <script src="https://sunelehmann.com/socialgraphs2026-web/explorables/scattertext-2012-conventions.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Your friends have more friends than you</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>network
+    <span class="seg" id="net-seg">
+      <button data-net="ba" class="on">scale-free</button><button data-net="er">random</button><button data-net="marvel">Marvel</button>
+    </span>
+  </label>
+  <button id="one" class="primary">Sample one person</button>
+  <button id="many">Sample 1,000</button>
+  <button id="reset">Reset tally</button>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Pick someone at random, then one of their friends</h2>
+    <canvas class="net" id="net"></canvas>
+  </div>
+  <div class="panel">
+    <h2>Degrees seen by the two kinds of sampling</h2>
+    <div class="legend">
+      <span class="key"><span class="swatch" style="background: var(--series-1)"></span>random person</span>
+      <span class="key"><span class="swatch" style="background: var(--series-2)"></span>their friend</span>
+    </div>
+    <svg class="chart" id="chart"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Samples</div><div class="value" id="r-n">0</div></div>
+  <div class="tile"><div class="label">Mean degree — person</div><div class="value" id="r-you">–</div></div>
+  <div class="tile"><div class="label">Mean degree — friend</div><div class="value" id="r-fr">–</div></div>
+  <div class="tile"><div class="label">Friend ≥ person</div><div class="value" id="r-pct">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/marvel.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/friendship-paradox.js"></script>
+</body>
+</html>

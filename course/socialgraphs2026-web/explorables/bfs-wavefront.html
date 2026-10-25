@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Breadth-first search on the Marvel network</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  select { font: inherit; color: var(--text-primary); background: var(--surface-1);
+           border: 1px solid var(--baseline); border-radius: 7px; padding: 3px 8px; max-width: 220px; }
+  .rings { fill: var(--series-1); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Start from
+    <select id="start"></select>
+  </label>
+  <label>Links
+    <span class="seg" id="mode-seg">
+      <button data-mode="any" class="on">Any direction</button><button data-mode="out">Follow arrows out</button><button data-mode="in">Follow arrows in</button>
+    </span>
+  </label>
+  <button id="step" class="primary">Step</button>
+  <button id="play">Play</button>
+  <button id="reset">Reset</button>
+  <span style="color: var(--text-muted); font-size: 12.5px">Click any character to start from it instead.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>The wave, one step at a time</h2>
+    <div class="legend" id="legend" style="flex-wrap: wrap; gap: 6px 12px"></div>
+    <canvas class="net" id="net" style="height: 340px; cursor: pointer"></canvas>
+  </div>
+  <div class="panel">
+    <h2>Characters first reached at each step</h2>
+    <svg class="chart" id="chart" style="height: 340px"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Reached so far</div><div class="value" id="r-reached">–</div></div>
+  <div class="tile"><div class="label">Farthest step</div><div class="value" id="r-far">–</div></div>
+  <div class="tile"><div class="label">Mean distance from the start</div><div class="value" id="r-mean">–</div></div>
+  <div class="tile"><div class="label">Unreachable</div><div class="value" id="r-unreach">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/marvel.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/bfs-wavefront.js"></script>
+</body>
+</html>

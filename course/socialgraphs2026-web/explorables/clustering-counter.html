@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · The clustering coefficient, by hand</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  svg.net { width: 100%; height: 320px; display: block; }
+  .hint { font-size: 12.5px; color: var(--text-muted); margin: 4px 0 0; }
+  .formula { font-size: 15px; color: var(--text-primary); margin: 10px 0 4px; font-variant-numeric: tabular-nums; }
+  .formula b { color: var(--accent); }
+  .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 4px; }
+  .frac span:first-child { border-bottom: 1.5px solid var(--text-secondary); padding: 0 4px; }
+  .frac span:last-child { padding: 0 4px; }
+  table.deg { border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  table.deg td, table.deg th { padding: 2px 10px; text-align: right; color: var(--text-secondary); }
+  table.deg th { font-weight: 600; color: var(--text-muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; }
+  table.deg tr.me td { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button id="reset" class="primary">Reset</button>
+  <button id="random">Random neighborhood</button>
+  <button id="clique">Make it a clique</button>
+  <button id="star">Make it a star</button>
+  <span class="hint">Click a neighbor to attach it to / detach it from A. Click a dashed line to link two of A's neighbors.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Node A and its neighborhood</h2>
+    <svg class="net" id="net"></svg>
+  </div>
+  <div class="panel">
+    <h2>A's local clustering coefficient</h2>
+    <div class="formula" id="formula"></div>
+    <p class="hint">links among A's neighbors, divided by the pairs of neighbors that <em>could</em> be linked.</p>
+    <table class="deg" id="table"></table>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">k_A — A's degree</div><div class="value" id="r-k">–</div></div>
+  <div class="tile"><div class="label">possible pairs k(k−1)/2</div><div class="value" id="r-pairs">–</div></div>
+  <div class="tile"><div class="label">e_A — links among them</div><div class="value" id="r-e">–</div></div>
+  <div class="tile"><div class="label">C_A</div><div class="value" id="r-c">–</div></div>
+  <div class="tile"><div class="label">Average C, all 7 nodes</div><div class="value" id="r-avg">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/clustering-counter.js"></script>
+</body>
+</html>

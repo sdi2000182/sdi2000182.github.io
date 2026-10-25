@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · From NER to a text-derived network</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/prediction-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/week7-explore.css">
+</head>
+<body>
+<div class="controls">
+  <label>Connect entities that occur in the same
+    <span class="seg" id="co-unit">
+      <button data-unit="sentence" class="on">sentence</button>
+      <button data-unit="paragraph">paragraph</button>
+      <button data-unit="page">page</button>
+    </span>
+  </label>
+</div>
+
+<div class="entity-pipeline">
+  <span>text</span><b>→</b><span>NER</span><b>→</b><span>resolve aliases</span><b>→</b><span>co-occurrence rule</span><b>→</b><span>network</span>
+</div>
+
+<div class="entity-build-layout">
+  <section class="panel">
+    <h2>Text, extracted names, and alias resolution</h2>
+    <div id="source-pages" class="source-pages"></div>
+    <div class="alias-box">
+      <div class="mini-k">resolved before the network is built</div>
+      <div class="alias-row"><code>Tony Stark</code><span>→</span><code>Iron Man</code></div>
+      <div class="alias-row"><code>Natasha Romanoff</code><span>→</span><code>Black Widow</code></div>
+      <div class="alias-row"><code>Bruce Banner</code><span>→</span><code>Hulk</code></div>
+      <div class="alias-row"><code>Logan</code><span>→</span><code>Wolverine</code></div>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>Network created by your rule</h2>
+    <div class="entity-rule-readout" id="rule-readout"></div>
+    <svg id="entity-network" class="entity-net entity-build-net" viewBox="0 0 520 430" aria-label="Network constructed from entity co-occurrence"></svg>
+    <p class="note" id="network-note"></p>
+  </section>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/entity-network.js"></script>
+</body>
+</html>

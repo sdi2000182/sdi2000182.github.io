@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Clique hunt</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  .panels { grid-template-columns: 3fr 2fr; }
+  @media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
+  svg.net { width: 100%; height: 340px; display: block; overflow: visible; }
+  svg.net circle.node { cursor: pointer; }
+  .status { font-size: 15px; line-height: 1.5; margin: 6px 0 10px; min-height: 4.5em; }
+  .status b { color: var(--accent); }
+  .status .win { font-weight: 600; }
+  .why { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .hint { font-size: 12.5px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Find the
+    <span class="seg" id="size">
+      <button data-v="3">3-clique</button>
+      <button data-v="4" class="on">4-clique</button>
+      <button data-v="5">5-clique</button>
+    </span>
+  </label>
+  <button id="new" class="primary">New network</button>
+  <button id="clear">Clear picks</button>
+  <button id="reveal">Reveal</button>
+  <span class="hint">Click nodes to pick them.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2 id="net-title">A fresh random network with exactly one 4-clique hidden in it</h2>
+    <svg class="net" id="net"></svg>
+  </div>
+  <div class="panel">
+    <h2>Your pick</h2>
+    <div class="status" id="status"></div>
+    <div class="why" id="why"></div>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Picked</div><div class="value" id="r-picked">0 of 4</div></div>
+  <div class="tile"><div class="label">Pairs linked</div><div class="value" id="r-pairs">–</div></div>
+  <div class="tile"><div class="label">Found</div><div class="value" id="r-found">0</div></div>
+  <div class="tile"><div class="label">Triangles in this network</div><div class="value" id="r-tri">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/clique-hunt.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable &middot; Topic mixtures</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+</head>
+<body class="topic-mixture-page">
+<div class="controls">
+  <label>Document <select id="doc"></select></label>
+  <label>Inspect topic <select id="topic"></select></label>
+</div>
+<div class="text-panels">
+  <div class="panel">
+    <h2>Document as a topic mixture</h2>
+    <div class="vector-line" id="doc-text"></div>
+    <div class="small-label">Topic proportions</div>
+    <div class="topic-stack" id="stack"></div>
+    <div class="metric-grid" id="mix-metrics"></div>
+    <p class="note">The proportions for a document sum to 1.</p>
+  </div>
+  <div class="panel">
+    <h2>Topic as a distribution over words</h2>
+    <div id="topic-words"></div>
+    <p class="note">The word probabilities shown here are truncated to the top terms. In a fitted model the full topic distribution spans the vocabulary.</p>
+  </div>
+</div>
+<div class="readout">
+  <div class="tile"><div class="label">Model idea</div><div class="value">document = mixture</div></div>
+  <div class="tile"><div class="label">Topic idea</div><div class="value">topic = word distribution</div></div>
+  <div class="tile"><div class="label">Input shown here</div><div class="value">counts</div></div>
+</div>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/topic-mixtures.js"></script>
+</body>
+</html>

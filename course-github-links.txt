@@ -1,0 +1,8 @@
+https://github.com/A-Lohse/Dialectograms
+https://github.com/HackerNews/API
+https://github.com/JasonKessler/scattertext
+https://github.com/LCB0B/adaptive_cut
+https://github.com/huggingface/torchMoji
+https://github.com/jeffalstott/powerlaw
+https://github.com/suneman
+https://github.com/suneman/socialgraphs2025/wiki/Project-Assignments

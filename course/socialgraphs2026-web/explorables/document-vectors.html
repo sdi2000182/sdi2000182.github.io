@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Bag of Words and the document-term matrix</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <span class="seg" id="view-seg">
+    <button data-view="row" class="on">row view</button>
+    <button data-view="col">column view</button>
+  </span>
+  <label id="pick-label">Document
+    <select id="pick"></select>
+  </label>
+  <button id="reset">Reset documents</button>
+</div>
+
+<div class="view-explain" id="view-explain">
+  <span class="view-kicker">ROW VIEW</span>
+  One document → counts for every vocabulary term.
+</div>
+
+<div class="stacked-panels">
+  <div class="panel">
+    <h2>Edit the three tiny documents</h2>
+    <div class="editable-docs" id="docs"></div>
+    <p class="note">The tokenizer lowercases the text and keeps alphabetic words. Edit one document and predict which matrix cells should change before you look below.</p>
+  </div>
+  <div class="panel">
+    <h2>Document-term matrix</h2>
+    <div class="matrix-wrap" id="matrix"></div>
+    <div class="small-label" id="vector-label">Document vector</div>
+    <div class="vector-line" id="vector"></div>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Documents</div><div class="value" id="r-docs">3</div></div>
+  <div class="tile"><div class="label">Vocabulary size</div><div class="value" id="r-vocab">–</div></div>
+  <div class="tile"><div class="label">Information discarded</div><div class="value">word order</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/document-vectors.js"></script>
+</body>
+</html>

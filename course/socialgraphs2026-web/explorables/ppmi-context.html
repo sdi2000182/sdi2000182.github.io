@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable &middot; PPMI context matrix</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+</head>
+<body class="ppmi-page">
+<div class="controls">
+  <span class="seg" id="mode-seg">
+    <button data-mode="count" class="on">co-occurrence counts</button>
+    <button data-mode="ppmi">PPMI</button>
+  </span>
+  <label>Word <select id="word"></select></label>
+</div>
+<div class="text-panels">
+  <div class="panel">
+    <h2>Word-context matrix</h2>
+    <div class="matrix-wrap" id="matrix"></div>
+    <p class="note" id="matrix-note"></p>
+  </div>
+  <div class="panel">
+    <h2>Selected word vector</h2>
+    <div class="vector-line" id="vector"></div>
+    <div class="small-label">Strongest dimensions</div>
+    <div class="bar-list" id="bars"></div>
+    <div class="metric-grid">
+      <div class="metric"><div class="k">Nearest word</div><div class="v" id="nearest"></div></div>
+      <div class="metric"><div class="k">Cosine</div><div class="v" id="near-cos"></div></div>
+    </div>
+    <p class="note">Nearest neighbor is computed using the current row representation across all context dimensions.</p>
+  </div>
+</div>
+<div class="formula" id="formula"></div>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/ppmi-context.js"></script>
+</body>
+</html>

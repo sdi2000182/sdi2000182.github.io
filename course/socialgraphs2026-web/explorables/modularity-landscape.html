@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · The modularity landscape of the karate club</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  svg.net { width: 100%; height: 340px; display: block; overflow: visible; }
+  .hint { color: var(--text-muted); font-size: 12.5px; }
+  .readout .tile .sub { font-size: 11.5px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Preset
+    <span class="seg" id="presets">
+      <button data-p="real" class="on">Zachary's real split</button><button data-p="best2">Best two-way split</button><button data-p="louvain">Louvain</button><button data-p="shuffle">Shuffle members</button><button data-p="one">One group</button>
+    </span>
+  </label>
+  <button id="reset">Reset</button>
+  <span class="hint">Click any member to move them to the next group.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>The karate club, 34 members, 78 friendships</h2>
+    <div class="legend" id="legend" style="flex-wrap: wrap; gap: 6px 14px"></div>
+    <svg class="net" id="net"></svg>
+  </div>
+  <div class="panel">
+    <h2>The landscape: Q of every state you have visited</h2>
+    <svg class="chart" id="chart" style="height: 340px"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Modularity Q</div><div class="value" id="r-q">–</div><div class="sub" id="r-qsub"></div></div>
+  <div class="tile"><div class="label">Links inside groups</div><div class="value" id="r-in">–</div></div>
+  <div class="tile"><div class="label">Expected inside, by chance</div><div class="value" id="r-exp">–</div></div>
+  <div class="tile"><div class="label">Groups in use</div><div class="value" id="r-k">–</div></div>
+  <div class="tile"><div class="label">Agrees with the real split</div><div class="value" id="r-agree">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/community.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/modularity-landscape.js"></script>
+</body>
+</html>

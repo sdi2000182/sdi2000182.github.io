@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Is it a power law? Three ways of drawing one distribution</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>degree
+    <span class="seg" id="deg-seg">
+      <button data-v="in" class="on">in</button><button data-v="out">out</button><button data-v="und">undirected</button>
+    </span>
+  </label>
+  <label>drawn as
+    <span class="seg" id="view-seg">
+      <button data-v="raw">raw P(k)</button><button data-v="binned">binned P(k)</button><button data-v="ccdf" class="on">CCDF P(K ≥ k)</button>
+    </span>
+  </label>
+  <label>reference
+    <span class="seg" id="ref-seg">
+      <button data-v="none">none</button><button data-v="pl" class="on">power law</button><button data-v="ln">log-normal</button><button data-v="poisson">Poisson</button>
+    </span>
+  </label>
+  <label id="gamma-ctl">γ <input type="range" id="gamma" min="1.5" max="4" step="0.05" value="2.5">
+    <span class="val" id="gamma-val">2.50</span></label>
+</div>
+
+<div class="panels" style="grid-template-columns: 1fr">
+  <div class="panel">
+    <h2 id="title">Marvel in-degree — log–log</h2>
+    <div class="legend" id="legend"></div>
+    <svg class="chart" id="chart" style="height: 340px"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Nodes</div><div class="value" id="r-n">–</div></div>
+  <div class="tile"><div class="label">Max k</div><div class="value" id="r-max">–</div></div>
+  <div class="tile"><div class="label">Mean k</div><div class="value" id="r-mean">–</div></div>
+  <div class="tile"><div class="label">Log-normal fit (k ≥ 1): μ, σ of ln k</div><div class="value" id="r-ln">–</div></div>
+  <div class="tile"><div class="label">Reference curve</div><div class="value" id="r-ref">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/marvel.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/ccdf-live.js"></script>
+</body>
+</html>

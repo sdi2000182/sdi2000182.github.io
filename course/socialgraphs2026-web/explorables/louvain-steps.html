@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Louvain, one move at a time</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  .legend .swatch.dash { height: 0; border-top: 3px dashed; background: none; width: 16px; }
+  .readout .tile .value.small { font-size: 15px; }
+  .readout .tile.wide { flex: 1 1 220px; min-width: 0; }
+  .readout .tile.wide .value { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button id="step" class="primary">Step</button>
+  <button id="sweep">Sweep</button>
+  <button id="aggregate">Aggregate</button>
+  <button id="play">Play</button>
+  <button id="reset">Reset</button>
+  <span style="color: var(--text-muted); font-size: 12.5px">Step = one node moves · Sweep = one pass over every node · Aggregate = phase 2.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>1,374 philosophers born before 1900, colored by their current community</h2>
+    <div class="legend" id="legend" style="flex-wrap: wrap; gap: 4px 12px; min-height: 66px; align-content: flex-start"></div>
+    <canvas class="net" id="net" style="height: 340px"></canvas>
+  </div>
+  <div class="panel">
+    <h2>Modularity after every move</h2>
+    <div class="legend" id="chart-legend"></div>
+    <svg class="chart" id="chart" style="height: 340px"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Communities</div><div class="value" id="r-comm">–</div></div>
+  <div class="tile"><div class="label">Q</div><div class="value" id="r-q">–</div></div>
+  <div class="tile"><div class="label">Moves</div><div class="value" id="r-moves">–</div></div>
+  <div class="tile"><div class="label">Phase</div><div class="value small" id="r-phase">–</div></div>
+  <div class="tile wide"><div class="label">Last move</div><div class="value small" id="r-last">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/marvel.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/community.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/louvain-steps.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · The birth of the giant component</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>N <input type="range" id="n" min="50" max="400" step="10" value="150">
+    <span class="val" id="n-val">150</span></label>
+  <label>⟨k⟩ <input type="range" id="k" min="0" max="4" step="0.05" value="0.5">
+    <span class="val" id="k-val">0.50</span></label>
+  <button id="regen">New network</button>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>G(N, p) — giant component in color</h2>
+    <canvas class="net" id="net"></canvas>
+  </div>
+  <div class="panel">
+    <h2>Share of nodes in the giant component</h2>
+    <div class="legend">
+      <span class="key"><span class="swatch" style="background: var(--series-1)"></span>theory, N → ∞</span>
+      <span class="key"><span class="swatch dot" style="background: var(--series-2)"></span>this network</span>
+    </div>
+    <svg class="chart" id="chart"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Giant component</div><div class="value" id="r-gcc">–</div></div>
+  <div class="tile"><div class="label">Components</div><div class="value" id="r-comp">–</div></div>
+  <div class="tile"><div class="label">Links</div><div class="value" id="r-links">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/er-phase-transition.js"></script>
+</body>
+</html>

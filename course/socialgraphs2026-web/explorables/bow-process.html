@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure · From documents to a Bag-of-Words matrix</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  body { padding: 14px 16px 18px; }
+  .bow-figure { width: 100%; max-width: 100%; overflow: hidden; }
+  .figure-title {
+    margin: 0 0 12px; color: var(--text-primary); font-size: 16px;
+    font-weight: 650; letter-spacing: -0.01em;
+  }
+  .head-grid,
+  .stage-row {
+    display: grid;
+    grid-template-columns: minmax(0, .82fr) minmax(0, 1.38fr);
+    gap: 16px;
+  }
+  .head-grid { margin-bottom: 8px; }
+  .section-label {
+    font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-muted); font-weight: 650;
+  }
+  .stage-row { align-items: stretch; }
+  .step,
+  .example-box {
+    border: 1px solid var(--baseline); border-radius: 10px; background: var(--page);
+    padding: 9px 11px; min-width: 0;
+  }
+  .step {
+    display: flex; flex-direction: column; justify-content: center; text-align: center;
+  }
+  .step .name { font-weight: 650; color: var(--text-primary); margin-bottom: 3px; }
+  .step .desc { font-size: 12px; line-height: 1.35; color: var(--text-secondary); }
+  .box-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--text-muted); margin-bottom: 5px; font-weight: 650;
+  }
+  .docline, .tokenline, .vocabline, .countline, .vectorline {
+    font: 11.5px/1.42 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: var(--text-secondary); overflow-wrap: anywhere;
+  }
+  .docline + .docline, .tokenline + .tokenline, .countline + .countline, .vectorline + .vectorline {
+    margin-top: 2px;
+  }
+  .between {
+    display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.38fr);
+    gap: 16px; height: 20px; align-items: center;
+  }
+  .arrow { text-align: center; color: var(--text-muted); font-size: 17px; line-height: 1; }
+  .arrow.right { opacity: .65; }
+  .mini-matrix { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 10px; }
+  .mini-matrix th, .mini-matrix td {
+    border: 1px solid var(--grid); padding: 4px 2px; text-align: center;
+    color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis;
+  }
+  .mini-matrix th { color: var(--text-primary); font-weight: 650; background: var(--surface-1); }
+  .mini-matrix th:first-child, .mini-matrix td:first-child { width: 58px; text-align: left; padding-left: 5px; }
+  .mini-matrix tbody tr:first-child td { background: var(--series-1-wash); }
+  .footer-note {
+    border-top: 1px solid var(--grid); margin-top: 11px; padding-top: 8px;
+    font-size: 11.5px; line-height: 1.4; color: var(--text-muted);
+  }
+  @media (max-width: 650px) {
+    .head-grid { display: none; }
+    .stage-row { grid-template-columns: 1fr; gap: 7px; }
+    .between { grid-template-columns: 1fr; height: 18px; }
+    .between .right { display: none; }
+    .step { text-align: left; }
+    .mini-matrix { font-size: 9.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="bow-figure">
+  <h1 class="figure-title">From raw documents to a Bag-of-Words matrix</h1>
+
+  <div class="head-grid">
+    <div class="section-label">The general process</div>
+    <div class="section-label">One course example</div>
+  </div>
+
+  <div class="stage-row">
+    <div class="step"><div class="name">Corpus</div><div class="desc">Start with a collection of documents.</div></div>
+    <div class="example-box">
+      <div class="box-title">Corpus</div>
+      <div class="docline">D1: brains predict the future</div>
+      <div class="docline">D2: models predict the future</div>
+      <div class="docline">D3: brains build models</div>
+    </div>
+  </div>
+  <div class="between"><div class="arrow">↓</div><div class="arrow right">↓</div></div>
+
+  <div class="stage-row">
+    <div class="step"><div class="name">Tokenize</div><div class="desc">Split each document into the units you want to count.</div></div>
+    <div class="example-box">
+      <div class="box-title">Tokenized documents</div>
+      <div class="tokenline">D1: [brains] [predict] [the] [future]</div>
+      <div class="tokenline">D2: [models] [predict] [the] [future]</div>
+      <div class="tokenline">D3: [brains] [build] [models]</div>
+    </div>
+  </div>
+  <div class="between"><div class="arrow">↓</div><div class="arrow right">↓</div></div>
+
+  <div class="stage-row">
+    <div class="step"><div class="name">Build the vocabulary</div><div class="desc">Collect the distinct terms that define the matrix columns.</div></div>
+    <div class="example-box">
+      <div class="box-title">Vocabulary</div>
+      <div class="vocabline">brains · build · future · models · predict · the</div>
+    </div>
+  </div>
+  <div class="between"><div class="arrow">↓</div><div class="arrow right">↓</div></div>
+
+  <div class="stage-row">
+    <div class="step"><div class="name">Count</div><div class="desc">Count every vocabulary term inside every document.</div></div>
+    <div class="example-box">
+      <div class="box-title">Counts inside each document</div>
+      <div class="countline">D1: brains 1 · future 1 · predict 1 · the 1</div>
+      <div class="countline">D2: future 1 · models 1 · predict 1 · the 1</div>
+      <div class="countline">D3: brains 1 · build 1 · models 1</div>
+    </div>
+  </div>
+  <div class="between"><div class="arrow">↓</div><div class="arrow right">↓</div></div>
+
+  <div class="stage-row">
+    <div class="step"><div class="name">Encode</div><div class="desc">Write the counts in the same vocabulary order for every document.</div></div>
+    <div class="example-box">
+      <div class="box-title">Document vectors</div>
+      <div class="vectorline">D1: [1, 0, 1, 0, 1, 1]</div>
+      <div class="vectorline">D2: [0, 0, 1, 1, 1, 1]</div>
+      <div class="vectorline">D3: [1, 1, 0, 1, 0, 0]</div>
+    </div>
+  </div>
+  <div class="between"><div class="arrow">↓</div><div class="arrow right">↓</div></div>
+
+  <div class="stage-row">
+    <div class="step"><div class="name">Document-term matrix</div><div class="desc">Stack the document vectors as rows in one numerical matrix.</div></div>
+    <div class="example-box">
+      <div class="box-title">Document-term matrix</div>
+      <table class="mini-matrix" aria-label="Bag-of-Words document-term matrix">
+        <thead>
+          <tr><th>doc</th><th>brains</th><th>build</th><th>future</th><th>models</th><th>predict</th><th>the</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>D1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+          <tr><td>D2</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+          <tr><td>D3</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer-note">Each row uses the same vocabulary order. That is what makes the documents comparable as numerical vectors, while the original word order is no longer represented.</div>
+</div>
+</body>
+</html>

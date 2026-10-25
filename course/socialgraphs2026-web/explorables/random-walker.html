@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · PageRank as a random walker</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  svg.netsvg { width: 100%; height: 300px; display: block; overflow: visible; }
+  .halo { paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Damping α <input type="range" id="alpha" min="0.5" max="1" step="0.05" value="0.85"><span class="val" id="alpha-val">0.85</span></label>
+  <button id="step">Step</button>
+  <button id="play" class="primary">▶ Play</button>
+  <button id="reset">Reset</button>
+  <span style="color: var(--text-muted); font-size: 12.5px">α = probability of following a link; 1 − α = probability of teleporting to a random node.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Network — node size = visits</h2>
+    <svg class="netsvg" id="net" viewBox="0 0 440 300" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+  <div class="panel">
+    <h2>Share of visits</h2>
+    <div class="legend">
+      <span class="key"><span class="swatch" style="background: var(--series-1); height: 10px"></span>walker so far</span>
+      <span class="key"><span class="swatch" style="background: var(--series-2)"></span>exact PageRank</span>
+    </div>
+    <svg class="chart" id="chart"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Steps</div><div class="value" id="r-steps">–</div></div>
+  <div class="tile"><div class="label">Teleports</div><div class="value" id="r-tele">–</div></div>
+  <div class="tile"><div class="label">Gap to exact</div><div class="value" id="r-gap">–</div></div>
+  <div class="tile"><div class="label">Top node (exact PageRank)</div><div class="value" id="r-top">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/random-walker.js"></script>
+</body>
+</html>

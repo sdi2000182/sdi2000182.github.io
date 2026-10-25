@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Explorable · TF-IDF weighting</title>
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+  <link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/document-vector-explore.css">
+</head>
+<body class="tfidf-clean-page">
+  <div class="tfidf-clean-controls">
+    <div class="control-block">
+      <span class="control-label">Query</span>
+      <span class="seg" id="query-seg">
+        <button type="button" data-query="stress" class="on">the superpower</button>
+        <button type="button" data-query="focus">mutant superpower</button>
+      </span>
+    </div>
+    <div class="control-block">
+      <span class="control-label">Representation</span>
+      <span class="seg" id="stage-seg">
+        <button type="button" data-stage="count" class="on">counts</button>
+        <button type="button" data-stage="tf">TF</button>
+        <button type="button" data-stage="tfidf">TF-IDF</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="idf-strip clean-idf-strip" id="idf-strip" aria-label="Inverse document frequency"></div>
+
+  <div class="tfidf-clean-head" aria-hidden="true">
+    <span></span><span>document</span><span>the</span><span>superpower</span><span>mutant</span><span>query score</span>
+  </div>
+  <div class="tfidf-docs clean-docs" id="doc-rows" aria-label="Document term weights and query scores"></div>
+
+  <div class="tfidf-clean-key">
+    <span><strong>term cells</strong> = weight under the selected representation</span>
+    <span><strong>bar</strong> = sum of the active query terms</span>
+  </div>
+
+  <script src="https://sunelehmann.com/socialgraphs2026-web/explorables/tfidf-weighting.js"></script>
+</body>
+</html>

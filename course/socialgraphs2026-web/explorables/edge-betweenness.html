@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Girvan–Newman, one cut at a time</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  svg.net { width: 100%; height: 350px; display: block; overflow: visible; }
+  .hint { color: var(--text-muted); font-size: 12.5px; }
+  .readout .tile .value.small { font-size: 15px; }
+  .readout .tile.wide { flex: 1 1 300px; min-width: 0; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button id="step" class="primary">Step</button>
+  <button id="split">Next split</button>
+  <button id="play">Play</button>
+  <button id="reset">Reset</button>
+  <span class="hint">Thickness = edge betweenness right now · violet = the link that goes next.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>100 nodes, 298 links, three planted communities</h2>
+    <svg class="net" id="net"></svg>
+  </div>
+  <div class="panel">
+    <h2>The dendrogram, and Q at every level</h2>
+    <svg class="chart" id="tree" style="height: 350px"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Links removed</div><div class="value" id="r-cuts">–</div></div>
+  <div class="tile"><div class="label">Groups</div><div class="value" id="r-groups">–</div></div>
+  <div class="tile"><div class="label">Q of these groups</div><div class="value" id="r-q">–</div></div>
+  <div class="tile"><div class="label">Cuts between planted groups</div><div class="value" id="r-between">–</div></div>
+  <div class="tile wide"><div class="label">Last cut</div><div class="value small" id="r-last">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/community.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/edge-betweenness.js"></script>
+</body>
+</html>

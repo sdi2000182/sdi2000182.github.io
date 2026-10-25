@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Mixing patterns: the same degrees, rewired</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  canvas.net { height: 340px; }
+  svg.chart { height: 340px; }
+  .sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 6px; min-height: 1.4em; }
+  .hint { font-size: 12.5px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Rewire toward
+    <span class="seg" id="mode">
+      <button data-v="assort">Assortative</button>
+      <button data-v="disassort">Disassortative</button>
+      <button data-v="random">Random</button>
+    </span>
+  </label>
+  <button id="play" class="primary">Play</button>
+  <button id="step">Step</button>
+  <button id="reset">Reset to real</button>
+  <span class="hint" id="progress"></span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2 id="net-title">Marvel giant component — every node keeps its degree</h2>
+    <p class="sub" id="net-sub"></p>
+    <canvas class="net" id="net"></canvas>
+  </div>
+  <div class="panel">
+    <h2>Average neighbor degree k<sub>nn</sub>(k) vs degree k</h2>
+    <div class="legend">
+      <span class="key"><span class="swatch dot" id="sw-cur"></span> current</span>
+      <span class="key"><span class="swatch dot" id="sw-real" style="background: transparent; border: 1.5px solid"></span> real</span>
+      <span class="key"><span class="swatch" id="sw-null"></span> no mixing ⟨k²⟩/⟨k⟩</span>
+    </div>
+    <svg class="chart" id="chart"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Degree assortativity r</div><div class="value" id="r-r">–</div></div>
+  <div class="tile"><div class="label">Real network</div><div class="value" id="r-real">–</div></div>
+  <div class="tile"><div class="label">Accepted swaps</div><div class="value" id="r-swaps">0</div></div>
+  <div class="tile"><div class="label">Giant component</div><div class="value" id="r-gcc">–</div></div>
+  <div class="tile"><div class="label">Clustering C</div><div class="value" id="r-c">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/marvel.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/mixing-dial.js"></script>
+</body>
+</html>

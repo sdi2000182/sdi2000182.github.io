@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · What makes a page distinctive</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<style>
+  .controls select { font: inherit; color: var(--text-primary); background: var(--page);
+    border: 1px solid var(--baseline); border-radius: 7px; padding: 3px 6px; max-width: 260px; }
+  .fp-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .fp-row { display: grid; grid-template-columns: 22px minmax(90px, 1.1fr) minmax(80px, 1.4fr) 58px 92px;
+    gap: 10px; align-items: center; padding: 5px 4px; border-bottom: 1px solid var(--grid); font-size: 13px; }
+  .fp-row > * { min-width: 0; }
+  .fp-row.head { color: var(--text-muted); font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; border-bottom-color: var(--baseline); }
+  .fp-row .rank { color: var(--text-muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .fp-row .word { font: 13px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-primary);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fp-row .word button { border: 0; padding: 0; font: inherit; color: inherit; text-align: left; text-decoration: underline dotted; text-underline-offset: 3px; }
+  .fp-row .word button:hover, .fp-row .word button.on { color: var(--accent); }
+  .fp-row .barcell .bar { display: block; }
+  .fp-row .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+  .fp-row.is-name .word { color: var(--text-muted); }
+  .fp-row.is-name .bar > span { background: var(--baseline); }
+  .also-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .also-list button { font-size: 12.5px; padding: 2px 8px; }
+  .also-empty { color: var(--text-muted); font-size: 13px; margin-top: 6px; line-height: 1.45; }
+  @media (max-width: 720px) {
+    .fp-layout { grid-template-columns: 1fr; }
+    .fp-row { grid-template-columns: 20px 1fr 50px 76px; }
+    .fp-row .barcell { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Character <select id="pick"></select></label>
+  <button id="random">random</button>
+  <span class="seg" id="names-seg">
+    <button data-names="on" class="on">names kept</button>
+    <button data-names="off">names removed</button>
+  </span>
+</div>
+
+<div class="fp-layout">
+  <div class="panel">
+    <h2 id="title">Most distinctive words</h2>
+    <div id="rows"></div>
+    <p class="note">Every word is scored with this page's TF-IDF: (count on the page ÷ page length) × ln(303 ÷ pages with the word).
+      <em>Names removed</em> drops every word that is capitalized in most of its uses across the corpus.
+      Click a dotted word to see which other pages use it.</p>
+  </div>
+  <div class="panel">
+    <h2 id="also-title">Who else uses it?</h2>
+    <div id="also" class="also-empty">Click a dotted word on the left. Rare words make the best clues: they connect a page to the few others that share them.</div>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Page length</div><div class="value" id="r-len">–</div></div>
+  <div class="tile"><div class="label">Top word shows up on</div><div class="value" id="r-df">–</div></div>
+  <div class="tile"><div class="label">Words treated as names</div><div class="value" id="r-names">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/fingerprints.js"></script>
+</body>
+</html>

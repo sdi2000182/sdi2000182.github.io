@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<!-- GENERATED from content/index.md — edit the .md and rerun ./generate.py; do not hand-edit. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02805 · Social Graphs and Interactions</title>
+<meta name="description" content="DTU course 02805 — network science and text analysis in the age of agentic AI. Fall 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/site.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.css">
+<script data-goatcounter="https://suneman.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="index.html">02805</a>
+  <a href="the-new-way.html">The new way</a>
+  <a href="index.html#weeks">Weeks</a>
+  <a href="index.html#overview">Overview</a>
+  <a href="index.html#groups">Groups</a>
+  <a href="index.html#tests">Tests</a>
+  <a href="index.html#project">Project</a>
+  <span class="spacer"></span>
+  <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Textbook ↗</a>
+</nav>
+
+
+
+<header class="hero">
+  <canvas id="hero-net" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <p class="eyebrow">DTU · Fall 2026 · Wednesdays from 9 · Sune Lehmann</p>
+    <h1>Social Graphs<br>and Interactions</h1>
+    <p class="lede">Networks are the mathematics of who we are together: friendships, collaborations, conflicts, epidemics, ideas. This course teaches you to measure them, model them, and tell the truth about them.</p>
+    <p class="thesis">We use paper to ensure understanding.<br>We use agents to explore the world.</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <h2 id="new-way">The new way</h2>
+
+  <div class="callout">
+    <p class="eyebrow">▶ The course starts here</p>
+    <p>Before anything else, read <a href="the-new-way.html"><strong>The new way of working</strong></a>. It's going to take about ten minutes, but I hope you'll find it worth your while. That explains in more detail why this course runs the way it does, what the components of the course are ... and a couple of practical things.</p>
+  </div>
+
+  <p>Below is an overview of everything you need to know. I've built the course to embrace that AI changes everything about how we work with data. So there are two separate strands going through every lecture:</p>
+
+  <ul>
+    <li><strong>Expanding your brain.</strong> I need to motivate you to actually learn something, and I need a way to test that you have actually learned something. So twice during the semester you will need to do an in-class, pen-and-paper test. Closed book, no devices. Nobody likes those tests. It's tough to face your actual capabilities. But it's the only way to see who you are without an all-powerful AI wingman by your side.</li>
+    <li><strong>Using AI to make teaching better.</strong> Everywhere else, use every tool you have. And it means we can raise the bar of what's possible: we'll be using real datasets you crawl yourself, interactive visualizations, simulations, complex tools. Things that there's no way I could have even imagined doing in 2020.</li>
+    <li><strong>Responsible AI driving</strong>: And there is also a brand new scientific skill that I'll try to push you to use all semester: <em>validating what the machine tells you</em>. An LLM that labels your data is a tool, and tools need to be calibrated, tested and checked.</li>
+  </ul>
+
+  <h3>Every exercise carries one of three modes</h3>
+
+  <div class="card-row">
+    <div class="card">
+      <h3><span class="mode learn">🧠 Learn</span></h3>
+      <p>AI hands-off. This is the material the tests draw from — concepts, calculations, interpretation. Do it with your head, your group, and paper.</p>
+    </div>
+    <div class="card">
+      <h3><span class="mode builder">🚀 Builder</span></h3>
+      <p>Full agentic mode. Judged on the outcome, the rigor behind it, and whether you can explain and defend every choice. Ideally defend it live and in person.</p>
+    </div>
+    <div class="card">
+      <h3><span class="mode instrument">🔬 Tool</span></h3>
+      <p>The machine produced the result — a model that annotated text, or an agent that wrote the code. Validate it the way a scientist validates any instrument: ground-truth samples, a hand check the code has to match, agreement statistics.</p>
+    </div>
+  </div>
+
+  <h2 id="weeks">The weeks</h2>
+
+  <p>I use a method called <em>flipped classroom</em>. The idea is that in class you work through a page of carefully designed material. Weeks 1–4 are the networks half, weeks 5–7 the language half, and in week 8 we combine everything.</p>
+
+  <p>I end every week with a <strong>Go nuts with your LLM</strong> exercise. It's a free-form, agent-powered analysis on a shared dataset that you should do in groups, then publish on your group's own site, with a weekly highlighted project. Weeks 9–13 are the project period.</p>
+
+  <div class="weeks">
+    <a class="week-card live" href="weeks/week1.html"><span class="num">WEEK 1</span>
+      <span class="title">Networks</span><br><span class="status">● live</span></a>
+    <a class="week-card live" href="weeks/week2.html"><span class="num">WEEK 2</span>
+      <span class="title">Models &amp; null models</span><br><span class="status">● live</span></a>
+    <a class="week-card live" href="weeks/week3.html"><span class="num">WEEK 3</span>
+      <span class="title">Who matters, and why</span><br><span class="status">● live</span></a>
+    <a class="week-card live" href="weeks/week4.html"><span class="num">WEEK 4</span>
+      <span class="title">Communities &amp; backbones</span><br><span class="status">● live</span></a>
+    <a class="week-card live" href="weeks/week5.html"><span class="num">WEEK 5</span>
+      <span class="title">The language half · NLP I</span><br><span class="status">● live</span></a>
+    <a class="week-card live" href="weeks/week6.html"><span class="num">WEEK 6</span>
+      <span class="title">NLP II</span><br><span class="status">● live</span></a>
+    <a class="week-card live" href="weeks/week7.html"><span class="num">WEEK 7</span>
+      <span class="title">NLP III</span><br><span class="status">● live</span></a>
+    <a class="week-card live" href="weeks/week8.html"><span class="num">WEEK 8</span>
+      <span class="title">Networks × language</span><br><span class="status">● live</span></a>
+  </div>
+
+  <h2 id="overview">Course overview</h2>
+
+  <p>One table, every date that matters. We meet 13 Wednesdays from 09:00. In weeks 5 and 9 the day starts early with the test, 08:30–09:30 (rooms below), then class continues as usual.</p>
+
+  <table class="plain">
+    <tr><th>Date</th><th>What happens</th></tr>
+    <tr><td>Wed 2 Sep</td><td><strong>Week 1</strong> · Networks</td></tr>
+    <tr><td>Wed 9 Sep</td><td><strong>Week 2</strong> · Models &amp; null models</td></tr>
+    <tr><td>Wed 16 Sep</td><td><strong>Week 3</strong> · Who matters, and why</td></tr>
+    <tr><td>Wed 23 Sep</td><td><strong>Week 4</strong> · Communities &amp; backbones</td></tr>
+    <tr><td>Wed 30 Sep</td><td><strong>Test 1</strong> (08:30–09:30 · weeks 1–4 · 25%), then <strong>Week 5</strong> · NLP I</td></tr>
+    <tr><td>Wed 7 Oct</td><td><strong>Week 6</strong> · NLP II</td></tr>
+    <tr><td>Wed 14 Oct</td><td><em>No teaching — autumn break</em></td></tr>
+    <tr><td>Wed 21 Oct</td><td><strong>Week 7</strong> · NLP III</td></tr>
+    <tr><td>Wed 28 Oct</td><td><strong>Week 8</strong> · Networks × language</td></tr>
+    <tr><td>Wed 4 Nov</td><td><strong>Test 2</strong> (08:30–09:30 · weeks 5–7 · 25%), then project kickoff</td></tr>
+    <tr><td>Wed 11 Nov</td><td>Project period</td></tr>
+    <tr><td>Wed 18 Nov</td><td>Project period</td></tr>
+    <tr><td>Wed 25 Nov</td><td>Project period</td></tr>
+    <tr><td>Wed 2 Dec</td><td><strong>Demo fair</strong> — the final projects, live (project · 50%)</td></tr>
+  </table>
+
+  <p>And the practicalities:</p>
+
+  <table class="plain">
+    <tr><th></th><th></th></tr>
+    <tr><td>Where</td><td>Building 303A: Auditorium 43 (main), Auditorium 44, Classroom 46. Tests 1 and 2: building 303A, Auditoriums 42 and 43.</td></tr>
+    <tr><td>Stack</td><td>Python, Jupyter, NetworkX — plus whatever agentic tools you work best with.</td></tr>
+  </table>
+
+  <h2 id="groups">Groups</h2>
+
+  <p>The idea is that you should work in a <strong>3-person group</strong>. Try to form one as early as possible during the first session(s). Then you work through the weekly pages in parallel, helping each other, discussing strategies, etc. The go-nuts posts are designed for groups (it's just more fun with friends to brainstorm and discuss alongside), as is the final project.</p>
+
+  <p>Groups smaller than three people are OK, but larger groups are not. The aim is to form a group in the first session, but if it takes a couple of lectures that's also OK.</p>
+
+  <p>There is a single iron rule: <em>everyone must be able to solve everything</em>. The tests are individual, on paper, and they do not care who in your group understood it.</p>
+
+  <h2 id="tests">The two tests</h2>
+
+  <p>Twice during the semester you sit down with pen and paper, in class: closed book, no devices. <strong>Test 1</strong> (Wed 30 Sep) covers weeks 1–4; <strong>Test 2</strong> (Wed 4 Nov) covers weeks 5–7; each counts 25%.</p>
+
+  <p>Each test is ~60 minutes: 16 multiple-choice questions, and 4 tasks where you draw, calculate and explain. The tests evaluate transfer, not recall: reading figures, predicting outcomes, spotting flawed analyses, small hand calculations, and choosing the right method. Everything is drawn from the 🧠 Learn-mode material — and every week page ends with an "on the test" box telling you exactly what you should be able to do on paper. No surprises, no trivia: if you did the 🧠 exercises with your own head, you are prepared.</p>
+
+  <p>Both tests take place in <strong>building 303A, Auditoriums 42 and 43</strong>. For Test 1 you got an email telling you which of the two rooms is yours; for Test 2, go to the same room. I want you to be there at <strong>8:10</strong> at the latest. We use 8:10–8:30 to get everyone seated and set up with pen and paper, and the test itself runs <strong>8:30–9:30</strong>, starting sharp. If you arrive later than 8:10 it will count as a score of zero. If you are ill or otherwise not able to attend, do let me know ahead of time. There will be one make-up test. Details on that will be made public later. But it will not be to your advantage to wait.</p>
+
+  <h2 id="project">The final project</h2>
+
+  <p>The overall idea is this. In your group,</p>
+
+  <ul>
+    <li>Pick an area that you are excited about</li>
+    <li>Find a dataset about that domain (much more on this later)</li>
+    <li>Use the tools you've learned in the class to explore the dataset and find something new and exciting about your dataset that nobody knew.</li>
+    <li>Deliver three things: a short scientific paper (PNAS template, LaTeX only, at most six pages including references) that we will evaluate. And a short in-person presentation (three slides, three minutes) in the final session, where we can ask questions. Plus a half-page reflection on how the course's "From an AI-drafted report" examples worked for you, ungraded.</li>
+  </ul>
+
+  <p>The full description, and how to pick a dataset and a question, is in <a href="weeks/week8.html#project">week 8</a>.</p>
+
+  <div class="callout" id="checklist">
+    <p class="eyebrow">The project in one box</p>
+    <p>The formalia, so you have them all in one place.</p>
+    <table class="plain">
+    <tr><th></th><th></th></tr>
+    <tr><td><strong>Weight</strong></td><td>50% of the grade, one score on the <a href="index.html#grading">0–3 scale</a> for paper and presentation together</td></tr>
+    <tr><td><strong>Group</strong></td><td>Up to three people; registered on DTU Learn by <strong>Wednesday 28 October</strong> (week 8); changes allowed until 4 November (update the registration)</td></tr>
+    <tr><td><strong>Hand-in</strong></td><td><strong>Friday 27 November, 23:59</strong>, on DTU Learn, three PDFs:</td></tr>
+    <tr><td>1 · The paper</td><td>PNAS template, <strong>LaTeX only</strong> (<a href="https://www.overleaf.com/latex/templates/template-for-preparing-your-research-report-submission-to-pnas-using-overleaf/fzcbzjvpvnxn" target="_blank" rel="noopener">Overleaf</a>), <strong>at most six pages including references</strong>, with Abstract, Significance Statement, Introduction, Results, Discussion, Methods, References and author contributions</td></tr>
+    <tr><td>2 · The slides</td><td><strong>Three pages</strong>, one per slide; we stitch everyone's into one deck</td></tr>
+    <tr><td>3 · The reflection</td><td><strong>Half a page</strong>, ungraded: did the "From an AI-drafted report" boxes change how you read your draft, and where did you use them (or not)?</td></tr>
+    <tr><td><strong>Presentation</strong></td><td><strong>Wednesday 2 December</strong>, three slides, three minutes, then questions to whoever we pick; everyone must be able to explain everything in the paper</td></tr>
+    <tr><td><strong>We are in the room</strong></td><td>Wed 4 Nov (after Test 2), 11 Nov, 18 Nov, 25 Nov</td></tr>
+    <tr><td><strong>Judged on</strong></td><td>A dataset with networks and text that fits the question · a research finding · checked measurements · one story, told well · a group that holds up under questioning</td></tr>
+  </table>
+  </div>
+
+  <h2 id="grading">Grading</h2>
+
+  <p>Test 1 (25%), Test 2 (25%), and the final project (50%) will be scored, and I'll provide each score as feedback so you can see how you're doing. For the final evaluation, I map the three scores holistically to a final grade on the Danish 7-point scale.</p>
+
+  <p><strong>The scores.</strong> For the two tests you simply get your raw score. The project gets one score on a four-step scale: <strong>0</strong> insufficient, <strong>1</strong> sufficient (the minimum), <strong>2</strong> good, <strong>3</strong> excellent. That single number covers the paper and the presentation together: at least two of us (the TAs and I) read every paper and sit in on every presentation, each of us scores it 0–3 in a handful of categories (<a href="weeks/week8.html#project">listed in week 8</a>: the research question, data and scope, use of the course, checks, figures, references, the presentation, overall impression), we discuss each one, and we agree on the number. The scores are feedback, not grades, and there is no simple formula from them to the 7-point scale; the final grade is a holistic evaluation of your work across the whole course. If someone sits right at a grading boundary, the go-nuts posts count too, as a tie-breaker. If you want more than the number, ask: we are happy to explain why you got the score you got and what would have made it higher.</p>
+
+  <h2 id="book">The books</h2>
+
+  <p>For the network half: Michele Coscia, <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener"><em>The Atlas for the Aspiring Network Scientist</em></a> (2nd edition) — free PDF, with per-chapter exercises and solutions on the site.</p>
+
+  <p>For the language half: Jurafsky & Martin, <a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank" rel="noopener"><em>Speech and Language Processing</em></a> (3rd edition draft) — free, chapter by chapter, on the authors' site.</p>
+
+  <p>Weekly pages point to exact chapters. A few classic papers join them along the way.</p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>02805 · Technical University of Denmark</span>
+    <span>Sune Lehmann · <a href="mailto:sljo@dtu.dk">sljo@dtu.dk</a></span>
+    <span>Content <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="license noopener">CC BY-SA 4.0</a></span>
+    <span><a href="https://github.com/suneman" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
+</footer>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/js/hero-network.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false}], throwOnError: false});"></script>
+</body>
+</html>

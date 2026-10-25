@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · How few shortcuts it takes</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  /* the number the whole explorable is about: accent + a bump whenever it changes */
+  .readout .tile.hot { background: var(--accent-wash); border-radius: 8px; padding: 4px 10px; margin: -4px -10px; }
+  .readout .tile.hot .value { color: var(--accent); font-variant-numeric: tabular-nums; display: inline-block; transform-origin: left center; }
+  .readout .tile.hot .value.bump { animation: bump 0.45s ease-out; }
+  @keyframes bump { 0% { transform: scale(1.25); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>shortcuts <input type="range" id="sc" min="0" max="30" step="1" value="0">
+    <span class="val" id="sc-val">0</span></label>
+  <button id="plus" class="primary">+1 shortcut</button>
+  <button id="src">Pick another start node</button>
+  <span style="color: var(--text-muted); font-size: 12.5px">Color = number of steps from the start node. Click any node to start from it.</span>
+</div>
+
+<div class="legend" id="legend" style="flex-wrap: wrap; gap: 8px 14px; margin-bottom: 10px"></div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Ring lattice, N = 60, k = 4 — no shortcuts</h2>
+    <canvas class="net" id="net0" style="height: 360px; cursor: pointer"></canvas>
+  </div>
+  <div class="panel">
+    <h2 id="title1">Same lattice + 0 shortcuts</h2>
+    <canvas class="net" id="net1" style="height: 360px; cursor: pointer"></canvas>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Lattice — mean distance from start</div><div class="value" id="r-d0">–</div></div>
+  <div class="tile"><div class="label">Lattice — farthest node</div><div class="value" id="r-m0">–</div></div>
+  <div class="tile"><div class="label">Lattice — clustering C</div><div class="value" id="r-c0">–</div></div>
+  <div class="tile hot"><div class="label">With shortcuts — mean distance</div><div class="value" id="r-d1">–</div></div>
+  <div class="tile"><div class="label">With shortcuts — farthest node</div><div class="value" id="r-m1">–</div></div>
+  <div class="tile"><div class="label">With shortcuts — clustering C</div><div class="value" id="r-c1">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/lattice-to-random.js"></script>
+</body>
+</html>

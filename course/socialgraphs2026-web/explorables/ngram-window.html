@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · N-grams</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <span class="seg" id="n-seg">
+    <button data-n="1">unigrams</button>
+    <button data-n="2" class="on">bigrams</button>
+    <button data-n="3">trigrams</button>
+  </span>
+  <button id="reset">Reset sentence</button>
+</div>
+
+<div class="text-panels">
+  <div class="panel">
+    <h2>Text</h2>
+    <textarea class="textbox" id="text">New York City is a city in the state of New York</textarea>
+    <div class="small-label">Tokens</div>
+    <div class="token-row" id="tokens"></div>
+  </div>
+  <div class="panel">
+    <h2>Sliding windows</h2>
+    <div class="ngram-grid" id="ngrams"></div>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">n</div><div class="value" id="r-n">2</div></div>
+  <div class="tile"><div class="label">Tokens</div><div class="value" id="r-tokens">–</div></div>
+  <div class="tile"><div class="label">N-grams</div><div class="value" id="r-grams">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/ngram-window.js"></script>
+</body>
+</html>

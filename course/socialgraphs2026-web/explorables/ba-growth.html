@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Rich get richer: growing a scale-free network</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>links per new node m
+    <span class="seg" id="m-seg">
+      <button data-m="1">1</button><button data-m="2" class="on">2</button><button data-m="3">3</button>
+    </span>
+  </label>
+  <label>attachment
+    <span class="seg" id="mode-seg">
+      <button data-v="pa" class="on">preferential</button><button data-v="uniform">uniform</button><button data-v="static">no growth</button>
+    </span>
+  </label>
+  <button id="play" class="primary">▶ Grow</button>
+  <button id="step">+10</button>
+  <button id="reset">Reset</button>
+  <label>speed <input type="range" id="speed" min="1" max="10" step="1" value="5"></label>
+  <label>right panel
+    <span class="seg" id="view-seg">
+      <button data-v="ccdf" class="on">degree distribution</button><button data-v="track">first-mover</button>
+    </span>
+  </label>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2 id="net-title">Preferential attachment — newest node in color</h2>
+    <canvas class="net" id="net"></canvas>
+  </div>
+  <div class="panel">
+    <h2 id="chart-title">Degree distribution (CCDF, log–log)</h2>
+    <div class="legend" id="legend">
+      <span class="key"><span class="swatch dot" style="background: var(--series-1)"></span>P(K ≥ k) for this network</span>
+      <span class="key"><span class="swatch" style="background: var(--baseline)"></span>k⁻² guide (what γ = 3 predicts)</span>
+    </div>
+    <svg class="chart" id="chart"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label" id="l-n">Nodes</div><div class="value" id="r-n">–</div></div>
+  <div class="tile"><div class="label">Links</div><div class="value" id="r-m">–</div></div>
+  <div class="tile"><div class="label">Biggest hub</div><div class="value" id="r-hub">–</div></div>
+  <div class="tile"><div class="label">Median degree</div><div class="value" id="r-med">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/ba-growth.js"></script>
+</body>
+</html>

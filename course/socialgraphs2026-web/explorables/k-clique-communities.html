@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · k-clique communities</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  .panels { grid-template-columns: 3fr 2fr; }
+  @media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
+  svg.net { width: 100%; height: 330px; display: block; overflow: visible; }
+  .status { font-size: 14.5px; line-height: 1.5; margin: 6px 0 8px; }
+  .status b { font-weight: 600; }
+  .status .c1 { color: var(--cat-1); } .status .c2 { color: var(--cat-2); }
+  .why { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .hint { font-size: 12.5px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>k =
+    <span class="seg" id="k">
+      <button data-v="3" class="on">3</button>
+      <button data-v="4">4</button>
+      <button data-v="5">5</button>
+      <button data-v="6">6</button>
+    </span>
+  </label>
+  <button id="reset">Reset</button>
+  <button id="step" class="primary">Step</button>
+  <button id="play">Play</button>
+  <button id="all">Show all</button>
+  <span class="hint">Step rolls one k-clique onto the next.</span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2 id="net-title">Thirteen nodes, 31 links: which k-cliques touch which?</h2>
+    <svg class="net" id="net" viewBox="0 0 480 330" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+  <div class="panel">
+    <h2>What k sees</h2>
+    <div class="status" id="status"></div>
+    <div class="why" id="why"></div>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">k-cliques</div><div class="value" id="r-cliques">–</div></div>
+  <div class="tile"><div class="label">Communities</div><div class="value" id="r-comms">–</div></div>
+  <div class="tile"><div class="label">Nodes in a community</div><div class="value" id="r-in">–</div></div>
+  <div class="tile"><div class="label">In two or more</div><div class="value" id="r-overlap">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/k-clique-communities.js"></script>
+</body>
+</html>

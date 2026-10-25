@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<!-- GENERATED from content/weeks/week5.md — edit the .md and rerun ./generate.py; do not hand-edit. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 5 · From language to numbers · 02805</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/site.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.css">
+<script data-goatcounter="https://suneman.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="../index.html">02805</a>
+  <a href="../the-new-way.html">The new way</a>
+  <a href="../index.html#weeks">Weeks</a>
+  <a href="../index.html#overview">Overview</a>
+  <span class="spacer"></span>
+  <a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank" rel="noopener">NLP textbook ↗</a>
+</nav>
+
+<nav class="page-toc" aria-label="On this page">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="week5.html#part-0-a-slight-change-to-the-format">Part 0: A slight change to the format</a></li>
+    <li><a href="week5.html#why-language">1 · Why language?</a></li>
+    <li><a href="week5.html#tokens">2 · From raw text to tokens</a></li>
+    <li><a href="week5.html#counting">3 · Counting language, the old-school way</a></li>
+    <li><a href="week5.html#documents">4 · From words to documents</a></li>
+    <li><a href="week5.html#counting-stops">5 · Where counting stops</a></li>
+    <li><a href="week5.html#next-week">6 · Next week: putting the tools to work</a></li>
+    <li><a href="week5.html#essentials">Essentials</a></li>
+    <li><a href="week5.html#goodies">Goodies</a></li>
+  </ol>
+</nav>
+
+<main class="wrap">
+
+  <p class="eyebrow">Week 5 of 8 · Language half</p>
+  <h1>From language to numbers</h1>
+  <p class="lede">For the next three weeks we switch our focus away from network science for a little while and begin to think about Natural Language Processing (NLP). NLP is the part of computer science that deals with turning language into something a computer can work with, analyze, interpret, and, in recent years, generate. And this is where the course diverges a lot from last year — with agents we can do so much more.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Before class</p>
+    <ul>
+    <li><strong>Bring</strong>. The same setup as before: laptop, Python + Jupyter, and an agentic coding tool you can use comfortably.</li>
+    <li><strong>Tools</strong>. From this week the shared Marvel playground gains its text. <code>marvel_pages.zip</code> is on the <a href="../data/index.html">course data page</a> — 303 plain-text Wikipedia articles, the same 303 characters whose network you have been working on since week 1. The loading snippet there gives you a dict keyed by <code>node_id</code>, so the language joins straight onto the network.</li>
+    <li><strong>As always</strong>. Work this page from top to bottom. The readings, videos, explorables and exercises appear where they are needed.</li>
+  </ul>
+  </div>
+
+  <h2 id="part-0-a-slight-change-to-the-format">Part 0: A slight change to the format</h2>
+
+  <p><strong>Format update</strong>. So the previous weeks ended up a bit differently than imagined. Instead of pointing you in the direction of which textbook pages to read, I ended up kind of writing my own Network Science textbook. I did that because I'm a world-leading expert on network science. I'm a decent NLP researcher, but I'm not a world-leading expert. Which means that these next three weeks will be a bit different. They will be more like what I had imagined the entire course to be like 😅 There is a real textbook now (that I will ask you to read) — and there are many other changes that I will explain below as you get to them.</p>
+
+  <p><strong>Intro to NLP teaching philosophy</strong>. NLP has obviously become much more visible after the launch of ChatGPT, but I do not want us to forget the old-school virtues of the field, because they are super cool and useful! So before we ask a large model to do anything clever, I want you to learn how to turn raw text into data, count what is there, inspect examples, and understand what different preprocessing choices can mean for an analysis.</p>
+
+  <p><strong>From pen and paper to Jupyter Notebooks</strong>. One change in how you work, for this half. In the network weeks I kept asking you to do things on paper — run BFS by hand, compute $Q$ for a small partition — because that is how those ideas get into your head. Language gives us fewer calculations that fit on paper, so from here the notebook takes over that job. Most sections below end with a short Python example, and they are there to be <strong>run</strong>, not read: put them in Jupyter, change a number, break something on purpose, and watch what happens to the output. That is this half's version of pen and paper. The 🧠 exercises are still where the test comes from, but I hope you'll work in the Jupyter Notebooks nevertheless (you can have your agent along to set up, start everything up, etc., of course). Playing with the code is how you build the intuition to solve the 🧠 exercises.</p>
+
+  <p><strong>Wikipedia is still our playground</strong>. Wikipedia is a particularly nice place to learn the basics of NLP, because it contains a lot of structured text. For the first four weeks we treated Wikipedia as a network of linked pages. But now we'll use the fact that every single one of those nodes is also a document full of language. We have learned to analyze the links, and now we will learn how to analyze the text. In week 8, after three weeks of NLP, we put the two things back together again and (together) think about how you can create amazing final projects.</p>
+
+  <h2 id="why-language">1 · Why language?</h2>
+
+  <p>Language is a very informative record of human behavior. It tells us what people talk about, which distinctions they make, and how they describe the world around them. There is a long-standing idea in linguistics, usually called <em>linguistic relativity</em>, that the language we use can shape the way we perceive, think about, and conceptualize the world.</p>
+
+  <p><strong>Hand me the beer north of you</strong>. One of my favorite examples of how the language we speak can influence human cognition comes from Kuuk Thaayorre, a language spoken at Pormpuraaw in northern Australia. In Danish or English, if I ask you to hand me something, I might say "the beer on your right". However, while we use <em>relative</em> spatial concepts such as left and right, Kuuk Thaayorre relies on <em>absolute</em> directions such as north, south, east, and west. So a speaker might instead describe an object as being southwest of you. This means that speakers have to keep track of their absolute orientation in a way that most Danish or English speakers rarely need to. The fact that cardinal directions are used in everyday spatial reference already means that speakers need to maintain a strong sense of their orientation.</p>
+
+  <p>But it is even deeper! In a study by Gaby (2012), participants were asked to arrange image sequences with a natural temporal order, such as a person growing older. English speakers tended to arrange the sequence from left to right. Kuuk Thaayorre speakers, however, tended to arrange it from east to west. When they were seated facing another direction, the direction of the sequence changed as well. The way they sequence things also follows the compass rather than the table they were seated at. You can find the study here: <a href="https://doi.org/10.3389/fpsyg.2012.00300" target="_blank" rel="noopener">Gaby (2012)</a>.</p>
+
+  <p>So why am I telling you this? Because <em>language is data about people</em>. Words record what people notice, how they group things, and how they communicate those groupings to other people. The example above is striking, but it's just the tip of the iceberg. Similar examples exist for color, space, time, and many other parts of cognition. And (lucky for us) the internet is the source of a fair bit of language, which means we can use it to study human behavior at a scale that would otherwise be impossible.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>Start with Jurafsky & Martin, <a href="https://web.stanford.edu/~jurafsky/slp3/1.pdf" target="_blank" rel="noopener"><em>Speech and Language Processing</em>, Chapter 1</a>. So remember: <strong>Today it is actually important that you read the book</strong>. You don't need every historical detail. Read to internalize the recurring idea that a language system needs some representation of text and a task to perform with that representation.</p>
+  </div>
+
+  <p>Natural Language Processing is the toolbox for studying human behavior through language at scale. The field has moved from hand-built rules, through corpus statistics and learned representations, to today's large language models. ChatGPT sits at the far end of that story. At a very high level, a causal language model repeatedly assigns probabilities to possible next tokens, picks one, adds it to the text, and then does the same thing again.</p>
+
+  <p>That sentence hides almost everything interesting. What is a token? How does raw text become tokens? How does a token become a number? Where do the probabilities come from? The goal is to work our way through those questions over the next three weeks.</p>
+
+  <p>Before we start taking the machinery apart, I want to begin at a conceptually high level and then move down to the nitty-gritty. The video below is from an insanely great mathematician focused on communicating math, Grant Sanderson, who posts on YubTub under the name 3Blue1Brown. This video gives you a visual intuition for what a large language model is doing. Your aim should not be to understand every detail on the first watch. Instead, watch the whole process once and pay attention to the repeated next-token loop, because over the next three weeks we will work our way down into the pieces that make it possible.</p>
+
+  <iframe class="video-embed" src="https://www.youtube.com/embed/LPZh9BOjkQs"
+    title="3Blue1Brown: Large Language Models explained briefly" loading="lazy" allowfullscreen></iframe>
+
+  <p class="explorable-caption">Watch the growing text rather than trying to memorize the architecture. Notice the repeated loop: text so far, probabilities over the next token, one token added, then the same process again.</p>
+
+  <p><strong>A toy next-token generator</strong>. In the explorable below I include a tiny version of that loop. The probabilities are hand-written teaching values, so there is no neural network hiding inside it and it is not ChatGPT. For now I only want you to notice how repeated next-token prediction can turn a short prompt into a sentence. The important point is that these machines are stochastic, so they won’t give you the same output for the same question; if they were deterministic, they would!</p>
+
+  <iframe class="explorable-frame" src="../explorables/next-token.html" height="500"
+    title="Explorable: next-token prediction" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Pick a prompt and generate one token at a time. Run the same prompt several times and notice how a lower-probability choice can send the sentence in a different direction.</p>
+
+  <h2 id="tokens">2 · From raw text to tokens</h2>
+
+  <p><strong>Tokenization. Sounds easy. Isn't easy</strong>. The loop above already depends on a word we have not properly defined, namely a <em>token</em>.</p>
+
+  <p>A computer does not begin with words. It begins with a string of characters. Take this sentence:</p>
+
+  <p><code>Iron Man wasn't in New York.</code></p>
+
+  <p>To the computer, that is just a sequence of characters. Before we can count words, build a vocabulary, calculate frequencies, or feed the text into a model, we need to decide where one piece of text ends and the next begins. That process is tokenization; the units that come out are tokens.</p>
+
+  <p>You might think to yourselves, well, this is easy. This is why we have spaces between words!</p>
+
+  <p>But even that simple approach already makes a choice. In Python we could split on such spaces:</p>
+
+  <pre><code class="language-python">raw = "Iron Man wasn't in New York."
+raw.split()
+# ['Iron', 'Man', "wasn't", 'in', 'New', 'York.']</code></pre>
+
+  <p>That's actually a tokenizer, just a very simple one. Notice what happened. <em>wasn't</em> stayed together, while the full stop stayed attached to <em>York.</em>. A more language-aware tokenizer might instead produce</p>
+
+  <p><code>['Iron', 'Man', 'was', "n't", 'in', 'New', 'York', '.']</code></p>
+
+  <p>Neither sequence is somehow "natural", and neither is objective or "right". Somebody wrote rules, or trained a model, that decided where the boundaries should go.</p>
+
+  <p><strong>Always be aware of your modeling choices</strong>. This is why tokenization sounds much easier than it is. Is um a token? Is New York one token or two? What about 'Apple's', 'weren't', an emoji, a URL, a hashtag, or punctuation? There is no single correct answer. The useful choice depends on what you are trying to measure. As with the network half of the course, preprocessing is part of the model whether we realize it or not. So you need to argue for your choices and be transparent about them.</p>
+
+  <p><strong>Getting into the weeds a little bit</strong>. A useful distinction here is between <em>word-like tokenization</em> and the <em>subword tokenization</em> used by modern language models. A library such as spaCy in Python usually gives us units that look like words and punctuation. A modern language model doesn't need to keep every possible word in a gigantic dictionary. Instead it works with a fixed vocabulary of reusable pieces. A rare word can therefore be split into smaller subword tokens that the model already knows.</p>
+
+  <p>So a modern pipeline looks something along the lines of</p>
+
+  <p><code>raw characters → tokenizer → token pieces → token IDs → model</code></p>
+
+  <p>The token ID is simply an integer that points to an entry in the model's vocabulary. The model never receives the word <em>apple</em> in the human sense. It receives one or more token IDs and learns how those IDs behave from training data.</p>
+
+  <p>Different tasks can reasonably tokenize the same text differently. A speech transcript may keep <em>um</em> and <em>uh</em> because hesitations carry information. A search system may normalize different forms of a word. A language model keeps punctuation and subword pieces because those units are useful for prediction.</p>
+
+  <p>There are also preprocessing choices that happen <em>after</em> tokenization. Lowercasing is one example. Sometimes <em>Apple</em> and <em>apple</em> should collapse to the same type. Sometimes the capital A is exactly the useful information. The <em>Big Apple</em> refers to New York City, while a <em>big apple</em> might be something you had for lunch. <em>Stopword removal</em> is another. Stopwords are the very frequent function words such as <em>the</em>, <em>of</em>, <em>in</em> and <em>were</em>, and dropping them leaves mostly the content words behind. A third is <em>lemmatization</em>, which maps every word form to its dictionary form, its <em>lemma</em>: <em>heroes</em> becomes <em>hero</em>, <em>fighting</em> becomes <em>fight</em>, and <em>were</em> becomes <em>be</em>. Every one of these choices removes information — capitalization, function words, tense and number — which may be completely fine for one analysis, but a terrible idea for another.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>Read Jurafsky & Martin, <a href="https://web.stanford.edu/~jurafsky/slp3/2.pdf" target="_blank" rel="noopener">Chapter 2, <em>Words and Tokens</em></a>. Focus on tokenization, normalization and subword tokenization. You can skim the implementation details on a first pass.</p>
+  </div>
+
+  <p>The explorable below starts from raw text, applies a word-like tokenizer, and then lets you change later preprocessing choices. Keep the order straight in your head: tokenization decides the units first; lowercasing and filtering decide what we do with those units afterwards.</p>
+
+  <iframe class="explorable-frame" src="../explorables/token-pipeline.html" height="460"
+    title="Explorable: from raw text to tokens" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Start with the raw sentence and look at the tokens the tokenizer creates. Then turn lowercasing, punctuation filtering and stopword filtering on one at a time. Watch both the number of tokens and the size of the vocabulary.</p>
+
+  <p><strong>Open up a Jupyter Notebook and play along as you read</strong>. The spaCy Python library makes the word-like tokenization step easy to inspect.</p>
+
+  <pre><code class="language-python">import spacy
+
+nlp = spacy.load("en_core_web_sm")  # the whole English pipeline, not just a tokenizer
+raw = "Marvel's heroes weren't fighting in New York."
+doc = nlp(raw)
+
+[t.text for t in doc]
+# ['Marvel', "'s", 'heroes', 'were', "n't", 'fighting', 'in', 'New', 'York', '.']</code></pre>
+
+  <p>Every item in that list is a single token occurrence. spaCy also attaches information to each token, which means we can make later preprocessing decisions keeping the original text in mind.</p>
+
+  <pre><code class="language-python">lower = [t.text.lower() for t in doc]
+no_punct = [t.text for t in doc if not t.is_punct]
+no_stop = [t.text for t in doc if not t.is_stop]
+lemmas = [t.lemma_ for t in doc]</code></pre>
+
+  <p>Documentation: <a href="https://spacy.io/usage/linguistic-features#tokenization" target="_blank" rel="noopener">spaCy tokenization</a> and the <a href="https://spacy.io/api/token" target="_blank" rel="noopener">spaCy Token API</a>.</p>
+
+  <p>Try the same sentence with a subword tokenizer and you will get a different set of units. That is exactly what we expect. And just to say it one more time: the reason is that the two tokenizers were <em>built for different jobs</em>.</p>
+
+  <p><strong>Some definitions</strong>. A token is an occurrence. A type is a distinct token form. The vocabulary is the set of types. If <em>apple</em> occurs ten times, that is ten tokens but one type. If <em>Apple</em> and <em>apple</em> both occur and we keep capitalization, they are two types. If we lowercase first, they become one. These counts are therefore partly properties of the corpus and partly properties of the preprocessing choices we made before counting.</p>
+
+  <p>There is one more reason modern models like subwords. As a corpus grows, we keep encountering new word forms, so the number of unique word types keeps growing. This empirical pattern is known as Heaps' law. A fixed subword vocabulary gives the model reusable pieces for words it has never seen as complete forms.</p>
+
+  <div class="exercise">
+    <h4>5.1 — Did you really read it? · language and tokens <span class="mode learn">🧠 Learn</span></h4>
+    <p>No notebook, no chatbot. Think, then write.</p>
+    <ol>
+    <li>The toy next-token generator at the start of the page already assumes that the text has been split into tokens and that a probability table exists for what comes next. In a real system, which part is decided by the tokenizer before the language model sees the text, and which part must the language model learn from training data?</li>
+    <li>Explain the difference between a <strong>token</strong>, a <strong>type</strong>, and a <strong>vocabulary</strong> using a sentence of your own. Then say exactly what can happen to the number of types if you lowercase the sentence.</li>
+    <li>Put these in the right order and explain what each step does: token IDs, raw characters, tokenizer, model, token pieces. Which step decides that <em>New York</em> is two pieces rather than one?</li>
+    <li>Lowercasing, stopword removal and lemmatization all throw information away. Pick <strong>one</strong> of them. Give one research question where it would probably be harmless, and one where it could destroy the signal you care about.</li>
+    <li>This one is about the reading. Jurafsky & Martin (Chapter 2) describe how byte-pair encoding (BPE) builds a subword vocabulary. In your own words, what does BPE start from, what does it repeat, and when does it stop? Why does starting from single characters mean no word is ever completely unknown to the model?</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>5.2 — Tokenization, by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>Paper first. The point is to make the choices visible before a library makes them for us.</p>
+    <ol>
+    <li>Start with <em>Spider-Man didn't save Queens; Doctor Strange's portal did!</em> Before you split anything, write down your rules: what happens to hyphens, apostrophes and punctuation? Then tokenize the sentence by hand and report the number of tokens and types. Keep your answer, because you will check it against spaCy in 5.3.</li>
+    <li>Now predict, without running code, what happens to the token and type counts after lowercasing and after removing punctuation. Then define a small stopword set of your own, remove it, and predict the counts again. Some counts may stay the same. Say why.</li>
+    <li><em>New York</em> remaining as two tokens is not a tokenizer failure. What later NLP task could decide that the two tokens together refer to one place? Give one more example where token boundaries and the thing we care about are not the same.</li>
+    <li>Now play subword tokenizer. Your whole vocabulary is the pieces <em>un, believ, able, spider, man, hat, tan, wak, anda</em>, plus every single letter. Lowercase each word, then split it from left to right, always taking the longest piece in the vocabulary that fits. Segment <em>unbelievable</em>, <em>Spiderman</em>, <em>Wakanda</em>, <em>Manhattan</em> and <em>Thanos</em>. Which word costs the most tokens, and why is that still better than having no representation for it at all?</li>
+    <li>Suppose your question is whether the word <em>power</em> is used differently across two Marvel communities. Would you lowercase? Lemmatize? Remove stopwords? There is no universal answer here. Make the choices you would use and defend them. Careful with the last one: if you compare how often <em>power</em> occurs relative to the total number of tokens, does removing stopwords change that number even though no <em>power</em> token was removed?</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>5.3 — Tokenization, as code <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Now let the machine do the boring part, but make it show its work.</p>
+    <ol>
+    <li>Run the sentence from 5.2 through spaCy and through the subword tokenizer used by recent OpenAI models: <code>tiktoken.get_encoding("o200k_base")</code>. <code>encode()</code> returns bare token IDs, so decode them one at a time to see the pieces: <code>[enc.decode([i]) for i in ids]</code>. Put spaCy's tokens, your hand tokenization and the subword pieces next to each other. Find at least two disagreements and explain why each tokenizer made its choice. (Look closely at the spaces.)</li>
+    <li>Have your agent build a table with token text, lowercase form, <code>is_stop</code>, <code>is_punct</code> and lemma. Check at least three rows yourself against the raw sentence before trusting the table.</li>
+    <li>Run the same pipeline on one Marvel page. Report the raw character count, token count, type count and the five most frequent types before and after one preprocessing choice of your own. Inspect the underlying text for anything that surprises you.</li>
+    <li>Find one tokenization or preprocessing decision that would actually change the answer to a plausible research question about the Marvel corpus. Show the before and after, then write three sentences on why the difference matters.</li>
+    <li>Test Heaps' law on Marvel. Read through the pages one at a time and plot the number of types seen so far against the number of tokens seen so far. Does the curve flatten out? Then take every Marvel type that occurs at least once and count how many the <code>o200k_base</code> tokenizer splits into more than one piece. Which kinds of words get split, and what does that tell you about why modern models use subwords?</li>
+  </ol>
+  </div>
+
+  <h2 id="counting">3 · Counting language, the old-school way</h2>
+
+  <p>Now that we have tokens, let us do the first thing that comes to mind: count them! Before doing any complex modeling, it is always informative (and important) to look at the corpus, and yes, I know you already counted with the builder in the exercise above, but now I will take you through how to count and some of the famous statistics of language.</p>
+
+  <p>The habit of counting, getting a sense of the underlying data before doing complex models is similar to our approach in the network half of the course. Frankly, it's a cornerstone of how I do science in general. You would not build a complex model of a network without first calculating the number of nodes, the number of edges and the degree distribution. Visualizing it, checking for self-loops, and so on. In the same way, don't just trust a text model before you know what is actually in the text. Yes, I know this is a little bit in contrast to the logic of deep learning development, but I am pretty sure that the frontier labs also see gains when they stop feeding their models garbage.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>Keep NLTK's <a href="https://www.nltk.org/book/ch01.html" target="_blank" rel="noopener">Chapter 1</a> open for this section. It is old-school in a good way: frequency distributions, concordances, lexical diversity, bigrams and collocations, all on text you can inspect directly.</p>
+  </div>
+
+  <p><strong>Start with the counts</strong>. Suppose <code>tokens</code> is a long list containing all the tokens in your corpus. The simplest thing we can ask is which token types occur most often.</p>
+
+  <p>Python's <code>Counter</code> gives us exactly that, so before we do anything else, let us simply start by looking at the most common words in a text. (And again, I highly recommend that you keep a Jupyter Notebook open and try the commands below for yourself.)</p>
+
+  <p>Here <code>tokens</code> is just a Python list containing one string for every token. To make the example concrete, let us start with a tiny corpus of four short sentences, already tokenized and lowercased. It is small enough that you can check every number below by hand:</p>
+
+  <pre><code class="language-python">tokens = [
+    "iron", "man", "fights", "the", "villain", ".",
+    "the", "villain", "escapes", "to", "new", "york", ".",
+    "iron", "man", "follows", "the", "villain", "to", "new", "york", ".",
+    "the", "city", "thanks", "iron", "man", "."
+]
+
+len(tokens)</code></pre>
+
+  <p>When you move to the Marvel corpus, you can replace this toy list by the tokens produced by the preprocessing pipeline you chose.</p>
+
+  <pre><code class="language-python">from collections import Counter
+
+counts = Counter(tokens)
+counts.most_common(10)</code></pre>
+
+  <p>which yields</p>
+
+  <pre><code class="language-text">[('the', 4), ('.', 4), ('iron', 3), ('man', 3), ('villain', 3),
+ ('to', 2), ('new', 2), ('york', 2), ('fights', 1), ('escapes', 1)]</code></pre>
+
+  <p>Count the <code>the</code>s in the list yourself before you believe that 4. And notice what came out on top: the definite article and a full stop. That is not a fact about superheroes, it is a fact about English — and it is the first thing you will meet again when we rank the whole Marvel corpus.</p>
+
+  <p>The same object lets us do a few useful sanity checks.</p>
+
+  <ul>
+    <li>How many tokens are there in total?</li>
+    <li>How many different types?</li>
+    <li>How many types occur only once?</li>
+  </ul>
+
+  <p>Those three numbers already tell you quite a lot about the size and shape of a corpus.</p>
+
+  <pre><code class="language-python">n_tokens = len(tokens)
+n_types = len(counts)
+n_hapax = sum(n == 1 for n in counts.values())
+
+n_tokens, n_types, n_hapax
+# (28, 13, 5)</code></pre>
+
+  <p>Five types occur exactly once — <em>fights</em>, <em>escapes</em>, <em>follows</em>, <em>city</em>, <em>thanks</em> — in a corpus of only 28 tokens. Notice what fraction of the vocabulary that is: $5/13$, almost 40%. That fraction shrinks surprisingly slowly as the corpus grows: across all 727,000 tokens of the full Marvel pages, 36% of the 27,000 types still occur only once.</p>
+
+  <p>If you compare corpora or documents of very different lengths, raw counts can be misleading because a longer document will tend to contain more of almost everything. One simple solution is to divide each count by the total number of tokens and work with relative frequencies instead.</p>
+
+  <pre><code class="language-python">total = len(tokens)
+relative_frequency = {
+    word: count / total
+    for word, count in counts.items()
+}</code></pre>
+
+  <p>NLTK's <code>FreqDist</code> does the same basic counting and adds a few convenient methods. The point is not which Python object you choose. What I want you to learn is simpler: count first, understand the corpus, and only then decide what more complicated analysis is worth doing.</p>
+
+  <pre><code class="language-python">from nltk import FreqDist
+
+fd = FreqDist(tokens)
+fd.most_common(10)
+fd.hapaxes()[:10]</code></pre>
+
+  <p><strong>From frequency to rank</strong>. If we sort all word types from most common to least common, we can give each word a frequency rank. Rank 1 is the most common word, rank 2 is the second most common, and so on. When people started doing this across large collections of language, they noticed a surprisingly regular pattern. A small number of words occur all the time, while a very large number occur rarely.</p>
+
+  <p>This pattern is usually called <em>Zipf's law</em>. In its simplest form,</p>
+
+  <p>$$ f(r) \propto \frac{1}{r^s} $$</p>
+
+  <p>where $r$ is the rank of a word and $f(r)$ is its frequency. For language, the exponent $s$ is often somewhere around 1. That means the word at rank 2 occurs about half as often as the word at rank 1, the word at rank 10 about one tenth as often, and so on.</p>
+
+  <p>The explorable shows the idealized pattern behind Zipf's law. On linear axes the relationship produces a steep curve with a very long tail. When we plot the same relationship on log-log axes, it becomes approximately a straight line. Use the buttons to move between the two views and change the exponent. Nothing mysterious happens when you switch axes. You are drawing the same rank and frequency values in a different coordinate system. (This is the second example of power laws in the course, a nice connection back to week 2.) In fact, the rank-frequency plot <em>is</em> the CCDF from week 2 with the axes swapped: the rank of a word with frequency $f$ is the number of words that occur at least $f$ times. That is why, just like the CCDF, it never needs binning.</p>
+
+  <iframe class="explorable-frame" src="../explorables/zipf-idealized.html" height="480"
+    title="Explorable: an idealized Zipf curve" loading="lazy"></iframe>
+
+  <p class="explorable-caption">This is a mathematical Zipf curve rather than observed language. Switch between linear and log-log axes and change the exponent to see how the rank-frequency relationship behaves.</p>
+
+  <p>The ideal curve is useful because it gives us something simple we can compare to real language. Real text rarely sits perfectly on the mathematical line, but large collections of language often come close over much of the distribution. A nice example comes from <em>Moby Dick</em>. In a paper on Zipf's law, Sander Lestrade plots the word frequencies from the novel against their ranks in log-log space, and the observed points follow the expected Zipf pattern closely. Other natural-language corpora deviate more, so it is better to think of Zipf's law as a recurring empirical pattern than as a rule every corpus has to follow exactly. If you are curious, you can see the example in <a href="https://doi.org/10.1371/journal.pone.0181987" target="_blank" rel="noopener">Lestrade (2017)</a>.</p>
+
+  <p>Our own Marvel corpus gives us a much more interesting test. In the next explorable I have used actual text from that data rather than an idealized Zipf curve. It starts on the short descriptions already included in the week 1 data (the <code>description</code> column of <code>week1_nodes.tsv</code> on the <a href="../data/index.html">course data page</a>), not the full Wikipedia text. Notice that words such as Marvel, Comics and published occur very often.</p>
+
+  <iframe class="explorable-frame" src="../explorables/zipf-language.html" height="570"
+    title="Explorable: word frequency in the Marvel text" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Observed counts from the short descriptions of all 303 Marvel characters, with an ideal Zipf line (s = 1) for comparison. Each dot is one frequency; the bar next to it covers every word tied at that count. Leave the toggle on the short descriptions for now: exercise 5.4 asks you to predict the full pages before you look.</p>
+
+  <p>Also notice that the curve looks much less perfect than both the theoretical example and the <em>Moby Dick</em> example above. Think for yourself for a moment. Why might that be? What is different about 303 short Wikipedia descriptions compared with an entire novel or a much larger collection of natural language? What role might corpus size, repeated Wikipedia phrasing, tokenization, and the kind of text we collected play?</p>
+
+  <p>In exercise 5.4 you will load the full Wikipedia text (<code>marvel_pages.zip</code> on the <a href="../data/index.html#loading">course data page</a>) and see what happens when the corpus becomes much larger. Only then flip the explorable to <em>303 full pages</em> and check your answer.</p>
+
+  <p><strong>Python example</strong>. The plots above may look like something mathematically complicated is happening, but an empirical rank-frequency plot starts from the same counts we already made. To create them, we sort the token frequencies from largest to smallest, give the most frequent token rank 1, the next one rank 2, and continue through the vocabulary. The code below plots those ranks and frequencies directly on log-log axes, which gives you the same kind of view you used in the explorables.</p>
+
+  <pre><code class="language-python">import matplotlib.pyplot as plt
+
+frequencies = sorted(counts.values(), reverse=True)
+ranks = range(1, len(frequencies) + 1)
+
+plt.loglog(ranks, frequencies, ".")
+plt.xlabel("frequency rank")
+plt.ylabel("frequency")
+plt.show()</code></pre>
+
+  <p>Run this first on your own token counts and look at the shape before trying to explain it. Then replace <code>plt.loglog()</code> with an ordinary <code>plt.plot()</code> and draw exactly the same frequencies on linear axes. The underlying data have not changed, but your ability to see the long tail has.</p>
+
+  <p>When you load the complete Marvel pages, run the same few lines again. Compare the short-description corpus with the full corpus and ask whether the larger sample begins to resemble the pattern from <em>Moby Dick</em> more closely.</p>
+
+  <p><strong>Words in context</strong>. Frequency tells us what occurs a lot, but it does not tell us how a word is being used. If <em>power</em> occurs 500 times, for example, those appearances could refer to political power, electrical power, superpowers, or something completely different. To understand that, we need to return to the language surrounding each occurrence.</p>
+
+  <p>A concordance, also called KWIC for <em>key word in context</em>, finds every occurrence of a target word and prints a small window of text around it. Instead of reading thousands of pages from beginning to end, we can put the target word in the middle and quickly inspect the different contexts in which it appears. This is a very simple method, but it is one I still find genuinely useful when I want to understand a new corpus.</p>
+
+  <p>Imagine that you downloaded every arXiv paper mentioning a particular scientific methodology (like "modularity"). Counting tells you how often the method appears and whether its use has increased over time. A concordance answers a different question because it lets you inspect what researchers actually say when they mention it. Are they introducing the method, criticizing it, comparing it with something else, or simply citing it?</p>
+
+  <p>NLTK's <code>similar()</code> asks another question. Instead of showing occurrences of the target word, it searches for other words that appear in similar immediate contexts. If <em>blue</em> repeatedly occurs in contexts where <em>red</em> could also occur, the two words may be returned as similar even though the algorithm has no dictionary telling it that they are both colors. Those returned words are not guaranteed to be synonyms. The method only knows that they occupy similar positions in this particular corpus.</p>
+
+  <p>That distinction will become useful next week because it gives us an early version of an idea that sits behind word embeddings (more on that later). If words repeatedly occur in similar contexts, we can start to represent that contextual behavior mathematically.</p>
+
+  <p>The explorable below puts the two ideas next to each other. The left side is a concordance-style view: it shows actual pieces of the toy corpus with your chosen target word in context. The right side mirrors the idea behind NLTK's <code>similar()</code>: it finds other words that can appear in the same immediate left-and-right contexts. Change the target word and compare the two outputs so you are clear about which question each method answers.</p>
+
+  <iframe class="explorable-frame" src="../explorables/context-similarity.html" height="350"
+    title="Explorable: concordance and NLTK-style similarity" loading="lazy"></iframe>
+
+  <p class="explorable-caption">The left side shows where the target occurs in context. The right side shows other words that share those contexts. Similar usage in a corpus is not the same thing as synonymy.</p>
+
+  <p><strong>Python example</strong>. The three NLTK commands below correspond to three related questions. <code>concordance()</code> prints occurrences of one word in context, <code>similar()</code> searches for words appearing in comparable contexts, and <code>common_contexts()</code> asks which contexts two chosen words share. Run them on the same target first so that you can see how the outputs differ before moving to another corpus.</p>
+
+  <p>A concordance needs a corpus with real repetition — in the 28-token toy above, every interesting word occurs once or twice. So this is the point where we switch to the real thing. Below, <code>marvel_tokens</code> is the token list your own pipeline produced from the Marvel pages.</p>
+
+  <pre><code class="language-python">from nltk.text import Text
+
+marvel = Text(marvel_tokens)
+
+marvel.concordance("power")
+marvel.similar("power")
+marvel.common_contexts(["power", "strength"])</code></pre>
+
+  <p>Documentation: <a href="https://www.nltk.org/book/ch01.html" target="_blank" rel="noopener">NLTK Chapter 1</a> and the <a href="https://www.nltk.org/api/nltk.text.html" target="_blank" rel="noopener">nltk.text API</a>.</p>
+
+  <p>Try <em>rock</em> or another ambiguous word next. If the corpus contains both music and geology, the concordance may make those meanings visible immediately, while <code>similar()</code> may return words from only some of those contexts.</p>
+
+  <p><strong>Which words occur together?</strong> Concordances and similarity begin to work on how words are connected to the text around them. But there is a simpler method that captures something subtly different. <em>New York</em> means something different from simply observing that <em>New</em> and <em>York</em> both occur somewhere in the same corpus, and <em>machine learning</em> carries information that disappears when we count <em>machine</em> and <em>learning</em> independently.</p>
+
+  <p>The <strong>n-gram</strong> is an ultra-simple yet powerful way to look at short sequences of neighboring tokens together. A unigram contains one token, a bigram contains two, and a trigram contains three. The sequence <em>New York City</em> therefore contains the unigrams <em>New</em>, <em>York</em>, and <em>City</em>, the bigrams <em>New York</em> and <em>York City</em>, and the trigram <em>New York City</em>.</p>
+
+  <p>This also gives us one of the simplest possible language models. Imagine that we want to predict the next word. A bigram model looks only at the previous token and asks which words have followed it in the corpus before. If <em>New</em> is followed by <em>York</em> 900 times and by <em>car</em> 5 times, the model will assign a much higher probability to <em>York</em> after <em>New</em>. A trigram model keeps two previous tokens instead, so after seeing <em>New York</em> it can estimate which tokens are most likely to come next.</p>
+
+  <p>In probability notation, a bigram model approximates</p>
+
+  <p>$$ P(w_t \mid w_{t-1}) $$</p>
+
+  <p>while a trigram model uses</p>
+
+  <p>$$ P(w_t \mid w_{t-2}, w_{t-1}). $$</p>
+
+  <p>This should feel familiar from the next-token generator at the start of the week. An n-gram language model can learn its probability table directly from counts in a corpus. That <em>is</em> actually next-token prediction, only with a very small window of previous language and no neural network.</p>
+
+  <p>There is an obvious trade-off as the n-grams get longer. Longer n-grams preserve more local order and give us more context, but exact sequences also become much rarer. You may see <em>New</em> thousands of times and <em>New York</em> hundreds of times, while a particular five-word sequence occurs once. This sparsity problem is one of the reasons older n-gram language models become difficult as the context window grows.</p>
+
+  <p>The explorable below makes the sliding window visible. Start with the sentence that is already there, move from unigrams to bigrams and then to trigrams, and watch how the window groups neighboring tokens. You can replace the sentence with your own text. As <code>n</code> grows, more local order survives inside each unit, while the number of exact repeated sequences usually decreases.</p>
+
+  <iframe class="explorable-frame" src="../explorables/ngram-window.html" height="590"
+    title="Explorable: n-grams and overlapping windows" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Change n and edit the sentence. The windows show exactly which neighboring tokens become one unigram, bigram or trigram.</p>
+
+  <p><strong>Python example</strong>. NLTK's <code>ngrams()</code> function does exactly what the visualization is doing. It slides a window of length <code>n</code> across your token sequence and returns every observed sequence. Start with a short sentence where you can verify the result yourself before running it over an entire Marvel page.</p>
+
+  <pre><code class="language-python">import spacy
+from nltk.util import ngrams
+
+nlp = spacy.load("en_core_web_sm")
+
+sentence = "New York City is a city in the state of New York."
+sentence_tokens = [t.text for t in nlp(sentence)]
+
+list(ngrams(sentence_tokens, 2))[:5]</code></pre>
+
+  <p>Change <code>2</code> to <code>3</code> and inspect the first few trigrams. Then run the same code over a Marvel page and count the most frequent bigrams. At that point you should be able to explain where every pair came from rather than treating <code>ngrams()</code> as a black box.</p>
+
+  <p>Frequency still creates one problem. A bigram such as <em>of the</em> may be extremely common simply because <em>of</em> and <em>the</em> are extremely common individually. A collocation asks which words occur together more strongly than we would expect from their separate frequencies. <em>machine learning</em> and <em>climate change</em> are good examples of pairs that often behave like units.</p>
+
+  <p>The code below counts the same kind of bigrams but adds an association score. The frequency filter removes very rare pairs before ranking them, while the scoring function determines which remaining pairs count as especially strongly associated. Run this one on the Marvel corpus rather than the sentence above: a filter that demands five occurrences throws away every bigram in a thirteen-token sentence, and <code>nbest</code> hands you back an empty list.</p>
+
+  <pre><code class="language-python">from nltk.collocations import BigramCollocationFinder, BigramAssocMeasures
+
+finder = BigramCollocationFinder.from_words(marvel_tokens)
+finder.apply_freq_filter(5)
+
+finder.nbest(
+    BigramAssocMeasures().likelihood_ratio,
+    10
+)</code></pre>
+
+  <p>Documentation: <a href="https://www.nltk.org/howto/collocations.html" target="_blank" rel="noopener">NLTK collocations</a>.</p>
+
+  <p>Run this first with <code>likelihood_ratio</code>, then replace it with <code>pmi</code>. Pick a few pairs that move substantially and ask why a different definition of association changes what looks interesting.</p>
+
+  <div class="callout">
+    <p class="eyebrow">From an AI-drafted report</p>
+    <p>"The Marvel corpus is dominated by the language of publishing rather than heroism: the most frequent words are <em>the</em>, <em>of</em>, <em>Marvel</em>, <em>Comics</em> and <em>published</em>. Frequency against rank is a straight line on log-log axes, which proves the corpus follows Zipf's law. And <em>power</em> occurs 1,204 times, making it the central theme of the Marvel universe." There are three flaws. Find them. Exercises 5.4 and 5.5 give you everything you need, and in <a href="week5.html#context-order">exercise 5.5</a>, item 6, you will rewrite the report yourself.</p>
+  </div>
+
+  <div class="exercise">
+    <h4>5.4 — Is Marvel Zipf-like? <span class="mode learn">🧠 Learn</span> + <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Reason first, then calculate.</p>
+    <ol>
+    <li>🧠 Look at the idealized Zipf curve and the Marvel-description curve before writing any code. Write down two reasons why the observed Marvel curve might deviate from the idealized one. Make one prediction about what will happen when you switch from the short descriptions to the full Wikipedia pages.</li>
+    <li>Load the full raw Marvel pages from the <a href="../data/index.html#loading">course data page</a>. Under one clearly stated preprocessing choice, report the total number of tokens, number of types, number of hapax types, and the ten most frequent token types.</li>
+    <li>Plot frequency against rank on both linear and log-log axes. Put the full-page result next to the short-description result and the idealized curve. Does the larger corpus look more Zipf-like? Go back to the explanations from item 1 and say which still look plausible.</li>
+    <li>🧠 A straight-ish line on log-log axes is tempting. Is that plot alone enough to conclude that the corpus follows Zipf's law? Say what the figure supports, what it does not establish, and what else you would want to check before making a stronger claim.</li>
+    <li>🧠 Think beyond Marvel. Name one corpus you expect to look <em>more</em> Zipf-like and one you expect to look <em>less</em> Zipf-like. Explain why. If either corpus is easy to get, test your prediction. One easy place to start: NLTK ships a small sample of Project Gutenberg books (<code>nltk.corpus.gutenberg</code>), including <em>Moby Dick</em> as <code>melville-moby_dick.txt</code>, so you can check Lestrade's example yourself.</li>
+  </ol>
+  </div>
+
+  <div class="exercise" id="context-order">
+    <h4>5.5 — Context and local order <span class="mode learn">🧠 Learn</span> + <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Counts tell us what is common. Here we ask what the surrounding language adds.</p>
+    <ol>
+    <li>🔬 Choose one word that occurs often enough in the Marvel corpus to be interesting and has more than one plausible use. Make a concordance for it and run NLTK's <code>similar()</code>. Explain, in your own words, the question each output answers. Inspect the original text before deciding whether the returned words actually have similar meanings.</li>
+    <li>Count the most common bigrams and trigrams. Pick one of each and find the exact passage it came from. What information did the bigram or trigram retain that unigram counts would have thrown away?</li>
+    <li>Rank bigrams once by raw frequency and once with an association measure such as likelihood ratio or PMI. Find one pair that looks important under raw frequency and one that becomes interesting only after association scoring. Why did the ranking move?</li>
+    <li>🧠 Write two short sentences that have the same unigram counts but different word order. Show that their unigram representation is identical, then show one bigram that tells them apart.</li>
+    <li>🔬 Verify one unigram count, one bigram count and one concordance hit directly in the raw text. If the code and the text disagree, the text wins. Work out what happened.</li>
+    <li>🧠 Rewrite the AI-drafted report above in three honest sentences: what was counted, what it was compared against, and what the counts do and do not establish about Marvel.</li>
+  </ol>
+  </div>
+
+  <h2 id="documents">4 · From words to documents</h2>
+
+  <p><strong>Old-school NLP</strong>. So far we have mostly treated the corpus as a stream of tokens. That is useful when we want to know which words occur, how frequently they occur, or which words tend to occur next to each other. As promised in the introduction, we have been working in the LLM way of thinking.</p>
+
+  <p>But old-school NLP is also still useful for science. Useful for understanding the world. And parts of the old-school stuff ask quite different questions. Questions about larger pieces of text. Which articles discuss the same thing? What does one network community talk about that another does not? Which character pages use unusually similar language?</p>
+
+  <p>For questions like these, the object we want to represent is no longer one word, but a document.</p>
+
+  <p>So what is a document? A document is simply the unit of text you decide to analyze. A Wikipedia page can be a document, but so can a news article, a review, a speech, everything written by one user, or all text attached to the nodes in one network community. There is no universally accepted document boundary. As with many of the choices we have made in both network science and NLP, the useful definition depends on the question you are asking.</p>
+
+  <p>Before doing anything clever with documents, we should (again ... this is a theme) start with some simple checks and statistics. For example, how long is each document? Is one page ten times longer than the others? How many different words occur in each document? Do some pages contain large amounts of repeated boilerplate? These checks are easy, and they often explain strange results long before the model does.</p>
+
+  <p><strong>Bag of Words</strong>. The simplest way to turn an entire document into numbers is a method called Bag of Words.</p>
+
+  <p>The idea is almost embarrassingly simple. We take the vocabulary of our corpus, give every vocabulary term its own position, and then describe each document by counting how many times those terms occur.</p>
+
+  <p>Often a corpus is summarized in a so-called <strong>document-term matrix</strong> $X$, with one row per document and one column per vocabulary term. The entry $X_{dt}$ is the number of times term $t$ appears in document $d$. (Some books, especially in information retrieval, use the transpose, a <em>term-document</em> matrix with terms as rows; the numbers are the same, only flipped.)</p>
+
+  <p>Before we play with the interactive version, I want to walk through the full process once. The static figure below starts with three tiny documents and follows them through tokenization, vocabulary construction and counting until they become numerical vectors in a document-term matrix. Read the left side as the general recipe and the right side as one concrete example of that recipe.</p>
+
+  <iframe class="explorable-frame" src="../explorables/bow-process.html" height="820"
+    title="Figure: from raw documents to a Bag-of-Words matrix" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Follow the process from corpus to tokens, vocabulary, counts and finally the document-term matrix. The figure is static so you can trace each number back to the original text before changing anything yourself.</p>
+
+  <p>Take the first document from the figure, <em>brains predict the future</em>. The vocabulary for the three documents is ordered alphabetically as</p>
+
+  <p><em>brains, build, future, models, predict, the</em></p>
+
+  <p>Now go through that vocabulary one term at a time. <em>brains</em> occurs once in the first document, <em>build</em> 0 times, <em>future</em> once, <em>models</em> 0 times, <em>predict</em> once and <em>the</em> once. The first document therefore becomes the vector</p>
+
+  <p><code>[1, 0, 1, 0, 1, 1]</code></p>
+
+  <p>Do the same thing for the other two documents and stack the vectors on top of one another:</p>
+
+  <pre><code class="language-text">                 brains  build  future  models  predict  the
+Document 1          1      0       1       0        1      1
+Document 2          0      0       1       1        1      1
+Document 3          1      1       0       1        0      0</code></pre>
+
+  <p>That takes us to the document-term matrix. Rows are documents, columns are vocabulary terms, and every cell tells us how many times that term occurred in that document.</p>
+
+  <p><strong>This is kind of amazing</strong>. I know this might seem trivial, but it's pretty great. Think about it. We started with language that a human can read and ended with a numerical representation that ordinary statistical tools can work with. You can already see why putting every document in the same vocabulary order is useful: Documents 1 and 2 share <em>future</em>, <em>predict</em> and <em>the</em>, while Document 3 shares <em>brains</em> with Document 1 and <em>models</em> with Document 2.</p>
+
+  <p>Once every document has the same set of coordinates, we can compare documents, cluster them, compare groups, or use the matrix as input to another model. You see where this is going: the words have become numbers, but we can still trace patterns in those numbers back to the text.</p>
+
+  <p>There is also an important limitation that is part and parcel of the name Bag of Words. We keep information about which words occur and how often they occur, <em>while word order disappears</em>. Consider the two sentences "brains predict models" and "models predict brains." They contain exactly the same words with exactly the same counts, so a Bag-of-Words representation gives them the same vector even though they describe different things. The example makes the loss of word order very easy to see.</p>
+
+  <p>As always, whether that matters depends on the question. If we want to compare what two political speeches discuss, word counts may already tell us a lot. If we want to know who did what to whom in a sentence, losing word order is a much bigger problem. This trade-off will keep coming back over the next two weeks because every representation keeps some information and throws other information away.</p>
+
+  <p><strong>Explore the matrix</strong>. The interactive explorable below uses the same three documents as above, but now you can change them yourself. Start by reading the text so you know what the raw documents actually say. In row view, choose one document and read its vector from left to right across the vocabulary. Then switch to column view, choose one word, and read down the matrix to see how often that term appears across documents. Edit one of the documents and predict which cells should change before you look at the updated matrix.</p>
+
+  <iframe class="explorable-frame" src="../explorables/document-vectors.html" height="590"
+    title="Explorable: Bag of Words and the document-term matrix" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Row view means one document across all vocabulary terms. Column view means one vocabulary term across all documents. Edit the text, make a prediction, and then check how the matrix changes.</p>
+
+  <p><strong>Python example</strong>. (Remember to play along.) The code below takes the same three documents, learns the vocabulary from them, counts every vocabulary term in every document, and returns the same kind of matrix you just explored. <code>CountVectorizer</code> does the bookkeeping for us, but the underlying steps are still tokenization, a vocabulary and counts.</p>
+
+  <pre><code class="language-python">from sklearn.feature_extraction.text import CountVectorizer
+
+documents = [
+    "brains predict the future",
+    "models predict the future",
+    "brains build models"
+]
+
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(documents)
+
+print(vectorizer.get_feature_names_out())
+print(X.toarray())</code></pre>
+
+  <p>The first line of output gives you the column names,</p>
+
+  <pre><code class="language-text">['brains', 'build', 'future', 'models', 'predict', 'the']</code></pre>
+
+  <p>and the matrix underneath contains the counts,</p>
+
+  <pre><code class="language-text">[[1, 0, 1, 0, 1, 1],
+ [0, 0, 1, 1, 1, 1],
+ [1, 1, 0, 1, 0, 0]]</code></pre>
+
+  <p>Do not accept the matrix simply because Python produced it. Pick one row and verify every number against the original sentence yourself, then pick one column, for example <em>predict</em>, and check its count across all three documents. You should be able to explain where every number comes from before you apply the same operation to hundreds of documents.</p>
+
+  <p><strong>What happens when the corpus gets large?</strong> Our example has six vocabulary terms, so every vector contains six numbers. Real corpora are less tidy. The full Marvel pages contain about 27,000 different vocabulary terms, so every document is represented in a space with about 27,000 dimensions.</p>
+
+  <p>Most of those cells will be zero because one Wikipedia page uses only a small fraction of the full vocabulary. We call a matrix like this <strong>sparse</strong>. A document might conceptually look like</p>
+
+  <p><code>[0, 0, 0, 3, 0, 0, 1, 0, 0, 0, ..., 2, 0]</code></p>
+
+  <p>with zeros almost everywhere. Back in the day, we were always looking for algorithms that were fast for sparse matrices.</p>
+
+  <p>Constructing the doc-term matrix is another place where the preprocessing choices from Section 2 matter. Keeping punctuation, capitalization, extremely rare words, common stopwords, and different grammatical forms can change the size and contents of the vocabulary, which changes the numerical representation of every document. The matrix does not simply exist inside the raw text waiting for us to discover it. We create it through a sequence of choices — and you should be able to defend those choices.</p>
+
+  <div class="exercise">
+    <h4>5.6 — Bag of Words, by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>No library for this one. If you can build the tiny matrix yourself, the large one stops being mysterious.</p>
+    <ol>
+    <li>Use the three documents <em>Thor fights the X-Men.</em>, <em>The X-Men fight back.</em> and <em>Thor and Loki fight and fight.</em> Lowercase everything, drop the punctuation, and keep <em>X-Men</em> as one word. Alphabetize the vocabulary, write the three document vectors, and stack them into the document-term matrix.</li>
+    <li>Read the matrix in both directions. Which terms do Documents 1 and 2 share? Which terms connect Document 3 to the other two? Pick the column for <em>fight</em> and explain what every number in that column means. Why do <em>fight</em> and <em>fights</em> get separate columns, and which preprocessing step from Section 2 would merge them?</li>
+    <li>Change one document so that a word already in the vocabulary appears one more time, and another so that it contains a brand-new word. Predict exactly which cells change, and what happens to the shape of the matrix, before you recalculate it.</li>
+    <li>Give one research question where losing word order is probably acceptable and one where it would make the representation close to useless.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>5.7 — Bag of Words on Marvel, as code <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Now scale the same object up. The agent may write the code; you still have to know what its matrix means.</p>
+    <ol>
+    <li>Reproduce your three-document matrix from 5.6 with scikit-learn's <code>CountVectorizer</code>. Compare every column and every cell with your hand-built version. Something will differ. Find the preprocessing choice inside <code>CountVectorizer</code> that caused it.</li>
+    <li>Apply the same operation to the full Marvel pages, one page per document. Report the matrix shape, the five longest documents (in tokens), the five most frequent vocabulary terms and the proportion of matrix cells that are zero. Your vocabulary will probably not be the 27,000 terms quoted in the text above. Explain why.</li>
+    <li>Pick one vocabulary column and trace it back to the documents. Which pages have the largest counts for that term? Open at least two of those pages and check that the counts make sense in context.</li>
+    <li>Change exactly one preprocessing choice, for example lowercasing, stopword removal, lemmatization, or dropping terms that occur in only one document. Rebuild the matrix and report what changed in its shape, sparsity and most common terms. Explain the change rather than just printing the numbers.</li>
+    <li>Finish with one paragraph: what can this matrix answer about the corpus already, and what question would force you to move beyond Bag of Words?</li>
+  </ol>
+  </div>
+
+  <h2 id="counting-stops">5 · Where counting stops</h2>
+
+  <p>Counting gets us surprisingly far. With little more than tokenization and a frequency table, we can already learn which words dominate a corpus, which words occur together, how documents differ, and which pieces of text use similar vocabularies. That is a lot of information from very simple tools, and in many research projects this type of information may already be enough to answer the question you care about.</p>
+
+  <p><strong>Which pages look alike?</strong> Once every page is a Bag-of-Words vector, we can do even more cool stuff. For example, we can ask which pages point in the same direction. The standard measure is <em>cosine similarity</em>, the cosine of the angle between two vectors,</p>
+
+  <p>$$ \cos(\mathbf{x}, \mathbf{y}) = \frac{\mathbf{x} \cdot \mathbf{y}}{\lVert \mathbf{x} \rVert \, \lVert \mathbf{y} \rVert}. $$</p>
+
+  <p>A value of 1 means that two vectors point in the same direction, and 0 means that they are at right angles, which for word counts means the two documents share no terms at all. Because we divide by the lengths, a long page and a short page that use words in the same proportions count as identical.</p>
+
+  <p>The explorable below does this for all 303 full Marvel pages. Pick a character and you get the ten pages whose word counts point in the most similar direction, the words that contribute most to each match, and whether the two characters are linked in the week 1 network. Start with Wolverine and raw counts. Why is Quicksilver, who is not even linked to Wolverine, his second-closest page? Look at the words behind the match, then remove the stopwords and look again. Finally, switch to <em>closest unlinked pairs</em>: pages that talk alike but never link to each other.</p>
+
+  <iframe class="explorable-frame" src="../explorables/lookalikes.html" height="610"
+    title="Explorable: Marvel lookalikes" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Bag-of-Words cosine between the full Wikipedia pages, with raw counts or with NLTK's English stopwords removed. The readouts compare how many of the ten textual neighbors are also network neighbors with what ten random pages would give.</p>
+
+  <p>Two things to take away. With raw counts almost everything looks like everything, because <em>the</em>, <em>and</em> and <em>of</em> dominate every vector. And once the stopwords are gone, language starts to rediscover the network: characters who link to each other also tend to be described in similar words, although nobody told the vectors about the links.</p>
+
+  <p>But there is one thing our counts still know almost nothing about, and that is meaning.</p>
+
+  <p><strong>Word vectors</strong>. Think back to the Bag-of-Words representation. Every vocabulary term gets its own column, and the value in that column tells us how often the word occurs. This works well for keeping track of word identity and frequency, but the coordinates themselves contain no information about how the words are related.</p>
+
+  <p>To see that, turn the matrix on its side. Until now a <em>document</em> has been the thing we represent, with words as its coordinates. Ask instead what vector a single <em>word</em> has in this scheme, and the answer is disappointing: its own column, and nothing else. This is a change in perspective that we'll use in the rest of the language half. The thing being represented stops being the document ... and becomes the word (did anyone say word embeddings?). So it is worth slowing down for one small example.</p>
+
+  <p>Suppose our vocabulary contains only three words:</p>
+
+  <table class="plain">
+    <tr><th>word</th><th>toy vector</th></tr>
+    <tr><td>dog</td><td><code>[1, 0, 0]</code></td></tr>
+    <tr><td>puppy</td><td><code>[0, 1, 0]</code></td></tr>
+    <tr><td>democracy</td><td><code>[0, 0, 1]</code></td></tr>
+  </table>
+
+  <p>In this toy coordinate system, <em>dog</em>, <em>puppy</em> and <em>democracy</em> are separate because they occupy different coordinates. If we compare those basis vectors with cosine similarity, <em>dog</em> is just as similar to <em>puppy</em> as it is to <em>democracy</em>:</p>
+
+  <pre><code class="language-text">cosine(dog, puppy)     = 0
+cosine(dog, democracy) = 0</code></pre>
+
+  <p>Basis vectors are at right angles to each other, so every pair of different words gets a cosine of 0. We will spend much more time on cosine similarity next week, when the vectors themselves begin to encode context and meaning.</p>
+
+  <p>That is a strange description of language. As humans, we know that <em>dog</em> and <em>puppy</em> are related, while <em>dog</em> and <em>democracy</em> usually are not (well... maybe in political satire). Our representation cannot recover that relationship because we never gave it information from which the relationship could be learned.</p>
+
+  <p>This brings us back to another problem we have met several times this week. When we count words independently, we throw away most of their context. As we've been over a few times, a Bag-of-Words model gives the same representation to</p>
+
+  <pre><code class="language-text">the dog chased the ball
+the ball chased the dog</code></pre>
+
+  <p>because the same words occur the same number of times. It also has no built-in way to know whether <em>bank</em> refers to a financial institution or the side of a river.</p>
+
+  <p><strong>Beyond the counts</strong>. N-grams helped us keep some local order, but they introduced another problem. As we make the sequence longer, exact combinations become increasingly rare. A five-word phrase gives us much more context than a single word, yet we may only see that exact phrase once in the entire corpus.</p>
+
+  <p>So perhaps we need to change the question. Until now we have mainly asked how often a word occurs, and next week we begin asking <em>where</em> this word occurs and which other words tend to appear around it.</p>
+
+  <p>There is a powerful idea hiding in that question. Words that occur in similar contexts often have related meanings. <em>dog</em> and <em>puppy</em> might both appear near words such as <em>walk</em>, <em>pet</em>, <em>owner</em>, <em>bark</em> and <em>leash</em>, while <em>democracy</em> will tend to appear in very different surroundings. If we record those contextual patterns, we can start to represent meaning through the company that words keep.</p>
+
+  <p>This is the step that takes us from counting words to vector semantics. Instead of leaving every word in an arbitrary vocabulary coordinate, we use patterns in language to build vectors whose positions tell us something about how words behave. Words used in similar contexts can then end up close together, and once language lives in that kind of space we can use geometry to measure similarity.</p>
+
+  <div class="exercise">
+    <h4>5.8 — Ship an explorable <span class="mode builder">🚀 Builder</span> · stretch, optional</h4>
+    <p>The widgets on this page are code you can inspect, copy and improve. Pick one Week 5 idea that you wish were easier to <em>see</em>, then build the explorable that would have helped you. Agents encouraged, taste yours.</p>
+    <p>Some possibilities: put two tokenizers side by side and make their disagreements visible; show vocabulary growth as a corpus gets longer; let a user switch between raw bigram frequency and a collocation score; build a tiny n-gram text generator; or make a Bag-of-Words collision machine where two very different sentences land on the same vector. Or build something better than all of those. The best ones get embedded on the page with credit.</p>
+  </div>
+
+  <div class="exercise" id="go-nuts">
+    <h4>5.9 — Go nuts with your LLM <span class="mode builder">🚀 Builder</span> · every week</h4>
+    <p>The standing rules live in <a href="week1.html#go-nuts">week 1, exercise 1.8</a>: one free-form post on your group's site, link in this week's Teams channel by Monday evening, friendly criticism for at least one other group. Winner announced at the start of the next session.</p>
+    <p>This week the Marvel network gets language. Use anything from the week to find something about that corpus that surprised you. <strong>One good question and one convincing figure beats five methods thrown together.</strong> Whatever you claim, inspect the text underneath it before you believe it.</p>
+    <p>Some openers, if you want them:</p>
+    <ul>
+    <li><strong>Turn links into relationships.</strong> For every link from A to B, pull out the sentence on A's page where B is mentioned, a concordance with one line per edge. Design a small word list (<em>enemy</em>, <em>ally</em>, <em>married</em>, <em>teammate</em>, <em>killed</em>) and use it to label the edges. You now have a typed Marvel network: friends, foes and family. Do enemies sit in different communities from week 4?</li>
+    <li><strong>Catch Wikipedia copying itself.</strong> Find pairs of pages that share long n-grams, say eight tokens or more. Copied plot summaries and templated paragraphs will turn up. Draw the copying as a network of its own and read the biggest clusters.</li>
+    <li><strong>A Marvel search engine in 20 lines.</strong> Treat a query such as <em>Norse god of thunder</em> as a tiny document, turn it into a Bag-of-Words vector, and rank the 303 pages by cosine similarity. Collect the queries where it fails and explain why. (Next week's TF-IDF will fix some of them.)</li>
+    <li><strong>Community autocomplete.</strong> Train one trigram generator per network community from week 4 and write a fake page for a new character in each. Let other groups guess which community each page came from, and report how often they get it right.</li>
+    <li><strong>Heaps' law of the Marvel universe.</strong> Add the pages one at a time, most-linked character first, and plot how the vocabulary grows. Do minor characters bring new words, or mostly repeat the famous ones? What happens if you add them in the opposite order?</li>
+    <li><strong>Does network fame buy you more words?</strong> Compare Wikipedia page length with in-degree or another network measure from the first half of the course. Find the characters far above and below the relationship, then read their pages. Why are they unusual?</li>
+    <li><strong>Who has the weirdest Wikipedia page?</strong> Decide what <em>weird</em> means using only tools from this week, rank the pages, then inspect the winners. Did your metric find anything real or just formatting and boilerplate?</li>
+    <li>Or ignore every suggestion and chase whatever the explorables made you wonder about. The winner is rarely the group that played it safe.</li>
+  </ul>
+    <p>Write the post around the question rather than the method: what you asked, what you did, one strong figure or table, what surprised you, what you checked in the underlying text, and one limitation.</p>
+  </div>
+
+  <h2 id="next-week">6 · Next week: putting the tools to work</h2>
+
+  <p>This week was about building the toolbox: tokens, counts, rank-frequency plots, concordances, n-grams and the document-term matrix. On their own, each one is a little humble. Next week we start combining them.</p>
+
+  <p>We will fix the problem you saw in the lookalikes explorable, that <em>the</em> and <em>and</em> dominate every comparison, by reweighting the counts with <a href="week6.html#tfidf">TF-IDF</a>. We will <a href="week6.html#groups">compare groups of pages</a> to find the words that tell two network communities apart, and let <a href="week6.html#topics">topic models</a> find recurring themes that nobody labeled. And we will turn the matrix on its side, as Section 5 suggested, so that words get vectors built from the company they keep, first by counting (<a href="week6.html#ppmi">PPMI</a>) and then by learning (<a href="week6.html#word2vec">Word2Vec</a>).</p>
+
+  <section class="band band-essentials">
+
+  <h2 id="essentials" class="essentials">Essentials</h2>
+
+  <p>This is the 🧠 Learn core of the week in one place. If you can do the small examples below with a pen and explain what each representation keeps and throws away, you are ready for this week's share of Test 2.</p>
+
+  <dl class="defs">
+    <dt>Natural Language Processing (NLP)</dt>
+    <dd>methods for turning language into representations a computer can work with, then using those representations to perform a task.</dd>
+    <dt>Token</dt>
+    <dd>one occurrence produced by a tokenizer. The same type can appear as many tokens.</dd>
+    <dt>Type · vocabulary</dt>
+    <dd>a <strong>type</strong> is one distinct token form; the <strong>vocabulary</strong> is the set of types kept by the representation.</dd>
+    <dt>Tokenization</dt>
+    <dd>the decision about where one text unit ends and the next begins. Different tokenizers can reasonably split the same string differently.</dd>
+    <dt>Subword tokenization</dt>
+    <dd>representing text with reusable pieces smaller than whole words. Modern language models use fixed subword vocabularies so unfamiliar words can still be represented.</dd>
+    <dt>Token ID</dt>
+    <dd>the integer index used to look up a token or subword piece in a model's vocabulary.</dd>
+    <dt>Preprocessing</dt>
+    <dd>choices made before measurement or modeling, such as lowercasing, lemmatization, punctuation filtering and stopword removal. Every one can remove useful information.</dd>
+    <dt>Stopword</dt>
+    <dd>a very frequent function word, such as <em>the</em>, <em>of</em> or <em>in</em>, that many analyses drop to leave the content words.</dd>
+    <dt>Lemmatization</dt>
+    <dd>mapping each word form to its dictionary form, its <em>lemma</em> (<em>heroes</em> → <em>hero</em>, <em>were</em> → <em>be</em>).</dd>
+    <dt>Frequency · relative frequency</dt>
+    <dd>a raw count of how often a type occurs; relative frequency divides by the total number of tokens so differently sized corpora can be compared more sensibly.</dd>
+    <dt>Hapax</dt>
+    <dd>a type observed exactly once in the corpus.</dd>
+    <dt>Zipf's law</dt>
+    <dd>the recurring empirical pattern that word frequency falls roughly as an inverse power of frequency rank. A straight-ish log-log plot is suggestive, not a proof that a corpus follows an exact Zipf model.</dd>
+    <dt>Concordance / KWIC</dt>
+    <dd>the occurrences of a target word shown with a small window of surrounding text. It answers <em>how is this word used here?</em></dd>
+    <dt><code>similar()</code></dt>
+    <dd>an NLTK operation that looks for words occupying comparable immediate contexts. Similar context does not guarantee synonymy.</dd>
+    <dt>N-gram</dt>
+    <dd>a sequence of neighboring tokens. Unigrams keep one token, bigrams two, trigrams three; longer n-grams keep more local order and become sparser.</dd>
+    <dt>Collocation</dt>
+    <dd>a pair or sequence that occurs together more strongly than its individual word frequencies alone would suggest.</dd>
+    <dt>Document</dt>
+    <dd>the unit of text you choose to represent, for example one Wikipedia page, article, speech, review or user's posts.</dd>
+    <dt>Bag of Words</dt>
+    <dd>a document representation that counts vocabulary terms while discarding word order.</dd>
+    <dt>Document-term matrix</dt>
+    <dd>rows are documents, columns are vocabulary terms, and each cell contains that term's value for that document, here a count.</dd>
+    <dt>Sparse matrix</dt>
+    <dd>a matrix in which most entries are zero, as happens when a large vocabulary is shared by documents that each use only a small part of it.</dd>
+  </dl>
+
+  <div class="on-the-test">
+    <p class="eyebrow">On Test 2</p>
+    <p>From this week, you should be able to do the following <strong>on paper, closed book</strong>. Any formula you need is printed on the test paper — you are never asked to write one from memory:</p>
+    <ul>
+    <li>explain how raw text becomes tokens and distinguish tokenization from later preprocessing;</li>
+    <li>split a word with a small subword vocabulary and explain why a word the model has never seen can still be represented;</li>
+    <li>distinguish a token, a type, a vocabulary and a document from a small text example;</li>
+    <li>predict how lowercasing, punctuation filtering, stopword removal or mapping word forms to a base form (<em>lemmatization</em>) can change the data you later count, and explain when a choice could remove signal;</li>
+    <li>construct a small frequency table, distinguish a raw count from one divided by the corpus total, and pick out the types that occur exactly once (the <em>hapax</em> types);</li>
+    <li>read a rank-frequency plot, explain what changes between linear and log-log axes, and say why a straight-ish log-log line is not by itself proof of an exact Zipf law — frequency falling as an inverse power of rank;</li>
+    <li>say what a target word shown with the text around each of its occurrences (a <em>concordance</em>) tells you that a frequency count does not, and what a search for words occupying similar contexts returns instead — including why similar context does not guarantee similar meaning;</li>
+    <li>construct the unigrams, bigrams and trigrams of a short sequence and explain the context-versus-sparsity trade-off as <code>n</code> increases;</li>
+    <li>distinguish a frequent n-gram from a pair that occurs together more often than its two words' separate frequencies predict (a <em>collocation</em>), and explain why common words make raw bigram counts misleading;</li>
+    <li>construct and read a small document-term matrix, including one document row and one vocabulary column;</li>
+    <li>explain why real document-term matrices are usually sparse, how preprocessing changes the matrix, and what information Bag of Words discards;</li>
+    <li>look at two text representations and say which research question each can answer and which information has already been thrown away;</li>
+    <li>spot the flaw in a short (possibly AI-written) claim about a corpus: a frequency list presented as a finding, a log-log line presented as a proof, a raw count presented as meaning, or a preprocessing choice that is never stated.</li>
+  </ul>
+  </div>
+
+  <div class="callout" id="test2">
+    <p class="eyebrow">Test 2 covers weeks 5–8</p>
+    <p>Wednesday 4 November in building 303A, Auditoriums 42 and 43, the same rooms as Test 1: be there by 08:10, and the test runs 08:30–09:30 sharp. Same shape as the one you sat this morning — pen and paper, closed book, 16 multiple-choice questions and 4 short written tasks. This week opens the span it covers. Everything on it will come from the Essentials bands and "On Test 2" lists of weeks 5 to 7: <a href="week5.html#essentials">week 5</a> · <a href="week6.html#essentials">week 6</a> · <a href="week7.html#essentials">week 7</a>; week 8 adds nothing to the test. The 🧠 exercises of each week are the shape of the questions; the ones you found hard are the ones to redo.</p>
+  </div>
+
+  </section>
+
+  <h2 id="goodies">Goodies</h2>
+
+  <p>Everything above is the course. Everything below is for the student who finished the page and wants more. Nothing here is on the test; all of it is worth your time.</p>
+
+  <div class="callout" id="slp3">
+    <p class="eyebrow">The NLP textbook</p>
+    <p>Jurafsky & Martin's free draft of <a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank" rel="noopener"><em>Speech and Language Processing</em></a> is the main reference for the language half. Chapter 2 goes much deeper on words, normalization and subword tokenization than we need this week; later chapters are where the representations on this page grow into modern language models.</p>
+  </div>
+
+  <div class="callout" id="nltk-book">
+    <p class="eyebrow">Old-school NLP, in the best sense</p>
+    <p>The first chapter of the <a href="https://www.nltk.org/book/ch01.html" target="_blank" rel="noopener">NLTK book</a> is a playground for frequency distributions, concordances, lexical diversity, bigrams and collocations. It is worth running the examples on a corpus you actually care about rather than treating them as library tricks.</p>
+  </div>
+
+  <div class="callout" id="zipf-reading">
+    <p class="eyebrow">Why Zipf keeps showing up</p>
+    <p>Sander Lestrade's <a href="https://doi.org/10.1371/journal.pone.0181987" target="_blank" rel="noopener"><em>Unzipping Zipf's law</em></a> uses real language, including <em>Moby Dick</em>, to ask why the rank-frequency pattern appears and why different corpora deviate from it. The useful habit is the same as in network science: the line is the beginning of the question, not the end.</p>
+  </div>
+
+  <div class="callout" id="llm-rewatch">
+    <p class="eyebrow">The high-level view of modern language models</p>
+    <p>Rewatch the <a href="https://www.youtube.com/watch?v=LPZh9BOjkQs" target="_blank" rel="noopener">3Blue1Brown video</a> from the start of the page after finishing the exercises. The second viewing should feel different because <em>token</em>, <em>vocabulary</em> and <em>next-token probability</em> now mean something concrete.</p>
+  </div>
+
+  <div class="callout" id="tokenizer-safari">
+    <p class="eyebrow">For the student who wants to look under the tokenizer</p>
+    <p>Take one paragraph and run it through several tokenizers: spaCy, <code>tiktoken</code>, and a Hugging Face tokenizer from a model you know. Print the token strings and IDs side by side. Rare names, punctuation, contractions and non-English words are where the different design choices become easiest to see.</p>
+  </div>
+
+  <p><a href="../index.html#weeks">← All weeks</a></p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>02805 · Technical University of Denmark</span>
+    <span>Sune Lehmann · <a href="mailto:sljo@dtu.dk">sljo@dtu.dk</a></span>
+    <span>Content <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="license noopener">CC BY-SA 4.0</a></span>
+  </div>
+</footer>
+
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/js/toc.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false}], throwOnError: false});"></script>
+</body>
+</html>

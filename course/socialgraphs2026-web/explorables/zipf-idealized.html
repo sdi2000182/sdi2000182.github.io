@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · An idealized Zipf curve</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <span class="seg" id="scale-seg">
+    <button data-scale="linear" class="on">linear axes</button>
+    <button data-scale="log">log-log axes</button>
+  </span>
+  <label>Exponent s <input type="range" id="s" min="0.7" max="1.3" step="0.02" value="1.00">
+    <span class="val" id="s-val">1.00</span></label>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Rank-frequency curve</h2>
+    <svg class="chart" id="chart"></svg>
+  </div>
+  <div class="panel">
+    <h2>What rank means</h2>
+    <div class="bar-list" id="topwords"></div>
+    <p class="note">The labels are familiar English examples; the frequencies are generated from an idealized Zipf distribution, f(r) ∝ 1/r<sup>s</sup>.</p>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Rank 1 / rank 10</div><div class="value" id="r-ratio">–</div></div>
+  <div class="tile"><div class="label">Ideal Zipf exponent</div><div class="value">≈ 1</div></div>
+  <div class="tile"><div class="label">Plot to inspect</div><div class="value" id="r-scale">linear</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/zipf-idealized.js"></script>
+</body>
+</html>

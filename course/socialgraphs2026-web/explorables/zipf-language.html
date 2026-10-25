@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Word frequency in the Marvel text</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <span class="seg" id="scale-seg">
+    <button data-scale="linear" class="on">linear axes</button>
+    <button data-scale="log">log-log axes</button>
+  </span>
+  <span class="seg" id="corpus-seg">
+    <button data-corpus="desc" class="on">303 short descriptions</button>
+    <button data-corpus="full">303 full pages</button>
+  </span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Rank-frequency curve</h2>
+    <svg class="chart" id="chart"></svg>
+  </div>
+  <div class="panel">
+    <h2>Most frequent tokens</h2>
+    <div class="bar-list" id="topwords"></div>
+    <p class="note" id="note-desc">Real counts from the one-line descriptions of all 303 characters in the week 1 node file. Many of those lines are Wikipedia's boilerplate (<em>…a fictional character appearing in American comic books published by Marvel Comics</em>), so about a dozen words sit near 300 each.</p>
+    <p class="note" id="note-full" hidden>Real counts from the full Wikipedia text of the same 303 characters (<code>marvel_pages.zip</code> on the course data page), tokenized the same way.</p>
+    <p class="note">Each dot is one frequency. The bar to its right spans every word tied at that frequency, so the long flat run at 1 is all the words seen only once. The dashed line is an ideal Zipf curve with s = 1.</p>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Tokens</div><div class="value" id="r-tokens">–</div></div>
+  <div class="tile"><div class="label">Types</div><div class="value" id="r-types">–</div></div>
+  <div class="tile"><div class="label">Types seen once</div><div class="value" id="r-hapax">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/zipf-language.js"></script>
+</body>
+</html>

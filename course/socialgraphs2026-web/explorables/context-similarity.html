@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Concordance and similar words</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>Target word
+    <select id="target"></select>
+  </label>
+</div>
+
+<div class="text-panels">
+  <div class="panel">
+    <h2>Concordance / KWIC</h2>
+    <div class="context-list" id="concordance"></div>
+    <p class="note">Each row is an actual occurrence of the target in the toy corpus. Read across the row to see the words immediately around it.</p>
+  </div>
+  <div class="panel">
+    <h2>NLTK-style similar()</h2>
+    <div class="bar-list" id="candidates"></div>
+    <p class="note">These words share immediate left-and-right contexts with the target. Shared context can indicate similar use, but it does not guarantee synonymy.</p>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Target</div><div class="value" id="r-target">–</div></div>
+  <div class="tile"><div class="label">Occurrences shown</div><div class="value" id="r-occurrences">–</div></div>
+  <div class="tile"><div class="label">Best context match</div><div class="value" id="r-best">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/context-similarity.js"></script>
+</body>
+</html>

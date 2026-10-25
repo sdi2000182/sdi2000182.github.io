@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Marvel corpus atlas</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/week7-explore.css">
+</head>
+<body>
+<div class="controls">
+  <span class="seg" id="projection">
+    <button data-projection="svd" class="on">PCA map</button>
+    <button data-projection="tsne">t-SNE map</button>
+  </span>
+  <label>Color
+    <select id="color">
+      <option value="none">none</option>
+      <option value="community">network community</option>
+      <option value="cluster" selected>text cluster</option>
+      <option value="bertopic">BERTopic topic</option>
+    </select>
+  </label>
+  <label style="flex:1;min-width:210px">Find
+    <input id="search" class="query-box" type="search" placeholder="Spider-Man, Hulk, Wolverine…">
+  </label>
+  <button id="reset">reset view</button>
+</div>
+<div id="legend" class="legend-inline"></div>
+
+<div class="atlas-layout">
+  <div class="atlas-stage">
+    <svg id="atlas" class="atlas-svg" viewBox="0 0 560 500" role="img" aria-label="Map of 303 Marvel character descriptions"></svg>
+    <div class="tooltip wide" id="tip"></div>
+    <div class="atlas-note">scroll to zoom · drag to pan · click a point · labeled dots are the most-linked characters</div>
+  </div>
+
+  <div class="atlas-side">
+    <div class="detail-card" id="detail">
+      <div class="detail-header">
+        <div class="mini-k">selected document</div>
+        <div class="detail-name" id="detail-name">Choose a point</div>
+        <p class="detail-desc" id="detail-desc">Click any character to compare its nearest neighbors in the original 384-dimensional embedding space with its nearest dots in the two-dimensional drawing.</p>
+      </div>
+
+      <div class="detail-columns">
+        <div class="detail-summary">
+          <div class="detail-meta" id="detail-meta"></div>
+          <div class="cluster-summary">
+            <div class="mini-k">text cluster</div>
+            <div class="cluster-name" id="detail-cluster-name">text cluster</div>
+            <div class="cluster-words" id="detail-cluster-terms"></div>
+          </div>
+          <div class="cluster-summary">
+            <div class="mini-k">BERTopic topic</div>
+            <div class="cluster-name" id="detail-bertopic-name">BERTopic topic</div>
+            <div class="cluster-words" id="detail-bertopic-terms"></div>
+          </div>
+        </div>
+        <div>
+          <div class="mini-k">nearest in the 384-d space (cosine)</div>
+          <ul class="neighbor-list" id="high-neighbors"></ul>
+        </div>
+        <div>
+          <div class="mini-k">nearest in this 2D map</div>
+          <ul class="neighbor-list" id="map-neighbors"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/corpus-atlas.js"></script>
+</body>
+</html>

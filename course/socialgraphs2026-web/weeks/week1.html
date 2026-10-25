@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<!-- GENERATED from content/weeks/week1.md — edit the .md and rerun ./generate.py; do not hand-edit. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 1 · Networks — 02805</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/site.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.css">
+<script data-goatcounter="https://suneman.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="../index.html">02805</a>
+  <a href="../the-new-way.html">The new way</a>
+  <a href="../index.html#weeks">Weeks</a>
+  <a href="../index.html#overview">Overview</a>
+  <span class="spacer"></span>
+  <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Textbook ↗</a>
+</nav>
+
+<nav class="page-toc" aria-label="On this page">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="week1.html#how-to-read-watch-work-in-the-age-of-ai">0 · How to read/watch/work in the age of AI</a></li>
+    <li><a href="week1.html#why-networks">1 · Why networks?</a></li>
+    <li><a href="week1.html#nodes-edges-and-all-that">2 · Nodes, edges, and all that</a></li>
+    <li><a href="week1.html#choosing-the-representation">3 · Choosing the representation</a></li>
+    <li><a href="week1.html#your-toolbox">4 · Your toolbox</a></li>
+    <li><a href="week1.html#degree-distributions">5 · Degree distributions</a></li>
+    <li><a href="week1.html#seeing-a-network">6 · Seeing a network</a></li>
+    <li><a href="week1.html#group-exercise">7 · Group Exercise</a></li>
+    <li><a href="week1.html#essentials">Essentials</a></li>
+    <li><a href="week1.html#goodies">Goodies</a></li>
+  </ol>
+</nav>
+
+<main class="wrap">
+
+  <p class="eyebrow">Week 1 of 8 · Networks half</p>
+  <h1>Networks</h1>
+  <p class="lede">Welcome. This week we will jump right in and get started on understanding networks! Networks are a kind of blueprint for real-world systems. An underlying structure that lets us see parallels between societies, brains, Wikipedia and power grids. And knowing those parallels will provide deep information about those systems, their flows, and their dynamics. To get you into the right mindset, I've designed a nice playground for you to build network-science intuition. There are also resources to learn more (too many, probably, but I get excited), and exercises to make sure that you actually learned what you thought you learned.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Before class</p>
+    <ul>
+    <li><strong>Read first</strong> — <a href="../the-new-way.html">The new way of working</a>: how this course runs, why it was rebuilt, and what the three exercise modes mean. It'll be worth your time.</li>
+    <li><strong>Bring</strong> — a laptop with a working Python 3 + Jupyter + NetworkX, and an agentic coding tool you have actually logged into (more under Part 4). We meet Wednesday <strong>09:00</strong> in Auditorium 43, building 303A.</li>
+    <li><strong>The day is simple</strong> — at 09:00 I give a little pep-talk about this week's ideas; the rest of the day you work through this page at your own pace, with me and the TAs around to help.</li>
+  </ul>
+  </div>
+
+  <h2 id="how-to-read-watch-work-in-the-age-of-ai">0 · How to read/watch/work in the age of AI</h2>
+
+  <p>Ok. I had hoped you could get started on networks by now, but I need to underscore one thing. <em>This page (incl. the videos) is the primary information in the course</em>. You should try to read everything I've put here, try to play with all the explorables. Then there are links out. We have a textbook, there is plenty of other outside material (cool videos from the internet, links to websites, etc). All that is for when you want to dig deeper. So while the page <em>is</em> the course in a deep way, it's also not trying to give you all the information in the way a traditional textbook might. I want this website to be the starting point. A trusted place to initiate your own adventures. So I hope I'll give you enough information to want to dig deeper.</p>
+
+  <p>And what's genuinely <em>new</em> this year is the AI possibilities for engaging with the material in new ways. AI doesn't just enable us to do coding in a new way. AI enables a new way of engaging with the material!</p>
+
+  <p>So when you leave the page, maybe don't start by just reading the full chapter in the textbook. Experiment with starting by getting a summary of the chapter from your favorite chatbot. Asking it some questions. And <em>then</em> you start reading. And if you get stuck on something technical while reading (or while watching one of my videos), pause and ask the chatbot to explain that part to you in a new/different way. Or ask the chatbot to find the best videos on the internet to explain a topic instead of the textbook. The possibilities are endless, and we're just beginning to figure out how to make the most of this new technology for learning. I hope you'll be part of the exploration. I want to hear about your experiences.</p>
+
+  <p>And always keep in mind: Being at university is about <em>you upgrading your human brain</em>. Learning. Getting smarter. That's why you're here. If you don't learn you're wasting your time.</p>
+
+  <h2 id="why-networks">1 · Why networks?</h2>
+
+  <p>Here is the key idea in the course: for many real-world systems, the <em>pattern of connections</em> can give us a deeper understanding of how the system works and changes than if we simply look at the individual parts. Who infects whom, which idea spreads, why some Wikipedia pages are famous and most are invisible, how a blackout cascades across a continent. We can't get any of that one component at a time. But if we start from the network, we can begin to see the patterns that shape those processes. And we can find patterns that reveal similarities between systems that we thought wouldn't be related at all.</p>
+
+  <p>The idea that networks are important has a history, running from a coffee-room puzzle about bridges in Königsberg to the moment physicists collided with sociologists in the late 1990s. It is a story that I am deeply connected to ... so that is where we start.</p>
+
+  <iframe class="video-embed" src="https://www.youtube.com/embed/qjM9yMarl70"
+    title="Video lecture: the history of networks" loading="lazy" allowfullscreen></iframe>
+
+  <p class="explorable-caption">Uncle Sune (young Sune in fact) tells his version of the story. The founding myths of network science: Euler's bridges, random graphs, small worlds, scale-free networks.</p>
+
+  <p>Notice what happened in my talk. For two hundred years, graph theory was mathematics — beautiful, exact. Then, around the turn of the millennium, the data began arriving. At first as a trickle, then a tsunami: email logs, collaboration records, the web itself. Suddenly the same key set of measurements could be run on networks of millions of nodes from wildly different domains.</p>
+
+  <p>And we (the scientists) kept finding the <em>same</em> structural patterns. That quest for 'universality' (more on that next week), the physicists' belief that something deep and structural ties distant systems together, is the reason network science exists as a field, and the reason a single course can be about friendship, Wikipedia, epidemics and power grids at once. (The textbook's own version of this origin story (Chapter 1, Introduction), and its case that networks are <em>the</em> way into complexity, and complexity the great scientific problem of our time, can be found in the <a href="week1.html#goodies">Goodies</a> at the bottom of the page.)</p>
+
+  <h2 id="nodes-edges-and-all-that">2 · Nodes, edges, and all that</h2>
+
+  <p>Ok. Now let's define the key terms. A network is a set of <strong>nodes</strong> (we also sometimes call them vertices, actors, sites) and a set of <strong>edges</strong> (links, ties, connections) between pairs of them. Sometimes the nodes and edges encode more information.</p>
+
+  <p>Here are some important definitions in a slightly messy list:</p>
+
+  <ul>
+    <li><strong>Degree</strong>: A node's <em>degree</em> is the number of edges that connect to it.</li>
+    <li><strong>Edges</strong>: <em>Undirected</em> edges don't have a direction. They are mutual by construction — a Facebook  friendship, a co-authorship, a physical cable. <em>Directed</em> edges have a direction: following on Instagram, citing a paper, one Wikipedia page linking to another. The distinction might seem small, but it completely changes how we think about the network. It changes how flows can unfold, and many other aspects. Starting with the simplest example, in a directed network every node has two degrees — how many edges come <em>in</em> and how many go <em>out</em> — and the two can tell completely different stories. (As we will see below, a page everyone links to is famous; a page that links to everyone is a list.) <em>Weighted</em> edges say something about the strength of connections. How many emails, how strong a friendship, how much traffic. Unweighted edges just exist. Most analyses start unweighted and add weights if and when the question demands them.</li>
+    <li><strong>Networks</strong>. Networks inherit these names, so when we talk about undirected networks, unweighted networks,  weighted networks, and so on, we just mean networks with those kinds of edges. And there's one more distinction. When we collect data in the wild, weird things can happen. Nodes that link to themselves, more than one link between two nodes, etc. That's also difficult to deal with mathematically, so someone invented <em>simple networks</em>. That's where we allow only one edge per pair of nodes and no self-loops. Simple, unweighted, undirected networks are the default in this course ... and in most of network science. Read more about this in <em>Atlas</em> Ch. 7, if you're curious now.</li>
+  </ul>
+
+  <p>Now for more important definitions.</p>
+
+  <p>If you add up all the degrees in an undirected network you get exactly <em>twice the number of edges</em> (because every edge has two ends). It might sound trivial, but if you think about it, we just did some math. Because when you divide by the number of nodes you get the <strong>average degree</strong> $\langle k\rangle = 2m/n$ (in a network with $n$ nodes and $m$ edges). Pro tip: This is the kind of common-sense math I might ask about on the pen and paper exam.</p>
+
+  <p>And how many edges <em>could</em> there be in a network? We can calculate that too. With $n$ nodes there are $n(n-1)/2$ possible pairs. If we divide the actual number of edges by the number of possible edges, we get the network's <strong>density</strong>: $2m/[n(n-1)]$. And there's a key empirical finding related to the density. It's almost always really low. This is because real networks tend to be sparse. Many of the networks you will encounter, be they social, neural, or technological, have only a tiny fraction of their possible edges, and almost everything interesting about network structure lives in <em>which</em> few edges made the cut.</p>
+
+  <p>Now for a short video of me talking about notation.</p>
+
+  <iframe class="video-embed" src="https://www.youtube.com/embed/MMziC5xktHs"
+    title="Video lecture: network notation" loading="lazy" allowfullscreen></iframe>
+
+  <p class="explorable-caption">It's proven that getting the same material from different sources helps learning. And there's extra stuff in the video, so take a look. It's also a nice way to mix things up.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p><a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;6 <em>Basic Graphs</em> — simple, directed, weighted. So you have the textbook version for reference. And keep in mind what I said in Part 0 of this page.</p>
+  </div>
+
+  <p>Your intuitive mental image might be a picture of nodes connected in some cool way. But how do we write down the networks so other people or computers can analyze them? The simplest way to store a network is the <strong>edge list</strong>. True to its name, the edge list simply lists the edges one at a time ("$A \leftrightarrow B$, $A \leftrightarrow C$, …").</p>
+
+  <p>Another common way of representing a network is the <strong>adjacency matrix</strong>. It contains the same information as the edge list, but in matrix form. The matrix form is convenient for many calculations. We have one row and one column per node, with the entry $a_{ij}$ recording the edge from node $i$ to node $j$. We put a 0 where there's no connection. If the network is weighted and directed, we place the weight $w$ of the connection between $i$ and $j$ as $a_{ij} = w$. And if the network is unweighted and undirected, we use a $1$ for each edge, and undirected means <em>symmetric</em>: $a_{ij} = a_{ji}$. In that way, every type of network from above (undirected, directed, weighted, etc.) becomes a visible property of the matrix. The simple-network constraint implies that the diagonal is all zeros (no self-loops).</p>
+
+  <p>To get a little sense of why the adjacency matrix is useful, notice that computing the sum across row $i$ gives you node $i$'s degree (out-degree, if directed); sum down column $j$, its in-degree. But reading is boring, and you will get a lot more intuition by playing with an actual adjacency matrix. So I made a system for you where you can do just that:</p>
+
+  <iframe class="explorable-frame" src="../explorables/adjacency-matrix.html" height="560"
+    title="Explorable: the adjacency matrix, live" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Type numbers into the matrix and watch the network obey — an entry is an edge, its size is the weight, and the row and column sums (the degrees) are computed for you at the margins. Make the matrix symmetric (or press symmetrize) and the arrows lose their heads: an undirected network <em>is</em> a symmetric matrix. Node H starts with an empty row and an empty column — that is what an isolate looks like in matrix form.</p>
+
+  <p><strong>Note</strong>: Don't skip playing with the explorable. Try to clear it, then decide where you want a link to appear, how you want it to look (directed, undirected, weighted, etc.) and see if you can make it happen. I promise you you'll get a better sense of the adjacency matrix if you do.</p>
+
+  <h2 id="choosing-the-representation">3 · Choosing the representation</h2>
+
+  <p>So we've just been talking about nodes, edges and about how networks are a great way to represent real world systems. <strong>But</strong> there's one thing I swept under the rug in saying so. Before we even have a network to think about, someone decides <em>what a node is and what an edge is</em>. And that decision determines every conclusion downstream. And it's not always clear what the right network is.</p>
+
+  <p>Consider "the network of science." Model it as papers citing papers: nodes live forever, edges point backward in time, and the hubs are classic scientific papers. Model it as scientists co-authoring papers as a team: nodes are active for some period, edges are mutual, and the hubs are sociable lab heads. Same underlying reality, two networks that disagree about almost every question you could ask: who matters, what spreads, what a community is. Neither representation is wrong. Each is a way of representing the same system, but designed to answer different questions.</p>
+
+  <p>This is the first skill we test on paper and the first question we will ask about your project: not "what did you measure?" but "why is <em>this</em> the network you measured it on?"</p>
+
+  <p>Exercises appear where the story needs them, starting here. Do them in your group or by yourself, but always in a notebook (except where the paper says paper), and keep an eye on the "mode" labels. The 🧠 exercises are the ones I will use for the test.</p>
+
+  <div class="exercise">
+    <h4>1.1 — Did you really read it? <span class="mode learn">🧠 Learn</span></h4>
+    <ol>
+    <li>List three real networks and state the nodes and the edges for each. Then, for each: directed or undirected? Weighted or unweighted? What question would force you to add weights?</li>
+    <li>Pick a network <em>you</em> personally care about — a fourth one. What are its nodes and edges? Roughly how large is it? Can it actually be mapped (is the data available), and does it change over time? Is something flowing or spreading <em>on</em> it? Why do you care?</li>
+    <li>The representation question we just discussed: describe one system that can be cast as a network in two genuinely different ways (different node choice, not just different data). Ask a question each representation answers that the other cannot.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>1.2 — Calibrate your tool <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Your first taste of the new skill that runs through the whole course: never trust a measurement you haven't checked.</p>
+    <ol>
+    <li>Ask your favorite LLM ten specific, factual questions about the domain of the network you chose in 1.1.2 — dates, names, numbers, who-connects-to-whom.</li>
+    <li>Grade every answer against a source you trust. Report the score as a fraction, and classify the failures: plainly wrong, subtly wrong, or confidently unverifiable?</li>
+    <li>One paragraph: given that error profile, what would you let this tool do unsupervised, and what would you always verify? Keep the paragraph. This is a mini practice run for your project's <code>AI_METHODS.md</code>.</li>
+  </ol>
+  </div>
+
+  <h2 id="your-toolbox">4 · Your toolbox</h2>
+
+  <p>Now for a detour. It's time to take a break from the networks for a bit and mix it up. So we'll be talking about how to work with the networks inside your computer. Why, you might ask? Well, a key finding in all of didactics (the theory of how people learn) is that <em>active learning</em> is best. You need to do stuff yourself, not just sit and passively watch/read. (That's why I created the adjacency matrix explorable.)</p>
+
+  <p>But we can do better than explorables. You need to get closer to the code. Like a real engineer. So I've set up the course with quick dips into Jupyter notebooks. You get to use a coding agent, so getting your hands dirty shouldn't take long. But there's still a lot of value in seeing what's actually going on behind the beautifully designed explorables.</p>
+
+  <p>You need two things running before the rest of this page makes sense, and getting them running is this week's first builder exercise. You will need:</p>
+
+  <p><strong>Python + Jupyter + NetworkX.</strong> Notebooks are your workspace. Your analyses, exercise answers and project experiments should take place in notebooks you keep in a dedicated folder on your computer. Any recent Python 3 works; install <code>jupyterlab</code> and <code>networkx</code> however you prefer. Your agent can help you (see next paragraph).</p>
+
+  <p><strong>An agentic coding tool.</strong> Any of the ones listed in the <a href="../the-new-way.html#agents">agents box on the read-this-first page</a> is fine; if in doubt, a terminal agent. Just pick one and start playing. In 🚀 exercises we assume you have one.</p>
+
+  <p>So let's start a habit that I hope will run through the whole course. There will be lots of explorables on these pages to activate those brains of yours. But there is always underlying code. A matrix, a graph, a plot, etc. An explorable lets you play with an idea, but <em>rebuilding it in your own notebook</em> will empower you and give you much more of a sense that YOU are in charge. Whenever there's an important explorable, there'll be an associated coding exercise.</p>
+
+  <div class="exercise" id="toolbox">
+    <h4>1.3 — Toolbox shakedown <span class="mode builder">🚀 Builder</span></h4>
+    <p>Get the machinery running.</p>
+    <ol>
+    <li>Install Python 3, JupyterLab and NetworkX. Set up your agentic coding tool and confirm it can create and edit a notebook for you.</li>
+    <li>Have your agent build a notebook that loads Zachary's Karate Club network (built into NetworkX), draws it, and reports the number of nodes, the number of edges, and the five highest-degree nodes.</li>
+    <li>Now the part that matters: <em>read the generated code</em> and verify one claim by hand. Pick a node, count its edges in the drawing, and check the machine agrees. In three sentences: what did the agent do well, and what would you not have caught if it were wrong?</li>
+    <li>Create your own version of Part 2's adjacency-matrix explorable as code. Write an $n \times n$ matrix by hand (you decide $n$), type it in as a <code>numpy</code> array, turn it into a directed NetworkX graph (<code>nx.from_numpy_array</code>), draw it, and print the row sums and column sums next to NetworkX's own <code>in_degree</code> and <code>out_degree</code>. Hopefully they agree. Then symmetrize the matrix ($A + A^{\mathsf T}$, clipped to 1), build an undirected graph from it, and draw again: the arrowheads should be gone. Finally, plant a weight, an isolate and a self-loop in the matrix and check that each shows up in the drawing exactly where Part 2 says it should.</li>
+  </ol>
+  </div>
+
+  <h2 id="degree-distributions">5 · Degree distributions</h2>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p><a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;9 <em>Degree</em>. Degrees and degree distribution are super important in network science. I'll explain why in a bit, but let's just get into it.</p>
+  </div>
+
+  <p>One node's degree is a number. All the degrees together form a revealing portrait of the network: the <strong>degree distribution</strong>. It shows, for each $k$, how many nodes have exactly $k$ connections. Plot it for many real-world networks and you meet a shape that launched a thousand papers (literally!).</p>
+
+  <p>It turns out that many real networks have 'heavy-tailed' distributions. Extreme degree counts are much more likely than you would expect. Take social networks. Most people have only a few links, but then there is a long tail of ever-rarer, ever-better-connected figures stretching far to the right.</p>
+
+  <p>On ordinary (linear) axes that tail is not easy to see. Those extreme counts are still rare. But if you plot your degree distribution on <strong>log–log axes</strong>, then you can see those extremely connected nodes clearly. Whether that tail is "a power law" is a discussion we'll get into next week; this week your job is smaller and more important: <em>make the two plots, and learn to read them</em>. In network science we love distributions.</p>
+
+  <p>So let's learn how to plot distributions. Nowadays, there's no need to actually make the plots. Your coding agent can write the matplotlib lines. But you need to learn to read the plots and decide whether to believe the answer (exercise 1.6 is about that). What stays human is <em>reading the shapes</em>.</p>
+
+  <p>That is what we will be training here, first in an explorable with two clean mathematical specimens, then on the real thing:</p>
+
+  <iframe class="explorable-frame" src="../explorables/two-distributions.html" height="520"
+    title="Explorable: two distributions, four ways of looking" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Flip one axis at a time and find the pair that makes each curve straight — that pair is the distribution's signature. Start linear–linear and notice how little you can see.</p>
+
+  <p><strong>Intermezzo: Marvel superheroes on Wikipedia.</strong> In the following I thought it would be fun to have some real data to work on. So I went to Wikipedia, found a list of all the Marvel characters (the nodes) and then I took all the internal wiki-links that connect them (the edges).</p>
+
+  <p>Let's characterize this network with the tools so far. The network has $n = 303$ nodes. The edges are <em>directed</em> — page $A$ linking to page $B$ says nothing about whether $B$ links back. And there are $1{,}784$ directed links. Every arrow has one tail and one head, so the average out-degree and the average in-degree are the same number: $1784/303 \approx 5.9$. Make the network undirected (and ask only which pairs are connected at all) and the directed links collapse to $m = 1{,}434$ pairs (350 of them link both ways). That gives the undirected average degree $\langle k\rangle = 2m/n = 2 \cdot 1434/303 \approx 9.5$. Density: with $n = 303$ there are $n(n-1)/2 = 45{,}753$ possible pairs, of which 1,434 exist, so the density is $1434/45753 \approx 0.031$. About 3%. So 97% of the connections that could exist, don't exist.</p>
+
+  <p>By real-world standards this is actually a <em>dense</em> network; many networks you will encounter have a density well below 1%. Finally, 17 characters have no links at all (the <strong>isolates</strong>). There is one connected blob of 277 characters (91% of the network; we call this the giant connected component — defined properly below) that holds almost everyone else. In between there is a single island of 9 characters. Every number in this paragraph follows from $n$, $m$ and the edge list alone. Which is exactly why the pen-and-paper test likes this kind of question.</p>
+
+  <p>Ok. Intermezzo complete. Now we can use the real data in the explorable. Below you can see the Marvel network's degree distribution, one dot per value of $k$. I am going to describe the explorable below, but TBH I find it really difficult. Just go play with it and you'll learn more than reading my text. But I'll try anyway.</p>
+
+  <ul>
+    <li>Start with this setting: <em>In degree only. Linear axes. Raw data</em>. That shows you how many pages have $k$ incoming links. Turn on binning and nothing much happens.</li>
+    <li>Next: <em>In degree only. Loglog axes. Raw data</em>. Now you see the power-law (or at least something power-law-ish). Turn on binning and you extend the power law.</li>
+    <li>Now do the same for the out-degree. Observe what happens.</li>
+    <li>Finally do the same for the undirected.</li>
+  </ul>
+
+  <p>I am passionate about <em>Binning</em>. For power laws, we often average over ranges of $k$ that widen as $k$ grows. It is a way to make sense of the noise out in that tail of the distribution. This is what happens when you turn binning on: at low $k$ the binned curve sits <em>exactly on</em> the raw dots (there is nothing to average where every value is well populated), and only starts smoothing where the data thins.</p>
+
+  <p>One important note is printed on the axis itself: it shows <em>$k+1$</em>, not $k$. That is because a log axis can't show zero, and 17 characters have no links at all; the shift keeps them in the picture. Every binning choice in this plot is deliberate, and <a href="week1.html#binning-footnote">a note in the Goodies at the bottom of the page</a> explains all of them.</p>
+
+  <iframe class="explorable-frame" src="../explorables/real-degrees.html" height="520"
+    title="Explorable: the Marvel network's degree distribution" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Switch in- to out-degree and watch the leaderboard change characters entirely; then go log–log and turn on binning to see the tail through the noise. Both axis modes plot $k+1$, so the zero-degree characters survive the log axis instead of silently vanishing.</p>
+
+  <div class="exercise">
+    <h4>1.4 — Reading the Marvel degree distributions <span class="mode learn">🧠 Learn</span></h4>
+    <p>Play with the explorable until you can answer these in your own words. It is fine to discuss your answers with a chatbot afterwards. But try to figure them out yourself first — that is the whole point of Part 0. Your weak human brain needs the exercise!</p>
+    <ol>
+    <li><strong>Only the in-degree looks like a power law.</strong> On log–log axes the in-degree tail stretches all the way to Spider-Man at $k = 106$; the out-degree tail dies almost four times earlier — the highest out-degree is Betsy Braddock's, at 28. Why? Think about <em>who creates</em> each kind of edge. An in-link is conferred by someone else: a different article's editors deciding this character matters. An out-link is authored: someone has to sit down and write it into this page. Which of the two has a ceiling, and which can keep growing? (Week 2 has a model of exactly that mechanism.) So what does a node's in-degree <em>mean</em> in this network, and what does its out-degree mean?</li>
+    <li><strong>Binning extends the power law.</strong> With raw data the straight line seems to stop somewhere around $k \approx 20$; switch binning on and it continues far to the right. Where did the extra range come from: was it hiding, or did the binning invent it? Hint: out in the tail every count is 0 or 1. There is a single character at $k = 106$ and nobody at 105 or 107 ... and a log axis can't even show the zeros.</li>
+    <li><strong>What can go wrong with binning?</strong> I am obsessed with getting it right for a reason. Scroll down the <a href="week1.html#binning-footnote">binning note in the Goodies</a> and name at least two ways a careless binning could manufacture a power law that is not there — or destroy one that is. (Things to think about: what if you forget to divide by the bin width? What if you bin where the data is dense? Where should a wide bin's dot sit on a log axis? Should you ever fit a slope to a binned plot?) Then the subtle one: degrees are <em>integers</em>. Drop log-spaced bin edges onto integers and what can happen — can one bin hold two integers while its neighbor holds none? And what can go wrong with the very first and the very last bin?</li>
+    <li><strong>The undirected distribution is the least useful of the three.</strong> Switch to it and look at both ends. It counts each neighbor once, whichever way the links point — so it is roughly in-degree plus out-degree, and two different generating mechanisms are mixed into one curve. What does that do to the low end — can an obscure character with zero in-links have an undirected degree of zero? And what does the tail really show you? Explain why a network scientist handed this network would look at in- and out-degree separately.</li>
+  </ol>
+  </div>
+
+  <p>Ok. I'm dropping in two extra network science vocabulary items so you have them. A <strong>path</strong> is a sequence of edges from one node to another; the <strong>distance</strong> between two nodes is the length of the shortest path; and a <strong>connected component</strong> is a set of nodes that can all reach each other via a path (it's a bit more complicated for directed graphs, check the book for that). Many real networks have a single <strong>giant component</strong> connecting nearly every node, plus a few scattered islands — just like the superheroes do. The deeper theory of paths (and the famous "six degrees") arrives in week 3.</p>
+
+  <div class="exercise">
+    <h4>1.5 — Pen and paper warm-up <span class="mode learn">🧠 Learn</span></h4>
+    <p>No notebook for this one — do it on paper. It's practice for the test.</p>
+    <ol>
+    <li>Take the edge list $A \leftrightarrow B$, $A \leftrightarrow C$, $A \leftrightarrow D$, $B \leftrightarrow C$, $C \leftrightarrow D$, $D \leftrightarrow E$, $E \leftrightarrow F$. Draw the network. Write down every node's degree. How many edges does the network have, and what does the sum of your degrees have to do with that number? Compute the average degree and the density.</li>
+    <li>Write the network's adjacency matrix, rows and columns ordered A–F. Two properties of this matrix follow directly from the network being <em>undirected</em> and <em>simple</em> — name them, and say which is which. Then check that every row sum reproduces the degree you wrote down in 1.</li>
+    <li>Find every triangle. Which node would you remove to disconnect the network, and what does that suggest "importance" might mean here? (Week 3 makes this precise.)</li>
+    <li>Now make the edges directed: $A \to B$, $A \to C$, $A \to D$, $B \to C$, $C \to D$, $D \to E$, $E \to F$. Write each node's in-degree and out-degree, and write the adjacency matrix again — which of the row sums and the column sums gives which degree now? What real relationship (following? citing? emailing?) would make this direction pattern meaningful?</li>
+    <li>Sketch the (undirected) network's degree distribution as a bar chart: $k$ on the $x$-axis, number of nodes on the $y$-axis. Then write the distances $d(A,F)$ and $d(B,E)$.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>1.6 — The distribution, as code <span class="mode instrument">🔬 Tool</span></h4>
+    <p>Now rebuild the two explorables above in a Jupyter notebook. The idea is that your agent writes the code, you decide what to plot and check every number against what the page shows.</p>
+    <ol>
+    <li>Load the week-1 snapshot of the Marvel network from the <a href="../data/index.html">course data page</a> — as a <em>directed</em> graph, and with every node added first so the 17 isolates survive (the page shows how). Confirm $n = 303$ and 1,784 directed edges. Then reconcile that with Part 2: collapse the edges to undirected pairs and check you get $m = 1{,}434$ and $\langle k\rangle \approx 9.5$ — and explain, in one sentence, why the two edge counts differ.</li>
+    <li>Reproduce the plots from the real-degrees explorable: the in-degree and the out-degree distribution, each on linear and on log–log axes, plotted against $k+1$ so the isolates stay on the log axis (and say so on the axis label). Print each distribution's top five characters and check them against the explorable's leaderboard.</li>
+    <li>Implement the binning scheme from the <a href="week1.html#binning-footnote">Goodies</a> — width-1 bins up to $k+1 = 7$, doubling bins after that, each count divided by the bin's width, each bin drawn at the geometric mean of the degrees it covers — and overlay it on the raw points. The two must coincide exactly where the bins are width 1; if they don't, something is wrong, and it is probably the normalization.</li>
+    <li>Reproduce the two-distributions explorable: draw 10,000 samples from an exponential distribution and 10,000 from a power law (your agent knows how; make it show you), plot both on all four axis combinations, and confirm with your own eyes which pair straightens which curve. Then put the real in-degree distribution on the same axes as the two specimens. Which does it resemble — and how sure are you? (We'll work more on this question during week 2.)</li>
+  </ol>
+  </div>
+
+  <h2 id="seeing-a-network">6 · Seeing a network</h2>
+
+  <p>Data visualization is a crucial part of network science. Networks are often beautiful. And there's lots to learn about plotting graphs. Today we get started and scratch the surface.</p>
+
+  <p>The first thing I do with a network is to plot it. The force-directed layout (NetworkX's default) pulls connected nodes together and pushes nodes in general apart, and for a few hundred nodes it is genuinely revealing: clusters, hubs and loners jump out. But know what you are looking at. Node positions in a force layout <em>are a good start</em>. They tell you what to look for. But in the end the node locations depend on a physics simulation (there's an energy function that is optimized) so you always have to be critical. Very large networks are difficult to visualize: maybe you run out of pixels on the screen, or you don't have enough compute to calculate a good layout. And if the networks are very dense you'll get a big undifferentiated <em>hairball</em>. In short, <em>there are many ways network visualization can go wrong</em>.</p>
+
+  <p>For now, let's look at the superheroes and enjoy the many ways we can organize the nodes.</p>
+
+  <p>To make the visualizations more fun, I have calculated the network <em>communities</em>. This is something we'll be getting into during week 4. But for now the idea is simply that we can find groups of nodes that are more connected than what we would expect if things were wired up randomly ... kind of like groups of friends in a social network. I've given each community a color and created a visualization that organizes according to community.</p>
+
+  <iframe class="explorable-frame" src="../explorables/layouts.html" height="650"
+    title="Explorable: the layout is not the network" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Flip between layouts and watch the same 277 characters (the giant component) fly to new homes — the edges never change, only the story the picture tells. Toggle the community colors to see the groups a clustering algorithm finds (week 4 explains how); in the community circle, edges bend toward the center so each cluster's internal chatter hugs the rim. <strong>Then hover a hub</strong> (go find Spider-Man) and watch one neighborhood survive every rearrangement.</p>
+
+  <div class="exercise">
+    <h4>1.7 — Reading a network drawing <span class="mode learn">🧠 Learn</span></h4>
+    <p>Short questions on the explorable above. This is again the kind of thing we can ask on a test: here is a drawing of a network — what in it is data, what is decoration, and what would a careless reader conclude?</p>
+    <ol>
+    <li>Flip through <em>force</em>, <em>circle A–Z</em>, <em>circle by degree</em> and <em>random</em>. For each of the following, does it change when the layout changes? The number of nodes; the number of edges; Spider-Man's degree; how far apart two characters sit on the screen; the network distance (Part 5) between the same two characters. Sort the five into <em>data</em> and <em>decoration</em>.</li>
+    <li>In <em>circle A–Z</em>, two characters sit right next to each other on the rim. What, if anything, does that tell you about whether they are connected? Now switch to <em>circle by degree</em>: what does this layout let you read off that A–Z does not — and what is the <em>only</em> piece of information any circle layout adds to the drawing?</li>
+    <li>In the <em>force</em> layout, pick two nodes that sit close together. Give two different reasons they might be close — one that is about the network, one that is not. Then hover a hub: are its neighbors all near it? What does that tell you about how much to trust "close on screen"?</li>
+    <li>Is the <em>random</em> layout wrong? Think of something it is good for (hint: it is the drawing you would get if position carried no information at all — a baseline). What does <em>force</em> show you that <em>random</em> cannot, and what does it tempt you to over-read?</li>
+    <li>Turn the community colors on and off in each layout. Which layout makes the communities easiest to see, which hides them completely, and why does the color survive every layout while the visual grouping does not? Finish with a three-sentence critique of one layout as a data visualization: what it makes visible, what it hides, and one wrong conclusion a reader might draw from it.</li>
+  </ol>
+  </div>
+
+  <h2 id="group-exercise">7 · Group Exercise</h2>
+
+  <p>Time to team up: you'll work in a <strong>3-person group</strong>, formed now and kept all semester (within reason). The rules (and the one iron rule) live on the front page — read <a href="../index.html#groups">Groups</a>. Aim to form yours today; if it takes a couple of sessions, that's OK too — but the exercise below is a lot more fun with friends to brainstorm alongside.</p>
+
+  <div class="exercise" id="go-nuts">
+    <h4>1.8 — Go nuts with your LLM <span class="mode builder">🚀 Builder</span> · every week, from now on</h4>
+    <p>Every week of this course ends this way, so read the rules once.</p>
+    <ol>
+    <li>Your group should start a <strong>public website</strong> — a GitHub Pages site your LLM helps you build and style, your personal corner of the internet.</li>
+    <li>Each week you add one post to the website: use the week's tools to get something fun out of the <strong>shared playground dataset</strong>. Be as free and creative as possible. Go nuts with your friends and an LLM. Try something. Make figures, build. Write about what you found (or didn't).</li>
+  </ol>
+    <p>By December you will have done the "interactive data story" eight times before it counts for anything — and the whole class will have accumulated insight on one dataset.</p>
+    <p>The playground: the 303 characters in Wikipedia's <a href="https://en.wikipedia.org/wiki/Category:Marvel_Comics_superheroes" target="_blank" rel="noopener">Category:Marvel Comics superheroes</a> and the links between their pages — a dense, hub-riddled little universe (Spider-Man alone is linked by a third of it), sitting right there in public. This half of the course we mine its structure; from week 5, its text.</p>
+    <p>This week — the bootstrap edition:</p>
+    <ol>
+    <li>Power up your group's site on GitHub Pages. Let your agent do as much as possible; make it yours — name it, style it, put your group on it.</li>
+    <li>Grab the week-1 release of the shared network — the edge list and the node roster on the <a href="../data/index.html">course data page</a> (frozen snapshot, so every group computes on identical data; the page tells you how to load it without losing the isolated nodes — yes, there are isolated nodes, and they are worth a look).</li>
+    <li>Explore, freely, with this week's ideas and tools: degree distributions (linear and log–log!), in- versus out-degree — who is linked <em>to</em> most, who links out most, and why are those different people? Draw the network. Make art. Go nuts. Find the islands outside the giant component. Or chase something we didn't think of — surprise us.</li>
+    <li>Write it up as your first post: what you asked, what you did, one figure or table, what surprised you. (Stretch: re-derive a corner of the dataset yourself with the Wikipedia API — see below — and check the snapshot.)</li>
+  </ol>
+    <p><strong>The Wikipedia API, for when you want to go beyond the snapshot.</strong> The course hands you the Marvel network ready-made. But the data comes from somewhere, your go-nuts posts are allowed to reach past the frozen snapshot, and your final project will need a cool dataset that could well be a crawl of a domain of its own. Wikipedia serves every page in two forms: the rendered HTML you read in a browser, and the raw wiki-source behind it — internal links sit in the wiki-source as <code>[[Page name]]</code>, which is exactly how the Marvel network's edges were harvested — and the API hands you either one programmatically. My old-school video walkthrough is <a href="https://www.youtube.com/watch?v=9l5zOfh0CRo" target="_blank" rel="noopener">here</a> (it is Python-2 era; the ideas hold, your agent speaks the current dialect). One practical note: Wikipedia may answer <code>403</code> unless your request carries a User-Agent header identifying your client.</p>
+    <p><strong>Then, always:</strong> post your site link in this week's Teams channel by Monday evening · read what other groups made · leave <strong>constructive, friendly criticism</strong> on at least one other group's post (what works, one concrete thing to try). Honing your critical eye on each other's work is half the point. We announce a winner from last week at the start of the next session.</p>
+  </div>
+
+  <section class="band band-essentials">
+
+  <h2 id="essentials" class="essentials">Essentials</h2>
+
+  <p>This is the 🧠 Learn core of the week, in one place: the definitions you must know cold, and what you should be able to do with them on paper. If a term below feels shaky, the section that teaches it is one click up the page — and if you can do everything here with a pen, you are ready for this week's share of Test 1.</p>
+
+  <dl class="defs">
+    <dt>Network</dt>
+    <dd><strong>nodes</strong> (the objects) connected by <strong>edges</strong> (their relationships). We write $n$ for the number of nodes and $m$ for the number of edges.</dd>
+    <dt>Directed · undirected</dt>
+    <dd>directed edges point — $A \to B$ says nothing about $B \to A$; undirected edges simply connect the pair. Wikipedia links are directed.</dd>
+    <dt>Weighted · unweighted</dt>
+    <dd>a weighted edge carries a number (intensity, capacity, a count); an unweighted edge just exists.</dd>
+    <dt>Simple network</dt>
+    <dd>at most one edge per pair of nodes, no self-loops. The default in this course — and in most of network science.</dd>
+    <dt>Degree $k_i$</dt>
+    <dd>the number of edges connected to node $i$; directed networks split it into <strong>in-degree</strong> and <strong>out-degree</strong>. Summing all degrees gives exactly $2m$, because every edge has two ends.</dd>
+    <dt>Average degree</dt>
+    <dd>$\langle k\rangle = 2m/n$.</dd>
+    <dt>Density</dt>
+    <dd>the fraction of possible edges that actually exist: $2m/[n(n-1)]$. Real networks are almost always <strong>sparse</strong> — the interesting structure lives in <em>which</em> few edges made the cut.</dd>
+    <dt>Edge list</dt>
+    <dd>the network written down as a list of its edges, one pair at a time.</dd>
+    <dt>Adjacency matrix</dt>
+    <dd>one row and one column per node; entry $a_{ij}$ records the edge from $i$ to $j$ (its weight, or $1$/$0$). Undirected $\Leftrightarrow$ symmetric: $a_{ij} = a_{ji}$.</dd>
+    <dt>Path · distance</dt>
+    <dd>a path is a sequence of edges leading from one node to another; the distance between two nodes is the length of the <em>shortest</em> path between them.</dd>
+    <dt>Connected component</dt>
+    <dd>a set of nodes that can all reach each other. An <strong>isolate</strong> is a node with no edges at all; the <strong>giant component</strong> is the one component that holds most of the network.</dd>
+    <dt>Degree distribution</dt>
+    <dd>for each value of $k$, how many nodes have exactly $k$ connections. The single most revealing portrait of a network.</dd>
+    <dt>Heavy tail</dt>
+    <dd>extreme degrees are far more common than a bell curve would allow. Nearly invisible on linear axes — plot on <strong>log–log axes</strong> to see it.</dd>
+    <dt>Binning</dt>
+    <dd>averaging a noisy distribution over ranges of $k$ that widen as $k$ grows. Done right, the binned curve sits <em>exactly on</em> the raw data where the data is dense; our plots show $k+1$ so the degree-0 nodes survive the log axis.</dd>
+  </dl>
+
+  <div class="on-the-test">
+    <p class="eyebrow">On the first test</p>
+    <p>From this week, you should be able to do the following <strong>on paper, closed book</strong>. Any formula you need is printed on the test paper — you are never asked to write one from memory:</p>
+    <ul>
+    <li>translate a described real-world system into nodes and edges — and defend the choice, or say what a different choice would change;</li>
+    <li>classify a network from its description: directed / undirected, weighted / unweighted — and spot when a representation is wrong for the question being asked of it;</li>
+    <li>compute, on a ≤6-node example: degrees, in- and out-degrees, edge counts, average degree and density — and use the fact that degrees sum to twice the edge count;</li>
+    <li>reconcile the directed and undirected views of the same network: explain why the directed link count and the undirected pair count differ, why the average in- and out-degree must be equal, and what happens to the isolates if a careless loading drops them;</li>
+    <li>write the adjacency matrix of a small network — directed or undirected, weighted or not — and read a matrix back into a drawing; know why undirected means symmetric, and where the degrees hide in the rows and columns;</li>
+    <li>sketch or read a degree distribution — including knowing what changes between linear and log–log axes, why heavy tails vanish on the former, and what a heavy in-degree tail next to a short out-degree tail says about how each kind of edge comes to exist;</li>
+    <li>say what binning does to a noisy degree distribution — where the binned curve must sit exactly on the raw data, why the plots show $k+1$ rather than $k$, and at least two ways a careless binning can manufacture a power law that is not there (or destroy one that is);</li>
+    <li>use the definitions of path, distance, and connected component on a small example;</li>
+    <li>look at a drawing of a network and say what in it is data and what is layout — and name one conclusion the drawing invites that the data does not support;</li>
+    <li>read a short network description or figure and identify what is a node property, what is an edge property, and what is a property of the whole network.</li>
+  </ul>
+  </div>
+
+  </section>
+
+  <h2 id="goodies">Goodies</h2>
+
+  <p>Everything above is the course. Everything below is for the student who finished the page and wants more. Nothing here is on the test, all of it is worth your time, and none of it has to be done this week (in fact many things remain relevant to check out later). Pick what you like.</p>
+
+  <div class="callout" id="own-expert">
+    <p class="eyebrow">⭐ Build your own network-science expert</p>
+    <p>Both textbooks — the <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a> we use this year and Barabási's <a href="https://networksciencebook.com/" target="_blank" rel="noopener"><em>Network Science</em></a> we used last year (more on both below) — are free PDFs. Drop them into <a href="https://notebooklm.google.com/" target="_blank" rel="noopener">NotebookLM</a> (or any tool that lets you chat with a pile of documents) and you have a tutor that has read both books cover to cover, can explain any concept from either angle, and can be asked "where do these two authors disagree?" — which is a better question than most exam questions. For a third voice, add Easley &amp; Kleinberg's <a href="https://www.cs.cornell.edu/home/kleinber/networks-book/" target="_blank" rel="noopener"><em>Networks, Crowds, and Markets</em></a> (free, from the economics/computer-science side of the field). Then remember Part 0: the point of the expert is to make <em>you</em> smarter, not to be smart on your behalf.</p>
+  </div>
+
+  <p><strong>Networks in the context of science.</strong> <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;1 <em>Introduction</em> — the textbook's own origin story, and its opening argument (its section 1.1 is literally titled "Why Complexity is the Key"): that complex systems are the great unsolved scientific problem of our time, and networks are the way in. Read it if you want to know where this field sits in science at large, not just what it computes.</p>
+
+  <p><strong>A second textbook, straight from the source.</strong> Last year this course ran on <a href="https://networksciencebook.com/" target="_blank" rel="noopener"><em>Network Science</em></a> by Albert-László Barabási — one of the field's founders, free online, and a genuinely different take: physics-flavored, model-first, with the scale-free story told by the person who started it. Ch.&nbsp;1 and Ch.&nbsp;2 cover this week's ground. Where the Atlas is broad and encyclopedic, Barabási is a narrative — read the two side by side and you learn as much from where they disagree as from where they agree.</p>
+
+  <p><strong>Six degrees, tested on the internet.</strong> Veritasium's <a href="https://www.youtube.com/watch?v=TcxZSmzPw8k" target="_blank" rel="noopener"><em>The Science of Six Degrees of Separation</em></a> (2015) is the video that put the small-world idea in front of millions — Milgram's original letter experiment, the Kevin Bacon game, and a live replication where viewers tried to reach Derek Muller by forwarding an email through people they knew. Average chain length: about three. Week 3 is where we do the mathematics of why.</p>
+
+  <p><strong>An explorable in the spirit of this page, but longer.</strong> Nicky Case's <a href="https://ncase.me/crowds/" target="_blank" rel="noopener"><em>The Wisdom and/or Madness of Crowds</em></a> is a playable essay about networks and people: why the crowd around you can look nothing like the population (the majority illusion), how small worlds arise, and when ideas and behaviors spread — or don't — depending only on the wiring. Half an hour, no equations, and it quietly covers weeks 1 through 3 before we get to them.</p>
+
+  <p><strong>The hidden influence of social networks.</strong> Nicholas Christakis's <a href="https://www.ted.com/talks/nicholas_christakis_the_hidden_influence_of_social_networks" target="_blank" rel="noopener">TED talk</a> (2010, 19 minutes) on the Framingham study: obesity, smoking, happiness and loneliness all clustering in a real social network — and the hard question of whether that is contagion, homophily, or something else. It is the sociological argument for this course in one talk.</p>
+
+  <p><strong>Play with the small world.</strong> The <a href="https://oracleofbacon.org/" target="_blank" rel="noopener">Oracle of Bacon</a> computes any actor's Bacon number from the film co-appearance network; mathematicians do the same with <a href="https://en.wikipedia.org/wiki/Erd%C5%91s_number" target="_blank" rel="noopener">Erdős numbers</a> on the co-authorship network. Both are shortest paths in a network someone chose to represent — try to name the nodes and edges of each, and notice the representation decisions from Part 3 hiding inside.</p>
+
+  <p><strong>Two books for the sofa.</strong> Barabási's <em>Linked</em> (2002) and Duncan Watts's <em>Six Degrees</em> (2003) are the popular-science accounts of the moment the field was born, written by two of the people who were in the room. Neither needs any mathematics; both explain why the physicists got so excited.</p>
+
+  <p><strong>Two more from me.</strong> <a href="https://www.youtube.com/watch?v=iDlb9On_TDQ" target="_blank" rel="noopener"><em>The NetworkX Library</em></a> — a few minutes on drawing and measuring networks in NetworkX, from an earlier year of this course (older syntax here and there; your agent can translate). And the <a href="https://www.youtube.com/watch?v=9l5zOfh0CRo" target="_blank" rel="noopener">Wikipedia API walkthrough</a> from the go-nuts exercise belongs here too, once you are ready to crawl a domain of your own.</p>
+
+  <div class="callout" id="binning-footnote">
+    <p class="eyebrow">For the one student who cares about binning</p>
+    <p>You noticed the axis says $k+1$ and the button says "binned," and you want to know exactly what was done to the data. Good instinct. Here is the full confession.</p>
+    <p><strong>Why bin at all.</strong> In a heavy-tailed distribution the tail is made of rare events — up there, every count is 0 or 1, and raw $P(k)$ degenerates into a jagged scatter (one dot per lonely character). Binning trades resolution for statistical reliability: average neighboring degrees together and the trend comes out of the noise. But binning where the data is <em>dense</em> buys no reliability and just blurs your best measurements.</p>
+    <p><strong>So the scheme is mixed.</strong> Working in $u = k+1$: bins of width 1 for $u = 1, \dots, 7$, then doubling bins $[8, 16)$, $[16, 32)$, $[32, 64)$, $[64, 128)$. Each bin's count is divided by the bin's <em>width</em> — otherwise a bin would look popular merely for being wide — so what is plotted is a probability density per unit of degree. That normalization (over all 303 nodes, isolates included) is why the width-1 bins coincide exactly with raw $P(k)$: where the bins are width 1, "binned" and "raw" are the same number, and the curve only becomes an abstraction where it has to. Each doubling bin is drawn at the geometric mean of the integers it covers — $[8, 16)$ sits at $\sqrt{8 \cdot 15} \approx 10.95$ — the midpoint as a log axis sees it, not the arithmetic middle, which would sit visibly right of center.</p>
+    <p><strong>The $k+1$ shift.</strong> A log axis cannot show zero, and this network has 17 characters with no links at all — plot raw $k$ and they silently vanish, which is exactly the kind of quiet data loss this course wants you allergic to. Shifting to $k+1$ keeps them in the picture at the cost of slightly bending the low end of the curve ($k = 0, 1, 2$ move the most; the tail barely notices). The rule, if you ever do this yourself: the axis label must say so. Ours does.</p>
+    <p><strong>Integers are not a continuum.</strong> Degrees are integers, and the standard recipe — <code>np.logspace</code> for the bin edges, then a histogram — quietly assumes they are not. Near the low end, log-spaced edges fall <em>between</em> consecutive integers: with edges at 1, 1.3, 1.8, 2.4, 3.2, … some bins contain no integer at all (they plot as zero, or on a log axis simply vanish) while a neighbor swallows two integers and looks twice as populated as it should. Dividing by the nominal bin width does not repair this; you have to divide by the number of <em>integers</em> the bin actually contains — or make the edges integers in the first place. The ends need the same care. Round fractional edges to integers and you can get two identical edges: a zero-width bin, or the first two bins silently merged into one. At the top, the largest degree sits exactly on the last edge and, depending on the library's half-open convention, either drops out of the histogram or lands in a bin that has quietly merged with its neighbor. This is why the scheme above uses width-1 bins where the degrees are dense and integer edges (powers of two) after that: every bin holds a known set of integers, none is empty by construction, and the normalization is honest.</p>
+    <p><strong>What binning is not for.</strong> Reading shapes, yes. Fitting exponents, no — never fit "the slope of a power law" to shifted, binned data (or, honestly, to a raw log–log plot either). The grown-up tool needs no bins at all: the cumulative distribution. It finds you in week 2.</p>
+  </div>
+
+  <p><a href="../index.html#weeks">← All weeks</a></p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>02805 · Technical University of Denmark</span>
+    <span>Sune Lehmann · <a href="mailto:sljo@dtu.dk">sljo@dtu.dk</a></span>
+    <span>Content <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="license noopener">CC BY-SA 4.0</a></span>
+  </div>
+</footer>
+
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/js/toc.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false}], throwOnError: false});"></script>
+</body>
+</html>

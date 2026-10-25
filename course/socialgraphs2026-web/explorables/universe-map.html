@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Map of the Marvel universe</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/week7-explore.css">
+<style>
+  .controls select { font: inherit; color: var(--text-primary); background: var(--page);
+    border: 1px solid var(--baseline); border-radius: 7px; padding: 3px 6px; }
+  .custom-row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 0 0 8px; font-size: 13px; color: var(--text-secondary); }
+  .custom-row input { flex: 1; min-width: 150px; font: inherit; color: var(--text-primary); background: var(--page);
+    border: 1px solid var(--baseline); border-radius: 7px; padding: 4px 8px; }
+  .custom-row .arrow { color: var(--text-muted); }
+  .custom-msg { width: 100%; font-size: 12px; color: var(--text-muted); min-height: 1em; }
+  .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  .axis-zero { stroke: var(--grid); stroke-width: 1; stroke-dasharray: 3 4; }
+  .axis-end { font-size: 12px; font-weight: 600; fill: var(--text-secondary); }
+  .map-point { fill: var(--series-1); }
+  .pull-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .pull-grid > div { border-top: 1px solid var(--grid); padding-top: 6px; min-width: 0; }
+  .pull-words { font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-secondary); }
+  .pull-words b { color: var(--text-primary); font-weight: 600; }
+  .zval { float: right; font-variant-numeric: tabular-nums; color: var(--text-primary); font-size: 13px; }
+  .fp-words { font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-secondary); margin-top: 4px; }
+  @media (max-width: 640px) { .pull-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="controls">
+  <label>Horizontal <select id="ax-x"></select></label>
+  <label>Vertical <select id="ax-y"></select></label>
+  <label>Color
+    <select id="color">
+      <option value="none">none</option>
+      <option value="community">network community</option>
+      <option value="gender">gender (Wikidata)</option>
+      <option value="team">team (Wikidata)</option>
+    </select>
+  </label>
+  <label style="flex:1;min-width:190px">Find
+    <input id="search" class="query-box" type="search" placeholder="Doctor Strange, Storm, Blade…">
+  </label>
+  <button id="reset">reset view</button>
+</div>
+<div class="custom-row">
+  <span>Your own axis:</span>
+  <input id="cust-a" value="young teenager school student teen" aria-label="words for one end of the custom axis">
+  <span class="arrow">↔</span>
+  <input id="cust-b" value="old veteran ancient retired aged" aria-label="words for the other end of the custom axis">
+  <button id="cust-go">use it</button>
+  <span class="custom-msg" id="cust-msg"></span>
+</div>
+
+<div id="legend" class="legend-inline"></div>
+
+<div class="atlas-layout">
+  <div class="atlas-stage">
+    <svg id="map" class="atlas-svg" viewBox="0 0 560 500" role="img" aria-label="303 Marvel characters placed on two semantic axes"></svg>
+    <div class="tooltip wide" id="tip"></div>
+    <div class="atlas-note">scroll to zoom · drag to pan · click a point · dot size = Wikipedia in-links</div>
+  </div>
+  <div class="atlas-side">
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="mini-k">selected character</div>
+        <div class="detail-name" id="d-name">Choose a point</div>
+        <div class="mini-k" style="margin-top:6px">its most distinctive words (TF-IDF, names removed)</div>
+        <div class="fp-words" id="d-words"></div>
+      </div>
+      <div class="pull-grid">
+        <div><div class="mini-k">horizontal <span class="zval" id="d-zx"></span></div><div class="pull-words" id="d-px"></div></div>
+        <div><div class="mini-k">vertical <span class="zval" id="d-zy"></span></div><div class="pull-words" id="d-py"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/universe-map.js"></script>
+</body>
+</html>

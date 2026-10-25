@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · The backbone of the weighted philosophers network</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  .controls label.off { opacity: 0.45; }
+  .controls input[type="range"]:disabled { cursor: default; }
+  .legend .swatch.dashed { height: 0; background: none; border-top: 3px dashed var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>Filter
+    <span class="seg" id="mode-seg">
+      <button data-mode="disparity" class="on">Disparity filter α</button><button data-mode="threshold">Threshold w ≥</button>
+    </span>
+  </label>
+  <label id="alpha-ctl">α
+    <input type="range" id="alpha" min="0" max="100" value="77">
+    <span class="val" id="alpha-val">0.20</span>
+  </label>
+  <label id="w-ctl">w ≥
+    <input type="range" id="wmin" min="1" max="10" value="3" style="width: 100px">
+    <span class="val" id="w-val">3</span>
+  </label>
+  <label>Dropped links
+    <span class="seg" id="drop-seg">
+      <button data-v="faint" class="on">faint</button><button data-v="hidden">hidden</button>
+    </span>
+  </label>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>What survives the filter — sized by strength, colored by community</h2>
+    <div class="legend" id="legend" style="flex-wrap: wrap; gap: 4px 12px"></div>
+    <canvas class="net" id="net" style="height: 360px; cursor: crosshair"></canvas>
+  </div>
+  <div class="panel">
+    <h2>How much is left, across the whole range</h2>
+    <div class="legend" id="chart-legend" style="flex-wrap: wrap; gap: 4px 12px">
+      <span class="key"><span class="swatch" style="background: var(--series-1)"></span>links kept (of 9,139)</span>
+      <span class="key"><span class="swatch" style="background: var(--series-2)"></span>nodes with a link (of 1,374)</span>
+      <span class="key"><span class="swatch dashed"></span>giant component (of 1,374)</span>
+    </div>
+    <svg class="chart" id="chart" style="height: 360px"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Links kept</div><div class="value" id="r-links">–</div></div>
+  <div class="tile"><div class="label">Nodes with a link</div><div class="value" id="r-nodes">–</div></div>
+  <div class="tile"><div class="label">Giant component</div><div class="value" id="r-giant">–</div></div>
+  <div class="tile"><div class="label">Strongest tie dropped</div><div class="value" id="r-dropped">–</div></div>
+  <div class="tile"><div class="label">Weakest tie kept</div><div class="value" id="r-kept">–</div></div>
+  <div class="tile"><div class="label">Hover a philosopher</div><div class="value" id="r-hover">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/marvel.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/community.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/backbone.js"></script>
+</body>
+</html>

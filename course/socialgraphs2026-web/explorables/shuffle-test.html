@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Shuffle test: the model becomes a test</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<style>
+  svg.mini { width: 100%; height: 120px; display: block; overflow: visible; margin-top: 6px; }
+  .sub { font-size: 12px; color: var(--text-muted); margin: 6px 0 0; }
+  .sub b { color: var(--text-secondary); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <label>quantity
+    <span class="seg" id="q-seg">
+      <button data-v="C" class="on">clustering C</button><button data-v="T">transitivity</button><button data-v="tri">triangles</button><button data-v="d">mean distance</button><button data-v="rec">reciprocity</button>
+    </span>
+  </label>
+  <label>null model
+    <span class="seg" id="null-seg">
+      <button data-v="swap" class="on">degree-preserving shuffle</button><button data-v="gnm">random G(n, m)</button>
+    </span>
+  </label>
+  <button id="one" class="primary">Shuffle once</button>
+  <button id="many">Shuffle ×100</button>
+  <button id="reset">Reset</button>
+  <span id="progress" style="color: var(--text-muted)"></span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2 id="net-title">Marvel giant component — nodes stay put, links get shuffled</h2>
+    <canvas class="net" id="net" style="height: 300px"></canvas>
+    <p class="sub" id="net-sub">The real network. Press <b>Shuffle once</b> to scramble it.</p>
+    <svg class="mini" id="mini"></svg>
+  </div>
+  <div class="panel">
+    <h2>The null distribution, one shuffle at a time</h2>
+    <div class="legend">
+      <span class="key"><span class="swatch" style="background: var(--series-1); height: 8px"></span>shuffled networks</span>
+      <span class="key"><span class="swatch" style="background: var(--accent)"></span>the real network</span>
+      <span class="key"><span class="swatch" style="background: var(--series-2)"></span>normal with the same mean &amp; sd</span>
+    </div>
+    <svg class="chart" id="chart" style="height: 330px"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label" id="l-real">Real network</div><div class="value" id="r-real">–</div></div>
+  <div class="tile"><div class="label">Shuffles</div><div class="value" id="r-n">0</div></div>
+  <div class="tile"><div class="label">Null mean ± sd</div><div class="value" id="r-null">–</div></div>
+  <div class="tile"><div class="label">z-score</div><div class="value" id="r-z">–</div></div>
+  <div class="tile"><div class="label">Empirical p (one-sided)</div><div class="value" id="r-p">–</div></div>
+  <div class="tile"><div class="label">Links</div><div class="value" id="r-m">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/marvel.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/shuffle-test.js"></script>
+</body>
+</html>

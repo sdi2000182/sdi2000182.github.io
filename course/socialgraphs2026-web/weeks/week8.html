@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<!-- GENERATED from content/weeks/week8.md — edit the .md and rerun ./generate.py; do not hand-edit. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 8 · Putting it all together · 02805</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/site.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.css">
+<script data-goatcounter="https://suneman.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="../index.html">02805</a>
+  <a href="../the-new-way.html">The new way</a>
+  <a href="../index.html#weeks">Weeks</a>
+  <a href="../index.html#overview">Overview</a>
+  <span class="spacer"></span>
+  <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Textbook ↗</a>
+</nav>
+
+<nav class="page-toc" aria-label="On this page">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="week8.html#today">1 · Today is different</a></li>
+    <li><a href="week8.html#project">2 · The exam: what, how, why</a></li>
+    <li><a href="week8.html#spine">3 · The best possible project</a></li>
+    <li><a href="week8.html#apis">4 · Workshop: finding undocumented APIs</a></li>
+    <li><a href="week8.html#dataset">5 · The coolest dataset you can find</a></li>
+    <li><a href="week8.html#question">6 · Asking the right question</a></li>
+    <li><a href="week8.html#report">7 · Writing the report</a></li>
+    <li><a href="week8.html#brainstorm">8 · The afternoon: a brainstorm</a></li>
+    <li><a href="week8.html#essentials">Essentials</a></li>
+    <li><a href="week8.html#goodies">Goodies</a></li>
+  </ol>
+</nav>
+
+<main class="wrap">
+
+  <p class="eyebrow">Week 8 of 8 · Networks × language</p>
+  <h1>Putting it all together</h1>
+  <p class="lede">Seven weeks of tools, and today no new method. Today is about the final project: what it is, why it looks the way it does, and everything we can do to help you make the best one possible.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Before class</p>
+    <ul>
+    <li><strong>Bring</strong>. Laptop with Chrome or Firefox, Python with <code>requests</code> installed, your agentic coding tool, and paper. For the workshop you need a browser whose developer tools you can open (right-click, <em>Inspect</em>), nothing more. For the afternoon you need paper, for the hour when the laptops are closed.</li>
+    <li><strong>Before you leave</strong>. Register your project group on DTU Learn before you go home. We plan the final session from that count, so this is the one administrative thing the day asks of you.</li>
+    <li><strong>This week's story in one line</strong>. With an agent you can produce infinite analysis, so the skill that matters is choosing the one question worth answering; a good dataset makes that question answerable, the method comes after the question, and every measurement has to be checked against what it claims to measure.</li>
+    <li><strong>Test 2 is next week</strong>. Wednesday 4 November, 08:30–09:30, and it covers weeks 5–7. Nothing from this week is on it.</li>
+  </ul>
+  </div>
+
+  <h2 id="today">1 · Today is different</h2>
+
+  <p>No new method, no explorables, no exercises to grind through. The day runs in three blocks, and the page is only one of them.</p>
+
+  <table class="plain">
+    <tr><th>When</th><th>What</th><th>Where</th></tr>
+    <tr><td>09:00–09:10</td><td>Welcome, and the go-nuts highlight from week 7</td><td>Auditorium 43</td></tr>
+    <tr><td>09:10–11:00</td><td><strong>Workshop: finding undocumented APIs</strong>, with our guest Piotr Sapiezynski (Section 4)</td><td>Auditorium 43</td></tr>
+    <tr><td>11:00–12:00</td><td><strong>Read this page</strong>, Sections 2–7, with your group</td><td>wherever you like</td></tr>
+    <tr><td>12:00–13:00</td><td>Lunch</td><td></td></tr>
+    <tr><td>13:00–13:10</td><td>A pep talk</td><td>Auditorium 43</td></tr>
+    <tr><td>13:10–16:00</td><td><strong>One big brainstorm</strong>: your group, a whiteboard, and Lasse, the TAs and me moving around the room (Section 8)</td><td>Auditorium 43 and the rooms around it</td></tr>
+    <tr><td>13:10–14:00</td><td><em>In parallel:</em> <strong>the group bazaar</strong>, for anyone still looking for a group</td><td>the front of Auditorium 43</td></tr>
+    <tr><td>before 16:00</td><td><strong>Register your group on DTU Learn</strong></td><td></td></tr>
+  </table>
+
+  <p>Lasse hosts the morning; I am around starting at 13:00.</p>
+
+  <p>Seven weeks ago you didn't know much about networks. Now you can build one from links or from text, find its communities, rank its nodes, embed its documents, measure sentiment, and extract the people mentioned on every page. And you have an agent that will run any of it while you get coffee. That last part changes what the rest of the course is about. When I taught this class before, the bottleneck was getting the code to work. Now the bottleneck is deciding what is worth running, and finding data worth running it on.</p>
+
+  <h2 id="project">2 · The exam: what, how, why</h2>
+
+  <p>The final project is the exam. It counts for 50% of your grade, it runs over weeks 9–13 on a dataset you pick, and here is what I am asking for.</p>
+
+  <p>The formalia in one box: <a href="../index.html#checklist">the project checklist on the front page</a>.</p>
+
+  <p><strong>What you deliver.</strong></p>
+
+  <ul>
+    <li><strong>A scientific paper.</strong> Written in the <strong>PNAS template</strong>, in <strong>LaTeX only</strong> (<a href="https://www.overleaf.com/latex/templates/template-for-preparing-your-research-report-submission-to-pnas-using-overleaf/fzcbzjvpvnxn" target="_blank" rel="noopener">the Overleaf template</a>; no Word version this year), <strong>at most six pages including references</strong>. The sections of a real paper: Abstract, Significance Statement, Introduction, Results, Discussion, Methods, References, plus author contributions (Section 7 walks through them). Uploaded as a PDF to DTU Learn by <strong>Friday 27 November, 23:59</strong>, so we can read every paper before we see you.</li>
+    <li><strong>A short presentation.</strong> <strong>Three slides, three minutes</strong>, in the final session, Wednesday 2 December, in front of me, Lasse and the TAs, followed by questions. The slides are a three-page PDF that you hand in together with the paper; we stitch everyone's into one deck and leaf through it on the day, so nobody plugs anything in. The point of the presentation is mainly to check if you know your stuff, so you'll pitch the project and we'll ask technical questions <em>mainly to check if you understand what you've handed in</em>.</li>
+    <li><strong>A half-page reflection.</strong> One PDF page at most, handed in with the paper, not graded. Two questions: did the "From an AI-drafted report" boxes on the week pages change how you read your own draft, and where in your own report work did you use them (or not)? Honest answers help us teach the course better next year; "they did not help" is a fine answer.</li>
+  </ul>
+
+  <p><strong>How it is graded.</strong> The project gets a single score on the course's <a href="../index.html#grading">0–3 scale</a>, paper and presentation together. Each of us who reads your paper scores it 0–3 in each of the categories below, with a comment, and after the presentations we meet and agree on the one number you get. The categories, so you know what we look for:</p>
+
+  <ul>
+    <li><strong>The research question.</strong> Is there one, is it interesting, and is it specific enough to be answered?</li>
+    <li><strong>Data and scope.</strong> The dataset contains both networks and text, it fits the question, and it took some ambition to get: collected, combined, or looked at in a way nobody has.</li>
+    <li><strong>Showcasing the course.</strong> You used the network science and the NLP from the course to learn something from your data, and you understand the methods you applied.</li>
+    <li><strong>Analysis and checks.</strong> The measurements are checked: a null, a second method, or a hand-labeled sample, with the result reported, and you say what your measurements actually measure.</li>
+    <li><strong>Figures.</strong> Are the figures awesome and serve the story? Also the basic stuff, like labeled axes, captions that say what to see.</li>
+    <li><strong>References and literature.</strong> Are you able to connect your work to the world around you and the scientific literature? References should be real, relevant, correctly cited, and should place the project in context: what was known before you started, what you added.</li>
+    <li><strong>Overall impression.</strong> One story, told well: a strong abstract and introduction, readable text, a sense of hard work and thoroughness.</li>
+    <li><strong>Presentation and questions.</strong> Three slides that pitch the project in three minutes, and a group that holds up under questioning.</li>
+  </ul>
+
+  <p><strong>Why it looks like this.</strong> Look at your group's go-nuts posts. Seven weeks, seven analyses, each one more than I could have asked of a student group a couple of years ago. You have proven you can create near infinite analyses - and I hope you have realized how much awesomeness you are capable of putting together. But the project and the exam deliberately do not reward more of that.</p>
+
+  <p>The exam format is chosen to grade two things:</p>
+
+  <ol>
+    <li>Can you pick an interesting problem? And</li>
+    <li>Can you communicate it clearly?</li>
+  </ol>
+
+  <p>A plain template with no room to spare means you lose a lot of the advantage that comes from the agents: flashy designs, volume, volume, volume. You cannot pile up endless nice-looking analyses, because they do not fit in the template, and a reader who sees six pages of everything can easily tell that you didn't focus.</p>
+
+  <p>The paper is about the one thing agents still cannot fully do for you: deciding which question is worth six pages. Just like a real scientific paper, a six-page paper is a great format for a single question, the analyses that support it, and reflections about how your methods impacted your findings. You have to carefully choose the two or three figures that carry the story.</p>
+
+  <p>The presentation part is about testing whether you know your stuff. If your agent wrote the pipeline, each of you still has to be able to say what it does, why the numbers are right, etc. We will ask whoever we like, so everyone in the group must be able to explain everything in the paper.</p>
+
+  <p><strong>The timeline.</strong></p>
+
+  <table class="plain">
+    <tr><th>When</th><th>What</th></tr>
+    <tr><td>Today, 13:00–16:00</td><td>The group bazaar and in parallel, the brainstorm: your candidate projects, cut down to one slide, discussed with Lasse, a TA or me; group registered on Learn before you leave</td></tr>
+    <tr><td>Wed 4 Nov</td><td>Test 2 in the morning; the first project session after: dataset locked, question drafted</td></tr>
+    <tr><td>Wed 11 Nov, 18 Nov, 25 Nov</td><td>Project period: we are in the room, come with questions</td></tr>
+    <tr><td>Fri 27 Nov, 23:59</td><td><strong>Hand-in on DTU Learn</strong>: the paper (PDF), the three slides (PDF) and the half-page reflection (PDF)</td></tr>
+    <tr><td>Wed 2 Dec</td><td>Presentations: three slides, three minutes, questions</td></tr>
+  </table>
+
+  <div class="callout" id="faq">
+    <p class="eyebrow">Frequently asked</p>
+    <p><strong>Can we use methods not covered in class?</strong> Yes, but the project is about showcasing what you've learned, so it should center on the network science and NLP tools from the course.</p>
+    <p><strong>Is our dataset too small?</strong> If it is around 50 nodes, probably, unless the text or the time dimension is unusually rich. Ask this afternoon.</p>
+    <p><strong>Do the six pages include figures?</strong> Yes. Everything, including references, fits in six pages of the template.</p>
+    <p><strong>Can we combine datasets?</strong> Please do. Section 5 says why.</p>
+    <p><strong>What goes on the three slides?</strong> Whatever pitches the project best in three minutes; most groups use one for the question and data, one for the main figure, one for what it means and what they checked. The deck is a plain PDF, no animations, since we leaf through everyone's in one file.</p>
+    <p><strong>Can we change groups after today?</strong> Yes, until 4 November; update the registration on Learn.</p>
+    <p><strong>What about terms of service, for data we collect ourselves?</strong> Collect gently (rate limits, pauses), keep what you collected and when.</p>
+  </div>
+
+  <h2 id="spine">3 · The best possible project</h2>
+
+  <p>The point of today is simple: we want to support you in making the best possible project. That is the spine of the day.</p>
+
+  <p>As I see it, the best possible project has three parts, and today has one block for each.</p>
+
+  <ul>
+    <li><strong>A dataset that you're excited about exploring.</strong> The morning workshop teaches you where such data might hide, and Section 5 gives you some questions you can ask to decide whether a dataset can carry a project.</li>
+    <li><strong>A question worth six pages.</strong> Section 6 is all about finding the right question.</li>
+    <li><strong>A story told clearly.</strong> Section 7 is how a scientific paper is built.</li>
+  </ul>
+
+  <h2 id="apis">4 · Workshop: finding undocumented APIs</h2>
+
+  <p>We kick off with a guest. <strong>Piotr Sapiezynski</strong> is an assistant professor at DTU Compute and an assistant research professor at Northeastern University. He audits online platforms and their algorithms, working with other researchers, journalists and NGOs, and his results have e.g. fed into a $5 billion FTC settlement with Facebook. With the journalist Leon Yin he edits <a href="https://inspectelement.org/" target="_blank" rel="noopener"><em>Inspect Element</em></a>, an online book that teaches journalists and researchers to find and use the APIs websites use behind the scenes. This morning he teaches the chapter that matters most for your project. In his words:</p>
+
+  <blockquote>
+    <p>You're probably already familiar with many APIs that come with a documentation and maybe even a tutorial. You might not yet know that most APIs are undocumented and hidden in plain sight. Being able to find them can provide a rich, reliable, and scalable method of building your own datasets. In this class you will learn how to find undocumented APIs in the wild, how to automate collecting data through them, and how they've been used by researchers and investigative journalists.</p>
+  </blockquote>
+
+  <div class="reading">
+    <p class="eyebrow">Workshop material</p>
+    <ul>
+    <li><strong>The chapter</strong>: <a href="https://inspectelement.org/apis.html" target="_blank" rel="noopener">Finding Undocumented APIs</a>, from <em>Inspect Element</em> (Leon Yin and Piotr Sapiezynski, eds.). The tutorial half is an eight-step walkthrough from the browser's Network tab to a Python function you can loop; the case studies show the method behind three real investigations. Skim it before class if you can; it is the scaffolding Piotr works from.</li>
+    <li><strong>Piotr's slides</strong>: <a href="https://docs.google.com/presentation/d/1N5_a1DD3lmZQ_2If5NMoMCjdir-SyqT8j5wCYass4mw/edit?usp=sharing" target="_blank" rel="noopener">Finding APIs tutorial</a>, from the last time he taught it.</li>
+    <li><strong>One thing to try before class</strong>: open any site you use that shows a list (a shop, a streaming service, a sports site), open the developer tools, click the <em>Network</em> tab, filter by <em>Fetch/XHR</em>, and reload. Click a request and look at the response. If you see the page's data as JSON, you have found your first undocumented API, and the workshop will teach you what to do with it.</li>
+  </ul>
+  </div>
+
+  <h2 id="dataset">5 · The coolest dataset you can find</h2>
+
+  <p>Here is why Piotr opens the day.</p>
+
+  <p>Every group in this room can download a Wikipedia category. Every group can find the same ten "network datasets" with the same ten Google searches, and I have read the papers that come out of them. The single biggest advantage a project can have is a dataset with an insight worth digging out of it, and after this morning you will learn about ways of finding insanely interesting data that most people do not know exists.</p>
+
+  <p>Think about what you looked at on your phone this week. The streaming service that recommends shows, the app that lists concerts in Copenhagen, the second-hand marketplace, the running app with its routes and kudos, the game with its match history, the recipe site including reviews, the real-estate listings, the sports site with every lineup since 1990. Each one of those pages is filled by a request you can probably see, copy, strip down and loop. Behind many of these apps you'll find a dataset with people in it, sometimes connections between them, and text they wrote, and few of them have been studied. Perfect for this class. Piotr's case studies are the proof: <a href="https://themarkup.org/google-the-giant/2021/04/08/google-youtube-hate-videos-ad-keywords-blocklist-failures" target="_blank" rel="noopener">a YouTube ad-keyword blocklist</a> found by watching which searches returned an empty response (<a href="https://themarkup.org/google-the-giant/2021/04/08/how-we-discovered-googles-hate-blocklist-for-ad-placements-on-youtube" target="_blank" rel="noopener">how they did it</a>), <a href="https://themarkup.org/amazons-advantage/2021/10/14/how-we-analyzed-amazons-treatment-of-its-brands-in-search-results" target="_blank" rel="noopener">Amazon's own brands</a> listed by a filter nobody documented, and <a href="https://themarkup.org/still-loading/2022/10/19/dollars-to-megabits-you-may-be-paying-400-times-as-much-as-your-neighbor-for-internet-service" target="_blank" rel="noopener">a million internet-service plans</a> collected in two days (<a href="https://themarkup.org/show-your-work/2022/10/19/how-we-uncovered-disparities-in-internet-deals" target="_blank" rel="noopener">the method</a>). Those were investigations. Yours is a project, but the strategy is the same: find the request, and the dataset is yours.</p>
+
+  <p><strong>Many other sources of data.</strong> Ambitious scraping of undocumented APIs is not the only way to go. There are many conventional datasets online that have carried great projects, and a familiar source with a fresh question beats a rare source with none. Some places to start:</p>
+
+  <ul>
+    <li><strong>Wikipedia</strong>, any category or list, with the crawl from <a href="week1.html#go-nuts">week 1</a>; the whole encyclopedia is one API. And <strong>Wikipedia back in time</strong>: every page's revision history is in the same API, so you can rebuild a category's network and text as it looked in 2010 and ask how it changed.</li>
+    <li><strong>The wikis devoted to shows, games, bands and books</strong> on Fandom and elsewhere, which run the same software and the same API as Wikipedia: <a href="https://starwars.fandom.com/wiki/Main_Page" target="_blank" rel="noopener">Wookieepedia</a>, the <a href="https://gameofthrones.fandom.com/wiki/Game_of_Thrones_Wiki" target="_blank" rel="noopener">Game of Thrones wiki</a>, the <a href="https://simpsons.fandom.com/wiki/Simpsons_Wiki" target="_blank" rel="noopener">Simpsons wiki</a>, the Marvel and DC wikis, <a href="http://brucebase.wikidot.com/" target="_blank" rel="noopener">Bruce Base</a> for every Springsteen show, and one for almost anything with fans.</li>
+    <li><strong>arXiv</strong>: every paper's title, abstract, authors and categories (<a href="https://www.kaggle.com/datasets/Cornell-University/arxiv" target="_blank" rel="noopener">bulk metadata</a>, or the <a href="https://info.arxiv.org/help/api/" target="_blank" rel="noopener">API</a>); co-authorship is the network, abstracts are the text, and <a href="https://openalex.org" target="_blank" rel="noopener">OpenAlex</a> (week 4, exercise 4.4) or <a href="https://www.semanticscholar.org/product/api" target="_blank" rel="noopener">Semantic Scholar</a> add the citations.</li>
+    <li><strong>Bluesky</strong>, which has an open, documented <a href="https://docs.bsky.app" target="_blank" rel="noopener">API</a> and a firehose: follows and reposts are the network, posts are the text, and it is young enough that most questions about it are unasked.</li>
+    <li><strong>Reddit</strong>, through the official API or the archives: a subreddit is a community, the users and their replies are the network, the comments are the text. <strong>Hacker News</strong> has the same shape and a <a href="https://github.com/HackerNews/API" target="_blank" rel="noopener">simple public API</a>.</li>
+    <li><strong>IMDb</strong> (<a href="https://developer.imdb.com/non-commercial-datasets/" target="_blank" rel="noopener">the datasets</a>) and <a href="https://grouplens.org/datasets/movielens/latest/" target="_blank" rel="noopener">MovieLens</a>: actors, films and crews as a network, plots and reviews as text.</li>
+    <li><strong>Music</strong>: <a href="https://docs.genius.com/" target="_blank" rel="noopener">Genius</a> for lyrics, <a href="https://musicbrainz.org/doc/MusicBrainz_API" target="_blank" rel="noopener">MusicBrainz</a> for who played with whom, Last.fm and Spotify's playlists for who is listened to together.</li>
+    <li><strong>Parliaments</strong>: the Danish Folketing publishes <a href="https://oda.ft.dk/" target="_blank" rel="noopener">every speech, member and vote</a> as an open API; the UK <a href="https://hansard.parliament.uk/" target="_blank" rel="noopener">Hansard</a> and the US <a href="https://www.congress.gov/" target="_blank" rel="noopener">Congressional Record</a> likewise.</li>
+    <li><strong>Books</strong>: <a href="https://www.gutenberg.org/" target="_blank" rel="noopener">Project Gutenberg</a> has tens of thousands of novels; the characters in one, or across an author's work, are a network you build with week 7's NER.</li>
+    <li><strong>GitHub</strong>: repositories, contributors, issues and README files, all through <a href="https://docs.github.com/en/rest" target="_blank" rel="noopener">one documented API</a>.</li>
+    <li><strong>Catalogs</strong>: <a href="http://bagrow.com/dsv/datasets.html" target="_blank" rel="noopener">Jim Bagrow's list</a>, Stanford's <a href="https://snap.stanford.edu/data/" target="_blank" rel="noopener">SNAP</a> and the <a href="https://networks.skewed.de/" target="_blank" rel="noopener">Netzschleuder</a> network catalog (mostly networks without text, so bring the text from elsewhere), and <a href="https://github.com/suneman/socialgraphs2025/wiki/Project-Assignments" target="_blank" rel="noopener">last year's list</a>.</li>
+  </ul>
+
+  <p>More in the <a href="week8.html#datasets">Goodies</a>.</p>
+
+  <p><strong>Combine datasets.</strong> This used to be a complicated/an impossible aspect: multiple sources, multiple formats, multiple sets of names that never quite match. With an agent, the joining is usually more like an afternoon. Lyrics plus collaboration credits, a character wiki plus the episode transcripts, a parliament's speeches plus its voting records, a subreddit plus the Wikipedia pages its users link to, the concert listings plus the setlists plus the artists' pages. The richest projects I have seen fused two datasets that nobody had put together, and the fusion itself was the first finding. Only the name resolution is still yours to check (recall week 7, Section 5): remember that two sources that both mention <em>Stark</em> have to agree on which one.</p>
+
+  <p><strong>The dataset questions.</strong> Before you fall in love with a question, make sure the data can carry it. A dataset is worth your five weeks if:</p>
+
+  <ul>
+    <li><strong>It has both halves.</strong> Nodes with links <em>and</em> text on the nodes, or text you can build a network from. The course is networks × language; the project should be too.</li>
+    <li><strong>It is big enough to have structure and small enough to work with.</strong> A few hundred to a few thousand nodes is the sweet spot. Below that, communities and distributions are noise. Above 10 thousand nodes everything becomes time consuming and your project will likely be more about managing compute than good questions.</li>
+    <li><strong>You can get it without too much effort.</strong> A documented API, an undocumented one, a dump, or a crawl you already have a pretty good idea of how to run. If getting the data is the project, you do not have a project. I've seen many projects die trying to crawl sites that didn't want to be crawled — e.g. Twitter or LinkedIn.</li>
+    <li><strong>You already care about the domain.</strong> You will read hundreds of these documents. Pick something where reading them is a pleasure, because you will also be the only person in the room who can tell whether a result is plausible.</li>
+    <li><strong>Something about it is unknown.</strong> Not unknown to science, unknown to you and to the people who care about that domain. "Which philosophers bridge traditions?" is a real question. "What is the degree distribution?" is a figure.</li>
+  </ul>
+
+  <div class="exercise">
+    <h4>8.1 — Three datasets, on paper <span class="mode learn">🧠 Learn</span></h4>
+    <p>Here are three candidate project datasets, described the way a group might describe them next week.</p>
+    <ol>
+    <li><em>The full English Wikipedia</em>: every article, every link, every word.</li>
+    <li><em>The 41 characters in our favorite TV series</em>: a fan wiki with one page per character and a "relationships" section.</li>
+    <li><em>Every speech in the Danish parliament 2010–2024</em>: about 400,000 speeches by about 600 members, with party, date, and who spoke right before whom.</li>
+  </ol>
+    <p>For each one, think about the five questions above and write one sentence per part. Then say which of the three you would pick, and what you would do to the other two to make them workable (subset, crawl deeper, change the unit, fuse with a second source). There is a defensible answer for all three, and the point is the reasoning.</p>
+  </div>
+
+  <h2 id="question">6 · Asking the right question</h2>
+
+  <p>Now for tips about asking a good research question.</p>
+
+  <p><strong>The question comes before the method.</strong> "We ran Louvain and word2vec on the corpus" is not a question. "Do the characters who are structurally central in the link network also sit at the center of the story, in the text?" is one. Notice that the second version tells you which methods to use. The first tells you nothing about why.</p>
+
+  <p>But it's complicated. Because sometimes the best questions arrive because you see that a method makes it possible to ask a new and interesting question. So don't be blind to the fact that methods can inspire good questions!</p>
+
+  <p>And also know that the VERY best questions arise from playing with the data. From iteration. In my own research I usually</p>
+
+  <ul>
+    <li>Start from a question (that I think is brilliant).</li>
+    <li>Do some analyses and realize it was actually a pretty stupid question to be asking.</li>
+    <li>Ask a new and better question based on the results of the initial analyses.</li>
+    <li>Repeat that a few times until I have the right final question</li>
+    <li>Then I pretend that I was asking that final question all along.</li>
+  </ul>
+
+  <p>And <em><strong>you are allowed to do that too</strong></em>. You are not bound by your initial idea. Allow it to develop as you work with data. Agents make those iterations cheaper and faster. Just remember that you need to have a clean and beautiful story when you're done. Then you put that story in the paper ;)</p>
+
+  <p><strong>Say what your analyses actually measure.</strong> Modularity measures how grouped a partition is, not how right. A sentiment score measures what a lexicon or a classifier does on your text, not how a character feels. Cosine similarity between embeddings measures shared context in the training data, not shared meaning in your domain. Every analysis in your paper needs one sentence that says what it captures and one that says what it misses.</p>
+
+  <p><strong>Validate your choices.</strong> Compare against a null (week 2), against another method (week 4), against a hand-labeled sample (week 7). If a model produced the number, you check the model on examples you read yourself, and you report the agreement. A result without a check is a claim about your software, not about the world.</p>
+
+  <p><strong>More on building a story.</strong> This point expands on what I ended on when I was writing about iterating to the right question above.</p>
+
+  <p>When you write your project, <em>build one single story</em>, not a pile of techniques. Every figure should answer part of your question ... or set it up. If a figure does neither, you probably don't need it. If you get your story perfect, a reader can say what you found in a single sentence after reading your abstract (and every section after that should make the sentence more believable).</p>
+
+  <p><strong>Know what makes an analysis convincing.</strong> It is not the method (sorry about repeating this so many times, but it's because it's a mistake that so many students make), it is the combination: a clear question, a measurement that fits it, a check that the measurement works, a comparison that rules out the boring explanation, and a limitation you found yourself before the reader did. A thing that I've written many times across the weekly lectures: <em>your entire pipeline going from raw data to big complicated models and measures impacts your answer</em>. Be aware of that in your writing and when you interpret and explain your results.</p>
+
+  <div class="callout" id="ai-report">
+    <p class="eyebrow">From an AI-drafted report</p>
+    <blockquote>
+    <p><em>We applied Louvain community detection, LDA topic modeling, sentiment analysis, named entity recognition, and semantic search to the Marvel corpus. The results show rich structure: Louvain found 9 communities (modularity 0.38), LDA found 12 topics, and the average sentiment was 0.12. These findings demonstrate that the network and the text are deeply interconnected, which confirms our hypothesis.</em></p>
+  </blockquote>
+    <p>Five methods, three numbers, zero questions. The modularity has no null (a shuffled Marvel scores 0.25, so 0.38 is modest). The 12 topics were never compared to the 9 communities, so "deeply interconnected" is asserted, not shown. The average sentiment of 0.12 is a property of the lexicon on Wikipedia prose, and nothing in the paragraph tells you what it was checked against. And "confirms our hypothesis" is the tell: no hypothesis was stated.</p>
+    <p>Here's a more precise description: <em>We asked whether the link communities and the text topics group the same characters. They agree above chance (NMI 0.31 against 0.05 for shuffled labels), and the disagreements concentrate in the 40 characters who appear in several team books. Sentiment did not separate the groups, and our lexicon agreed with our own labels on only 61% of a 50-sentence sample, so we do not interpret it.</em></p>
+  </div>
+
+  <div class="exercise">
+    <h4>8.2 — Which is the better question? <span class="mode learn">🧠 Learn</span></h4>
+    <ol>
+    <li>Take the three go-nuts posts your group is proudest of. For each, write the question it answered in one sentence. If you cannot, write the question it <em>should</em> have answered.</li>
+    <li>For each question, name the measurement that answered it and write one sentence on what that measurement captures and one on what it misses.</li>
+    <li>Pick the one post where a check was missing (a null, a second method, a hand-labeled sample). Say which check, and what result would have made you retract the post.</li>
+    <li>Rewrite the AI-drafted paragraph above for <em>your</em> best post: the same three-sentence honest version, with your numbers.</li>
+  </ol>
+  </div>
+
+  <h2 id="report">7 · Writing the report</h2>
+
+  <p>I'm basically asking you to write a <em>scientific paper</em>. That's why I chose this format. The format is PNAS's own: start from <a href="https://www.overleaf.com/latex/templates/template-for-preparing-your-research-report-submission-to-pnas-using-overleaf/fzcbzjvpvnxn" target="_blank" rel="noopener">the PNAS template on Overleaf</a> on day one, and write into it, so you always know how much room you have left. Before writing anything, watch this.</p>
+
+  <iframe class="video-embed" src="https://www.youtube.com/embed/vtppZ3wDVGs"
+    title="Video lecture: the structure of a scientific paper" loading="lazy" allowfullscreen></iframe>
+
+  <p class="explorable-caption">The anatomy of a paper, section by section, and what each section is for. Watch it before you start writing, and again when you think you are done.</p>
+
+  <p>The sections, and what each one is for:</p>
+
+  <ul>
+    <li><strong>Abstract.</strong> The whole paper in 150 words: the question, the data, the main result with a number in it, and what it means. Write it last, and make it the sentence you want the reader to repeat.</li>
+    <li><strong>Significance statement.</strong> Two or three sentences for a reader outside the field: why should anyone who does not care about your domain care about this?</li>
+    <li><strong>Introduction.</strong> The question, why it is interesting, what is already known, and the one-sentence preview of the answer. Cite the work you build on; if a method or an analysis is someone else's, say so.</li>
+    <li><strong>Results.</strong> The story, carried by the figures. Each figure answers one part of the question, has a caption that can be read on its own, and shows the check next to the claim (the null, the baseline, the agreement with your hand labels).</li>
+    <li><strong>Discussion.</strong> What the result means, what it does not mean, and the limitation you found yourself. A negative result with a convincing check is a fine discussion.</li>
+    <li><strong>Methods.</strong> Enough that a reader could redo it: the data (what, from where, collected when, how many), every preprocessing choice that could change a number, each measurement and what it measures, each validation and its result.</li>
+    <li><strong>References.</strong> Academic standards; cite what you used.</li>
+  </ul>
+
+  <p><strong>Figures carry the paper.</strong> Three good figures beat eight. A figure of a network with a thousand nodes is a decoration; a figure that shows your effect against its null is a result. Every caption says what is plotted, what the comparison is, and what the reader should see.</p>
+
+  <p><strong>Author contributions</strong> must be specific. "All group members contributed equally" is not a contribution statement. Who collected the data, who built which analysis, who did the hand labeling, who wrote which section.</p>
+
+  <h2 id="brainstorm">8 · The afternoon: a brainstorm</h2>
+
+  <p>The afternoon is not an exercise and it is not a go-nuts post. It is three hours of human thinking about the most interesting project your group could possibly build, with the people who will grade it walking around to think with you.</p>
+
+  <p>I start the session with a Group Bazaar and there's a reason for that. I really don't think you should do this project alone.</p>
+
+  <p>The best ideas arise when human brains meet resistance, and a brain with no one to argue with produces its first idea and keeps it. Working in groups of three is ideal in my opinion (see <a href="../index.html#groups">front page</a> for full details). If you are one or two people right now, I recommend that you go to the front of the room to fill out the group.</p>
+
+  <p>The bazaar basically works like a market: if you have an idea and need people, write it on the board with your name; if you have people and want an idea, read the board; if you are a pair that wants a third, say so out loud. Talk to strangers, and merge.</p>
+
+  <p>Everyone who already has a group skips this and starts the brainstorm straight away. By 14:00 everybody sits with the people they will write the paper with.</p>
+
+  <p>Here's the plan (you don't have to follow it exactly — the times below are just a guide)</p>
+
+  <p><strong>13:00–13:10, a pep talk.</strong> I say a few words about what I have seen work, and what I have seen fail.</p>
+
+  <p><strong>13:10–14:00, the group bazaar, at the front of the room.</strong> See description above.</p>
+
+  <p><strong>13:10–14:50, brainstorm.</strong> The agent is excellent at producing and bad at wanting; the wanting is yours, and it is the part of the project we grade. So for this stretch, I recommend no screens except for quick research. Start from the people in the room: what do you each care about that has people in it, connections between them, and text they wrote? What did you see this morning that is secretly a dataset? What would you genuinely love to know the answer to, and who else would care? Aim for ten ideas on the board, and don't judge too harshly yet. Crazy is good.</p>
+
+  <p><strong>14:50–15:30, deeper research.</strong> Laptops open. Pick the three ideas the group is most excited about and send your agent out as a scout: find the data, estimate the size, pull a sample, list what is on the nodes, check whether the page is fed by an API you can see. Every idea that survives this has a dataset you have actually touched and a question written as one sentence.</p>
+
+  <p><strong>15:30–16:00, the final cut, and the registration.</strong> Run the two tests from this page on each survivor: the five questions about a dataset from Section 5 and the five rules from Section 6. Kill two of the three. For the one that is left, cut until you have exactly this on <strong>one slide</strong>:</p>
+
+  <ul>
+    <li>the question, one sentence;</li>
+    <li>the dataset, one line: what the nodes are, what the links are, where the text is, how many, and where it comes from;</li>
+    <li>the measurement that answers it, and which tools from the two halves of the course it uses;</li>
+    <li>the check you will run, and the result that would make you abandon the question;</li>
+    <li>the one figure you imagine in your paper, sketched by hand.</li>
+  </ul>
+
+  <p>Then, before you leave: <strong>register your group on DTU Learn</strong>. We plan the final session, its rooms and its timing from that list, so a group that is not registered is a group we do not know exists.</p>
+
+  <p>And don't forget to <strong>register your group on DTU Learn</strong>.</p>
+
+  <p>And did I mention that you need to <strong>register your group on DTU Learn</strong> before you leave? It's important.</p>
+
+  <p><strong>Come and talk, all afternoon.</strong> Lasse, the TAs and I are in the room the whole time, and this is what we are there for. Grab one of us at any stage: with ten ideas on the board, with three scouted, or with the slide. No sign-up, no schedule, no presentation; a conversation at your table. You are not being graded and chatting with us is the fastest way to find out whether your question is a project, a figure, or a go-nuts post, before you spend five weeks on it.</p>
+
+  <p>Keep the slide and the two ideas you killed. Bring the slide to the first project session on 4 November, and the two killed ideas are your insurance (see <a href="week8.html#road-not-taken">the Goodies</a>).</p>
+
+  <section class="band band-essentials">
+
+  <h2 id="essentials" class="essentials">Essentials</h2>
+
+  <p>There are no new terms this week. The Essentials are the judgment calls, written down so you can carry them into the project; none of them is on Test 2. Every one of them refers back to a method you already own.</p>
+
+  <dl class="defs">
+    <dt>The final project in total</dt>
+    <dd>a six-page scientific paper in the PNAS LaTeX template (references included, link above), three slides and an ungraded half-page reflection, handed in on Learn by Friday 27 November; a three-minute presentation with questions on 2 December; 50% of the grade, one 0–3 score for paper and presentation together, on the choice of problem, the checks, the clarity of the story, and how it holds up under questioning.</dd>
+    <dt>The question comes before the method</dt>
+    <dd>a project statement names something you want to know, and the method is whatever answers it. "We ran X" is a method; "does A predict B, and where does it fail?" is a question.</dd>
+    <dt>The best questions come from iteration</dt>
+    <dd>start from a question, run the analysis, discover it was the wrong question, ask a better one, and repeat until the question and the data fit. Then write the paper as if you had asked the final question all along; you are allowed to, as long as the story you end with is clean.</dd>
+    <dt>What your analysis measures</dt>
+    <dd>every measurement captures something specific and misses something specific: modularity scores how grouped, not how right; a sentiment score is a lexicon's or a classifier's behavior on your text; embedding similarity is shared context in training data. One sentence each, in the paper.</dd>
+    <dt>Validate</dt>
+    <dd>check a measurement against a null (shuffle), a second method (NMI, agreement), or a hand-labeled sample (precision, κ). If a model produced the number, you report how well the model did on examples you read.</dd>
+    <dt>One story</dt>
+    <dd>every figure answers the question or sets it up. The finding fits in one sentence, and the sections make the sentence believable.</dd>
+    <dt>Convincing</dt>
+    <dd>a clear question, a measurement that fits it, a check that it works, a comparison that rules out the boring explanation, and a limitation you found yourself.</dd>
+    <dt>The dataset test</dt>
+    <dd>both halves present (links and text); a few hundred to a few thousand nodes; obtainable in a day; a domain you care about; something unknown about it.</dd>
+    <dt>Text as attribute · text as network</dt>
+    <dd>two ways to join the halves. A text measurement placed on nodes is an attribute, tested with a shuffle; entities extracted from text and connected by co-occurrence are a second network, tested by reading a sample of its edges.</dd>
+    <dt>Undocumented API</dt>
+    <dd>the request a web page makes to fill itself with data, visible in the browser's Network tab; found, copied, stripped to its essentials, and looped from Python, it is a dataset builder. Not on the test.</dd>
+  </dl>
+
+  <div class="callout" id="test2">
+    <p class="eyebrow">Test 2 covers weeks 5–7</p>
+    <p>Wednesday 4 November in building 303A, Auditoriums 42 and 43, the same rooms as Test 1: be there by 08:10, and the test runs 08:30–09:30 sharp. Same shape as Test 1: pen and paper, closed book, multiple-choice questions and short written tasks. Everything on the test is in the Essentials bands and "On Test 2" lists of the three language weeks: <a href="week5.html#essentials">week 5</a> · <a href="week6.html#essentials">week 6</a> · <a href="week7.html#essentials">week 7</a>. Nothing from this week is on it, neither the API workshop nor the project pages, so this is one week with nothing to revise.</p>
+  </div>
+
+  </section>
+
+  <h2 id="goodies">Goodies</h2>
+
+  <p>Everything above is the course. Everything below is for the student who finished the page and wants more. Nothing here is on the test; all of it is worth your time.</p>
+
+  <div class="callout" id="api-steps">
+    <p class="eyebrow">The eight steps, for when the workshop is a memory</p>
+    <p>The tutorial half of <a href="https://inspectelement.org/apis.html" target="_blank" rel="noopener">the chapter</a>, compressed. (1) Open the developer console. (2) Click the <em>Network</em> tab. (3) Filter by <em>Fetch/XHR</em> and read the Domain and File columns to guess what each request does. (4) Click a request, read the response, and check it against what the page shows; search for a string you can see on screen. (5) Right-click the request and <em>Copy as cURL</em>. (6) Paste it into a cURL-to-<code>requests</code> converter and run the Python. (7) Strip the request down: drop every header and parameter it still works without, keep the authentication and the inputs you want to vary. (8) Wrap it in a function, loop over your inputs with a pause between calls, and load the results into pandas. Then the same care you learned for models: respect rate limits, keep the request that works, and write down exactly what you collected and when, because the site will change and your Methods section has to say what the paper was built on.</p>
+  </div>
+
+  <div class="callout" id="datasets">
+    <p class="eyebrow">Where datasets live</p>
+    <p>Places groups have found good networks-with-text before, in no particular order. Wikipedia categories and lists (the crawl from week 1 works on any of them). Fan wikis on Fandom, which have an API like Wikipedia's. Bluesky, which has an open, documented API and a firehose. Reddit, through the archives or the official API: users, subreddits, comments as text. Song lyrics plus collaboration credits from Genius or MusicBrainz. Parliamentary records: the Danish Folketing publishes every speech with speaker and party; the UK Hansard and the US Congressional Record likewise. Scientific papers through OpenAlex (week 4's exercise 4.4 shows the API): citations as links, abstracts as text. GitHub: repositories, contributors, README files. Podcasts and their guests; TV series and their character wikis; recipes and their ingredients. And, from this morning, every website that fills a list from an endpoint you can now find. The best datasets usually come from a hobby someone in the group already has.</p>
+  </div>
+
+  <div class="callout" id="road-not-taken">
+    <p class="eyebrow">The road not taken</p>
+    <p>Keep the two candidates you killed this afternoon. Around week 12, about a third of the groups discover that the survivor's dataset has a hole, or the effect is not there. A group that wrote down its alternatives switches in a day. A group that did not starts over. Negative results are also fine projects, by the way, if the check that produced them is convincing.</p>
+  </div>
+
+  <p><a href="../index.html#weeks">← All weeks</a></p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>02805 · Technical University of Denmark</span>
+    <span>Sune Lehmann · <a href="mailto:sljo@dtu.dk">sljo@dtu.dk</a></span>
+    <span>Content <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="license noopener">CC BY-SA 4.0</a></span>
+  </div>
+</footer>
+
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/js/toc.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false}], throwOnError: false});"></script>
+</body>
+</html>

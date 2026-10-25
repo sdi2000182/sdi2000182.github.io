@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · The layout is not the network</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>layout
+    <span class="seg" id="layout-seg">
+      <button data-v="force" class="on">force</button><button data-v="circleAZ">circle A–Z</button><button data-v="circleDeg">circle by degree</button><button data-v="circleCom">circle by community</button><button data-v="random">random</button>
+    </span>
+  </label>
+  <label>community colors
+    <span class="seg" id="color-seg">
+      <button data-v="on" class="on">on</button><button data-v="off">off</button>
+    </span>
+  </label>
+</div>
+
+<div class="panels" style="grid-template-columns: 1fr">
+  <div class="panel">
+    <h2>The shared network (giant component) — same nodes, same edges, whatever shape you ask for</h2>
+    <div class="legend" id="legend" style="flex-wrap: wrap"></div>
+    <canvas class="net" id="net" style="height: 400px; cursor: crosshair"></canvas>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Nodes shown</div><div class="value" id="r-n">–</div></div>
+  <div class="tile"><div class="label">Edges</div><div class="value" id="r-m">–</div></div>
+  <div class="tile"><div class="label">Communities (Louvain)</div><div class="value" id="r-c">–</div></div>
+  <div class="tile"><div class="label">Hover a node (click to pin)</div><div class="value" id="r-sel">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/community.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/layouts.js"></script>
+</body>
+</html>

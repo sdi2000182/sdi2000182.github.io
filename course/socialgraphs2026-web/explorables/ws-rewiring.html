@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Small worlds: the Watts–Strogatz sweet spot</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>rewiring q <input type="range" id="logp" min="-4" max="0" step="0.05" value="-2">
+    <span class="val" id="p-val">0.010</span></label>
+  <button id="resample">Resample</button>
+  <span id="progress" style="color: var(--text-muted)"></span>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Ring lattice, N = 200, k = 6 — shortcuts highlighted</h2>
+    <canvas class="net" id="net"></canvas>
+  </div>
+  <div class="panel">
+    <h2>Clustering and distance vs rewiring</h2>
+    <div class="legend">
+      <span class="key"><span class="swatch" style="background: var(--series-2)"></span>C(q) / C(0) — clustering</span>
+      <span class="key"><span class="swatch" style="background: var(--series-1)"></span>L(q) / L(0) — mean distance</span>
+    </div>
+    <svg class="chart" id="chart"></svg>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Clustering C</div><div class="value" id="r-c">–</div></div>
+  <div class="tile"><div class="label">Mean distance L</div><div class="value" id="r-l">–</div></div>
+  <div class="tile"><div class="label">Shortcuts</div><div class="value" id="r-sc">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/ws-rewiring.js"></script>
+</body>
+</html>

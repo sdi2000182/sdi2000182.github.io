@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · The ring lattice</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <span style="color: var(--text-muted); font-size: 12.5px">Color = number of steps from the start node. Click any node to start from it instead.</span>
+</div>
+
+<div class="panels" style="grid-template-columns: 1fr">
+  <div class="panel">
+    <h2>Ring lattice, N = 100, k = 6 — every node linked to its three nearest neighbors on each side</h2>
+    <div class="legend" id="legend" style="flex-wrap: wrap; gap: 8px 14px"></div>
+    <canvas class="net" id="net" style="height: 400px; cursor: pointer"></canvas>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Clustering C</div><div class="value" id="r-c">–</div></div>
+  <div class="tile"><div class="label">Farthest node from the start</div><div class="value" id="r-far">–</div></div>
+  <div class="tile"><div class="label">Mean distance from the start</div><div class="value" id="r-mean">–</div></div>
+  <div class="tile"><div class="label">Random network, same N and links — farthest</div><div class="value" id="r-rnd-far">–</div></div>
+  <div class="tile"><div class="label">Random network — mean distance</div><div class="value" id="r-rnd-mean">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/graphlib.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/ring-lattice.js"></script>
+</body>
+</html>

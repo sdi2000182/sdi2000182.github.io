@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<!-- GENERATED from content/weeks/week3.md — edit the .md and rerun ./generate.py; do not hand-edit. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 3 · Who matters, and why — 02805</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/site.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.css">
+<script data-goatcounter="https://suneman.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="../index.html">02805</a>
+  <a href="../the-new-way.html">The new way</a>
+  <a href="../index.html#weeks">Weeks</a>
+  <a href="../index.html#overview">Overview</a>
+  <span class="spacer"></span>
+  <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Textbook ↗</a>
+</nav>
+
+<nav class="page-toc" aria-label="On this page">
+  <p class="toc-title">On this page</p>
+  <ol>
+    <li><a href="week3.html#who-matters">1 · Who matters?</a></li>
+    <li><a href="week3.html#paths-distances-and-the-machine-that-computes-them">2 · Paths, distances, and the machine that computes them</a></li>
+    <li><a href="week3.html#the-first-two-answers-degree-and-closeness">3 · The first two answers: degree and closeness</a></li>
+    <li><a href="week3.html#betweenness-the-broker">4 · Betweenness: the broker</a></li>
+    <li><a href="week3.html#who-has-important-friends">5 · Who has important friends?</a></li>
+    <li><a href="week3.html#compared-to-what">6 · Compared to what?</a></li>
+    <li><a href="week3.html#mixing-patterns-do-the-important-stick-together">7 · Mixing patterns: do the important stick together?</a></li>
+    <li><a href="week3.html#cliques">8 · Cliques</a></li>
+    <li><a href="week3.html#essentials">Essentials</a></li>
+    <li><a href="week3.html#goodies">Goodies</a></li>
+  </ol>
+</nav>
+
+<main class="wrap">
+
+  <p class="eyebrow">Week 3 of 8 · Networks half</p>
+  <h1>Advanced network measures</h1>
+  <p class="lede">It has been two weeks and now you know the basics of describing a network. You also know how to compare to null-models to understand how the real networks are different. This week we describe more network measures that show the many ways real networks are different from random ones.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Before class</p>
+    <ul>
+    <li><strong>Bring</strong>. Laptop, Python + Jupyter + NetworkX, your agentic coding tool. Wednesday <strong>09:00</strong> in Auditorium 43: a short pep-talk, the go-nuts winner from week 2, then you work this page top to bottom with me and the TAs around.</li>
+    <li><strong>This week's story in one line</strong>. Distances are computed by one simple algorithm (breadth-first search). Centrality measures tell us about node importance in many different ways. And as last week, a number is more meaningful when we compare to the right baseline.</li>
+  </ul>
+  </div>
+
+  <h2 id="who-matters">1 · Who matters?</h2>
+
+  <p>Ask most people who have looked at the Marvel network for five minutes who the most important character is and there is a good chance that they will say Spider-Man.</p>
+
+  <p>He has the most links (106 characters link to his page), and by every measure on this page he comes out on top. Fine. Now ask the second question: who is number five? Or: which character would you remove to split the Marvel universe into pieces? Or: whose page should a new character try to get a link from? Each of those is a question about importance, and each one has a <em>different</em> answer.</p>
+
+  <p>This week we will be talking about <em>centrality</em>. From its roots in sociology, network science has dozens of centrality measures, and a useful way to think about them is as a small toolbox where each tool answers one question well:</p>
+
+  <ul>
+    <li><strong>Degree centrality</strong>: how many direct connections do you have?</li>
+    <li><strong>Closeness centrality</strong>: how quickly can you reach everyone?</li>
+    <li><strong>Betweenness centrality</strong>: how often are you the bridge others must cross?</li>
+    <li><strong>Eigenvector centrality / PageRank</strong>: are you connected to people who are themselves important?</li>
+  </ul>
+
+  <p>The first three measures are based on <em>paths</em>, so that is where we start. The last one is built out of a <em>random walk</em>, which is a different and beautiful idea (and it is also the single idea that made Google Google).</p>
+
+  <iframe class="video-embed" src="https://www.youtube.com/embed/IOWXZFOyk9Y"
+    title="Video lecture: network measures" loading="lazy" allowfullscreen></iframe>
+
+  <p class="explorable-caption">A lecture from an earlier edition of the course on the measures we use to describe nodes and networks. It opens with ideas from last week (clustering, and how clustering depends on degree), then covers mixing patterns (Section 7 below), shortest paths, the centralities of Sections 3 to 5 and how each correlates with degree, and ends with cliques (Section 8). Treat it as the guided tour and the text below as the map.</p>
+
+  <h2 id="paths-distances-and-the-machine-that-computes-them">2 · Paths, distances, and the machine that computes them</h2>
+
+  <p>Let's begin with some definitions that are interesting in and of themselves, but also lay the foundation for what we will be learning in the next few parts.</p>
+
+  <p>A <strong>walk</strong> is any sequence of nodes where each consecutive pair is linked. A <strong>path</strong> is a walk that never repeats a node. The <strong>distance</strong> $d_{ij}$ between two nodes is the length of the <em>shortest</em> path between them, and if no path exists the distance is infinite. Last week you actually used three numbers built from distances: the <strong>average path length</strong> $\langle d\rangle$ (over all pairs in the giant component), the <strong>diameter</strong> (the longest shortest path), and the small-world fact that both grow like $\log n$.</p>
+
+  <p>The trick to calculating all these paths is <strong>breadth-first search</strong> (BFS). Stand on a node. Everyone it links to is at distance 1. Everyone <em>they</em> link to that you have not seen yet is at distance 2. Repeat until nothing new appears. The nodes come out in rings, and the ring a node lands in <em>is</em> its distance. One BFS gives you the distance from one node to every other. If you run it from every node you have all the distances, $\langle d\rangle$, the diameter, and everything else on this page that involves a path.</p>
+
+  <iframe class="explorable-frame" src="../explorables/bfs-wavefront.html" height="570"
+    title="Explorable: breadth-first search on the Marvel network" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Start from Spider-Man and press <em>Step</em>: ring 1 is his 106 direct links, ring 2 adds 152 more, and ring 3 finishes the network. Nobody in the giant component is more than three steps from Spider-Man; he is the network's <em>center</em>. Now pick a character from the far end of the list (try one you have never heard of), step again, and count the rings. Then switch to <em>Follow arrows out</em> and start from Spider-Man once more. His page links to only nine characters, so the wave crawls, and 46 characters are never reached at all.</p>
+
+  <p>Two things to notice about the real network. First, as we know from last week, it's a small world (the distances are short). The Marvel giant component has $\langle d\rangle = 2.67$ and diameter 6, and 86% of all pairs of characters are exactly two or three steps apart. Second, <em>direction matters.</em> The network is built from Wikipedia links, and a link from A to B does not mean B links back. If you follow arrows, a pair of nodes can be close one way and far, or unreachable, the other way. Spider-Man is within three steps of everyone when you ignore direction, but <em>from</em> Spider-Man's page you can only reach 230 of the characters.</p>
+
+  <p>So connected components are more complicated in directed networks. The largest <strong>strongly connected component</strong> (every node can reach every other node by <em>following</em> the arrows) contains 229 of the 303 characters. The rest can be reached but cannot get back, or the other way around. When a question is about reaching, spreading, or flowing, it's a good idea to think about whether the arrows matter <em>before</em> you compute your metrics.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p><a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;10 <em>Paths & Walks</em> (10.1 on walks and paths, 10.4 on connected components) and Ch.&nbsp;13 <em>Shortest Paths</em> (13.1 graph exploration, i.e. BFS and DFS; 13.2 finding shortest paths; 13.3 the path length distribution). Ch.&nbsp;8 <em>Matrices</em> is neat background if you want to see why powers of the adjacency matrix count walks.</p>
+  </div>
+
+  <div class="exercise">
+    <h4>3.1 — Did you really read it? — paths <span class="mode learn">🧠 Learn</span></h4>
+    <p>No notebook, no chatbot. Think, then write.</p>
+    <ol>
+    <li>Walk vs path vs shortest path: define all three, then give an example of a walk of length 4 in a triangle that is not a path.</li>
+    <li>Explain BFS to someone who has never seen it, in five sentences or fewer, and say why the ring a node lands in is guaranteed to be its shortest distance from the start.</li>
+    <li>In a directed network, $d_{AB} = 2$ and $d_{BA} = \infty$. Draw the smallest network in which that is true. What do "weakly connected" and "strongly connected" mean, and which of them does your drawing have?</li>
+    <li>The Marvel network has $\langle d\rangle = 2.67$. The random network with the same $n$ and $m$ (your table from week 2) has $\langle d\rangle = 2.8$. Is the real network's value evidence of anything? What <em>would</em> be?</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>3.2 — BFS by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>Draw this network: nodes 1–8, links 1–2, 1–3, 2–4, 3–4, 4–5, 5–6, 5–7, 7–8.</p>
+    <ol>
+    <li>Run BFS from node 1. Write the nodes ring by ring (distance 0, 1, 2, …). What is the eccentricity of node 1 (its distance to the farthest node)?</li>
+    <li>Run BFS from node 5. Which nodes are the network's <em>center</em> (smallest eccentricity), and what is the diameter?</li>
+    <li>Now make the links 4→5 and 5→6 directed (all others stay undirected). Recompute the distances from node 1 and from node 6. Which pairs became unreachable?</li>
+    <li>Count the shortest paths from 1 to 5. (There are two.) You will need this way of counting in Section 4.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>3.3 — Distances on Marvel, as code <span class="mode instrument">🔬 Tool</span></h4>
+    <p>The explorable is BFS in disguise. Rebuild the numbers and go past them.</p>
+    <ol>
+    <li>Load the Marvel network (the <a href="../data/index.html">data page</a> has the snippet), extract the giant component of the <em>undirected</em> version, and compute $\langle d\rangle$, the diameter, the radius, and the center. Check every number against this page.</li>
+    <li>Plot the distribution of distances (the fraction of pairs at distance 1, 2, 3, …). Then do the same for the random network and the configuration-model network from week 2. Which of the two nulls reproduces the real distribution, and what does that tell you?</li>
+    <li>Now keep the arrows. Compute the size of the largest strongly connected component, the fraction of ordered pairs that are reachable at all, and the mean directed distance over the reachable pairs. Find a pair of characters with $d_{AB} = 1$ and $d_{BA} \ge 5$, and explain, from their Wikipedia pages, why.</li>
+    <li>🔬 Have your agent write the BFS itself (no <code>networkx</code> shortest-path calls) and validate it against <code>networkx</code> on 20 random start nodes. Keep the validation cell; this is how you will treat every piece of AI-written analysis in your project.</li>
+  </ol>
+  </div>
+
+  <h2 id="the-first-two-answers-degree-and-closeness">3 · The first two answers: degree and closeness</h2>
+
+  <p>Now we can get started on the actual measures.</p>
+
+  <p><strong>Degree centrality</strong> is a rebranding of the metric you already know and love: $k_i$, or in a directed network $k_i^{\text{in}}$ and $k_i^{\text{out}}$ separately. It is local (it never looks past a node's own links), it is cheap, and it is often right. In the Marvel network, in-degree answers "who is mentioned most," and out-degree answers "whose page mentions the most others," which are different questions with different "central nodes." The Hulk, for example, is mentioned by 64 pages (second only to Spider-Man) but his page mentions just ten characters; Betsy Braddock is mentioned by seven, yet her page mentions 28, the most of anyone.</p>
+
+  <p><strong>Closeness centrality</strong> is more complex and draws on the paths from Part 2. It asks how near a given node is to <em>everyone</em>. It's defined by taking the mean distance from $i$ to all other nodes and then using the inverse (so that closeness to others corresponds to large values):</p>
+
+  <p>$$C_i^{\text{close}} = \frac{n-1}{\sum_{j \ne i} d_{ij}}$$</p>
+
+  <p>So a node with closeness $0.5$ is, on average, two steps from everybody. Spider-Man's is $0.59$ (mean distance $1.68$); the median character sits at $0.38$. Another way of putting it is that closeness is a measure of network <em>reach</em>: if you want to spread a rumor, a disease, or an update as fast as possible, a good bet is to start from the node with the highest closeness (there's a whole cottage industry of papers focused on where to start rumors for maximum effect, and closeness isn't the best ... but pretty good).</p>
+
+  <p>Closeness centrality has one well-known problem. If any node is unreachable from $i$ the sum is infinite and $C_i = 0$, so in a directed network or a network with several components the measure breaks. The standard fix is to use something called <strong>harmonic centrality</strong>. Here you sum the inverse distances instead, with $1/\infty = 0$:</p>
+
+  <p>$$C_i^{\text{harm}} = \frac{1}{n-1}\sum_{j \ne i} \frac{1}{d_{ij}}$$</p>
+
+  <p>For this measure, unreachable nodes simply contribute nothing. On a connected network the two rankings agree (almost) perfectly; on a directed one, you can use harmonic centrality and stop worrying.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p><a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;14 <em>Node Ranking</em>: the introduction (why degree is not enough) and 14.1 <em>Closeness</em>; 14.6 <em>Harmonic</em> is the one-page fix for disconnected networks.</p>
+  </div>
+
+  <h2 id="betweenness-the-broker">4 · Betweenness: the broker</h2>
+
+  <p><strong>The Medici story</strong>. Let's time-travel. You're in Florence (Firenze for us Europeans), around 1430. At that time, the city was run by a few dozen elite families. They were all connected to each other in complicated ways by marriage. This is the network that the political scientist John Padgett spent years reconstructing. In the resulting marriage network the Medici family was the best connected, but only just. They had six marriage ties, but the other families were also well connected. The Guadagni family had four links and the Strozzi (who were richer) four.</p>
+
+  <p>Yet within a few years Cosimo de' Medici controlled the city. The cool thing is that the marriage network can help us understand why. Of the Medici's six partner families, only one pair had a tie to each other. Every other family that wanted to deal with a Medici partner had to go <em>through</em> the Medici. <em>More than half of all shortest paths between the other families run through the Medici.</em> That's twice as many as the share of any rival. So the Medici were only a little better connected than their rivals. What set them apart was that they were the family <em>in between</em>.</p>
+
+  <p>The centrality that reveals what is special about the Medici family is <strong>betweenness centrality</strong>. For every pair of other nodes $s, t$, count the fraction of their shortest paths that pass through $i$, and add it all up:</p>
+
+  <p>$$b_i = \sum_{s \ne i \ne t} \frac{\sigma_{st}(i)}{\sigma_{st}}$$</p>
+
+  <p>where $\sigma_{st}$ is the number of shortest paths from $s$ to $t$ and $\sigma_{st}(i)$ the number of them that go through $i$. (Divide by the number of pairs, $(n-1)(n-2)/2$ for an undirected network, to get a value between 0 and 1, which is what <code>networkx</code> reports.) A node with high betweenness is a <strong>broker</strong>, a <strong>bridge</strong>, a bottleneck: remove it and traffic has to reroute, or cannot flow at all. Betweenness is the measure of <em>control</em>.</p>
+
+  <p>Notice what it is <em>not</em>: it is not degree. A node can have two links and enormous betweenness if it is the only door to part of the network, and a node can have thirty links and betweenness near zero if all thirty neighbors are also linked to each other. A beautiful demonstration is a ten-node network drawn by David Krackhardt to illustrate centrality differences. It's set up so that different centralities have different "most central" nodes. Specifically, three of the four measures we talk about today has a different "most central" node:</p>
+
+  <iframe class="explorable-frame" src="../explorables/centrality-anatomy.html" height="560"
+    title="Explorable: the anatomy of centrality" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Switch between the four measures and watch the "top" tag move: degree says D, closeness says F and G, betweenness says H, eigenvector centrality says D again. Now click H to remove it. What happens to I and J, and to everyone's closeness? Put H back and remove D instead: who takes over, and by which measure?</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p><a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;14, section 14.2 <em>Betweenness</em>.</p>
+  </div>
+
+  <div class="exercise">
+    <h4>3.4 — Centrality by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>The kite, on paper. Draw it from the explorable (ten nodes, eighteen links) or use the network from exercise 3.2.</p>
+    <ol>
+    <li>Compute the closeness of nodes D, F, and J from their distance lists. Explain in one sentence why F beats D even though D has more links.</li>
+    <li>Compute the betweenness of H. Hint: H sits on <em>every</em> shortest path between {I, J} and the other seven nodes, and on no others. How many such pairs are there? Now do I, and explain why I has substantial betweenness with only two links.</li>
+    <li>Compute the betweenness of C. (It should be zero. Why?)</li>
+    <li>In exercise 3.2's network, which node has the highest betweenness? Compute it, using your count of shortest paths from item 4 there.</li>
+    <li>Come up with a network where betweenness centrality and closeness centrality have really different behaviors.</li>
+    <li>For each of these questions, say which measure you would use and why: <em>whom to vaccinate first</em> · <em>whose retirement would hurt the company most</em> · <em>who has the most friends</em> · <em>which airport's closure delays the most journeys</em>.</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>3.5 — Centralities on Marvel <span class="mode instrument">🔬 Tool</span></h4>
+    <ol>
+    <li>Compute degree, closeness, harmonic, and betweenness for the undirected giant component. Print the top ten by each. How many characters are in all four top tens? (This page says the answer for two of the pairs; check it.)</li>
+    <li>Scatter betweenness against degree, log axes, one point per character, and label the outliers. Find <em>Hercules</em> and <em>Black Widow</em>: high betweenness for their degree. Look at their neighbor lists and explain, in Marvel terms, what they bridge. Then find <em>Rockman</em>, a character with two links and a betweenness far above other two-link characters. What is going on? (Look at his second neighbor.)</li>
+    <li>Recompute betweenness with the arrows kept. Which characters move the most between the two rankings, and why does <em>Hercules</em> move up?</li>
+    <li>🔬 Ask your LLM which centrality measure is "best." Then make it commit to one for a concrete question of your choosing, and check its reasoning against Section 1.</li>
+  </ol>
+  </div>
+
+  <h2 id="who-has-important-friends">5 · Who has important friends?</h2>
+
+  <p>When you consider degree, you're making an assumption that every link is equally important. But if you think about your own life, that's not the case. Some of the people you know are much more important than others. So it's not just about how many people you know, but <em>who</em> you know. In the Marvel network, a link from Spider-Man's page is worth more than a link from a character nobody has heard of. If we define importance by having many links, this starts to sound circular! But as you'll see in a moment, it's circular in a way that will work out nicely and take you back to your linear algebra classes.</p>
+
+  <p>Anyway. A node is important if it is linked to by important nodes. As an equation, we can write the importance $x_i$ of node $i$ as:</p>
+
+  <p>$$x_i = \frac{1}{\lambda}\sum_j A_{ij}\,x_j$$</p>
+
+  <p>Every node's score is the sum of its neighbors' scores, then rescaled by a constant $\lambda$. A vector that satisfies this for every node at once is an <em>eigenvector</em> of the adjacency matrix. The eigenvector with only positive entries is <strong>eigenvector centrality</strong>.</p>
+
+  <p>We calculate it through iteration: give everyone a score of 1, replace each score by the sum of the neighbors' scores, rescale, repeat until nothing changes. In the kite explorable, that is why D wins: not the most links, but links to the best-linked nodes.</p>
+
+  <p><strong>PageRank</strong> is the closely related idea in a directed network. (It is also the idea that made Google: in 1998 Larry Page and Sergey Brin pictured a <em>random walker</em> who sits on a page, clicks a random link, and keeps clicking forever. A page's importance, then, is the fraction of time the walk spends there.)</p>
+
+  <p>In the random walk, each page sends the walker out among its out-links, so a link from a page that links to few others is worth more than in the classic eigenvector centrality. In network science terms, it means that Page and Brin were estimating the eigenvectors of a slightly different matrix. The <em>walk matrix</em>, we can call it. That matrix is just the adjacency matrix with each row normalized to sum to one.</p>
+
+  <p>You can't just take the eigenvector of that matrix and be done, though, and the reason is related to what we discussed in Part 2: in a directed network you can't get everywhere from everywhere. (The same is true on the real web, which is what Page and Brin were trying to index). Pages with no out-links trap the random walker, and groups of pages that only link to each other can trap him too. Page and Brin fixed this using a simple trick. At every step, with a small probability, the walker <em>teleports</em> to a random page. With $\alpha$ the probability of following a link ($0.85$ by convention),</p>
+
+  <p>$$\mathrm{PR}_i = \frac{1-\alpha}{n} + \alpha \sum_{j \to i} \frac{\mathrm{PR}_j}{k_j^{\text{out}}}$$</p>
+
+  <iframe class="explorable-frame" src="../explorables/random-walker.html" height="520"
+    title="Explorable: the random walker and PageRank" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Press <em>Play</em> and watch the bars settle onto the markers: the walker's visit frequencies converge to the exact PageRank. Now drag $\alpha$ to $1.00$ (no teleporting) and play again: the walker enters the trap on the right and never comes out, and the exact answer puts all the weight there. Drag $\alpha$ down to $0.50$ and see how much of the structure the ranking still sees.</p>
+
+  <p>On the Marvel network, PageRank sees <em>who</em> links to you, not just how many. Spider-Man's page links to only nine characters, so each receives a ninth of the largest vote in the network; two of them, <em>Black Cat</em> and <em>Mayday Parker</em>, have modest in-degrees (21 and 14) yet land at ranks five and seven.</p>
+
+  <p>Why these two measures belong in the same part, why Page and Brin didn't just work on the adjacency matrix, and neat details on teleportation, all make for an excellent story. You can find it in <a href="week3.html#eigen-pagerank">Goodies</a>.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p><a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;14, section 14.4 <em>Eigenvector</em> (including its PageRank part). Ch.&nbsp;11 <em>Random Walks</em>, section 11.1 on the stationary distribution, is the two-page idea underneath; skim it.</p>
+  </div>
+
+  <div class="exercise">
+    <h4>3.6 — PageRank by hand <span class="mode learn">🧠 Learn</span></h4>
+    <p>Take the four-node directed network A→B, A→C, B→C, C→A, D→C.</p>
+    <ol>
+    <li>Start with $\mathrm{PR} = 0.25$ for every node and $\alpha = 0.85$. Apply the PageRank equation once, to all four nodes, and write down the new vector. (D has no incoming links; what does it get, and from where?) Apply it a second time. Which node is winning, and why does A score well with a single incoming link?</li>
+    <li>Set $\alpha = 1$ (no teleporting). What happens to D's score, and after that to the whole thing? Say in one sentence what teleportation is <em>for</em>.</li>
+    <li>Explain the difference between eigenvector centrality and PageRank in terms of what one node's link is worth when that node has many out-links. Then: in an undirected network, what does the random walker's stationary distribution reduce to?</li>
+  </ol>
+  </div>
+
+  <div class="exercise">
+    <h4>3.7 — PageRank on Marvel <span class="mode instrument">🔬 Tool</span></h4>
+    <ol>
+    <li>Compute PageRank on the <em>directed</em> Marvel network with $\alpha = 0.85$ and compare the top ten with the in-degree top ten. Which characters are in one list and not the other? For each one, find the page that gives them their rank.</li>
+    <li>🔬 Write PageRank yourself, as the iteration above, with the agent's help; validate against <code>networkx.pagerank</code> to six decimals for three values of $\alpha$. Then make the agent explain what its code does with dangling nodes, and check that it is right.</li>
+  </ol>
+  </div>
+
+  <p><strong>Centralities head-to-head</strong>. In the video in Part 1, I plot centralities against one another to give you a sense of how correlated they are. Krackhardt's kite was <em>built</em> to make them disagree. On the Marvel network they mostly agree, and the explorable below shows exactly where they do not. Keep degree on the x-axis and put each of the other measures on the y-axis in turn: the cloud is a diagonal, the rank correlation stays above $0.8$, and the characters a measure crowns that degree does not are ringed and named. Those are the Krackhardt cases in real data. (You built one panel of this yourself in exercise 3.5.)</p>
+
+  <iframe class="explorable-frame" src="../explorables/centrality-scatter.html" height="590"
+    title="Explorable: every centrality against degree" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Start with betweenness against degree. The cloud is a diagonal (rank correlation $0.91$), and the three ringed characters, Hercules, Black Widow, and U.S. Agent, make the betweenness top ten from degree ranks 19, 22, and 32. Switch y to PageRank: Black Cat and Mayday Parker appear, each holding a ninth of Spider-Man's vote. Then closeness: the cloud flattens into a curve, because closeness is squeezed between $0.2$ and $0.6$ and can barely tell the hubs apart. Put eigenvector on x and closeness on y for the pair that agrees most ($0.98$). Hover any point for the name.</p>
+
+  <h2 id="compared-to-what">6 · Compared to what?</h2>
+
+  <p>Last week's null-model point does not go away because the measures got more advanced.</p>
+
+  <p>Spider-Man has the highest betweenness in the Marvel network: 23% of all shortest paths run through him. Is that a finding? Shuffle the network 200 times with the degree-preserving shuffle from week 2 and recompute. In the shuffled networks Spider-Man's betweenness averages 23% as well.</p>
+
+  <p>That means that his betweenness is similar to what a node with 106 links will have in <em>any</em> network with this degree distribution. Now look at good old <em>Hercules</em>: 26 links, betweenness $0.037$, against $0.018$ in the shuffles, four standard deviations out. Or <em>Black Widow</em>: 25 links, twice her shuffled value. Those characters are <em>brokers</em>, characters whose position, not their popularity, <em>connects different parts of the universe</em> (Hercules links the Avengers, the Hulk's circle, the cosmic characters, and Asgard). And <em>Black Cat</em>, with 28 links is decidedly not a broker. She has a <em>third</em> of the betweenness her degree predicts: 24 of her 28 neighbors are also Spider-Man's, so almost every path near her has a shortcut around her.</p>
+
+  <div class="callout">
+    <p class="eyebrow">From an AI-drafted report</p>
+    <p>"Betweenness centrality identifies Spider-Man as the critical broker of the Marvel universe: 23% of all shortest paths pass through him, far more than any other character. His closeness of 0.59 confirms this, showing he can reach 59% of the network directly."</p>
+  </div>
+
+  <p>The quote has three claims, two of them are wrong. Find them before you read on.</p>
+
+  <p>(Solution: As we just discussed, the first claim is not a finding, it is driven by his degree, see above. The third claim misreads closeness, which is an inverse mean distance, not a fraction of anything. The middle claim is simply true.)</p>
+
+  <p>So I suggest that you try to cultivate two habits for every centrality number you ever report:</p>
+
+  <ul>
+    <li><strong>Say which question.</strong> Degree for popularity, closeness for reach, betweenness for control, PageRank for prestige. On the Marvel network the four top-ten lists overlap on six to eight names, and the rank correlation between degree and betweenness is $0.91$, so most of the time they agree, and <em>the disagreements are the interesting part.</em></li>
+    <li><strong>Say compared to what.</strong> This one is more general. It really is something you should try to do for <em>any</em> measure. You can only really understand if a centrality high or low if you compare it to a null model. The degree-preserving shuffle is the right one for the "is this node's position more than its degree?" question.</li>
+  </ul>
+
+  <div class="exercise">
+    <h4>3.8 — Brokers, compared to what <span class="mode learn">🧠 Learn</span> + <span class="mode instrument">🔬 Tool</span></h4>
+    <ol>
+    <li>🧠 Before computing anything: a node has degree 2 and the highest betweenness in its network. Draw a network where this happens. Then draw one where the highest-degree node has betweenness zero.</li>
+    <li>Shuffle-test betweenness on the Marvel giant component: 200 degree-preserving shuffles, and for every character the $z$-score of the real betweenness against the shuffled distribution. Plot $z$ against degree. Which characters are the surprises, in both directions? Do the names on this page appear?</li>
+    <li>Do the same for closeness. Is <em>anyone</em> surprising by closeness? Explain why closeness is so much harder to be surprising at than betweenness (think about what the shuffle preserves and what closeness depends on).</li>
+    <li>🧠 Write three sentences for a report that state Hercules's betweenness correctly: the value, the comparison, and what it does and does not mean.</li>
+  </ol>
+  </div>
+
+  <h2 id="mixing-patterns-do-the-important-stick-together">7 · Mixing patterns: do the important stick together?</h2>
+
+  <p>Ok. Until now, I've been great at constructing a coherent narrative across these pages, but I can't keep it up any more. In this Part and the next, I'll do quick intros to other important measures that will tell you about network structure. They are also discussed in the video.</p>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p><a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;31 <em>Quantitative Assortativity</em>, section 31.1 <em>Degree Correlations</em> (31.2 revisits the friendship paradox from this angle). Ch.&nbsp;30 <em>Homophily</em>, 30.2 <em>Quantifying Homophily</em>, is the same idea for attributes other than degree.</p>
+  </div>
+
+  <p><strong>Degree assortativity</strong>. Every measure we've looked at today scores a single node. Now ask a question about <em>pairs</em>: when we consider a node's neighbors, does it connect to other hubs, or does it pick the small fry ... and how does that depend on the degree of the node itself? Among scientists, the stars co-author with stars, so hubs are densely interconnected. On the Internet, the big backbone routers connect to thousands of tiny ones, so hubs are spread out across the network by design.</p>
+
+  <p>One of my favorite network scientists, Mark Newman, calls this a network's <strong>mixing pattern</strong>. The way to quantify it is via the <strong>degree assortativity</strong> $r$. This is basically the Pearson correlation between the degrees at the two ends of a link, taken over all links.</p>
+
+  <p>When $r > 0$ we say that the network is <strong>assortative</strong>, like links to like, hubs to hubs. When $r < 0$ we say the network is <strong>disassortative</strong>, hubs to low-degree nodes. When $r = 0$, your degree says nothing about your neighbor's. A classic finding is that social networks tend to be assortative (physics co-authorship $+0.36$, film actors $+0.21$) while technological and biological ones tend to be disassortative (the Internet $-0.19$, protein interactions $-0.16$).</p>
+
+  <p><strong>Visualizing assortativity</strong>. A picture can capture more than the single number. Below we construct a plot where for each degree $k$, we take the nodes with that degree and calculate the average degree of their neighbors: $k_{nn}(k)$, the <strong>average neighbor degree</strong>. If that line is rising, the network is assortative, falling means disassortative, and flat means no mixing at all. The flat line sits at $\langle k^2\rangle/\langle k\rangle$, which you met last week as the friendship paradox: it is the expected degree of a random neighbor.</p>
+
+  <p>Marvel has $r = -0.105$. The characters with a single link sit next to a neighbor of degree 45 on average; the ten biggest hubs' neighbors average 19. Mildly disassortative, so a technological network rather than a social one? Before you write that sentence: compared to what. Fifty degree-preserving shuffles give $r = -0.118 \pm 0.009$, and the real value is 1.4 standard deviations from that. Marvel's disassortativity is <em>what its degree sequence forces</em>. A node with 106 links in a network of 277 has no choice but to link mostly to small nodes, because there are not enough hubs to go around. This is called <strong>structural disassortativity</strong>, and every heavy-tailed network has some. The explorable makes the limit visible: rewire toward assortative and the process stalls near $r = +0.17$ with the hubs out of hubs to link to and the network falling into pieces as leaves pair off with leaves; rewire toward disassortative and it reaches $-0.53$, a hub-and-spoke picture with almost no triangles left.</p>
+
+  <iframe class="explorable-frame" src="../explorables/mixing-dial.html" height="590"
+    title="Explorable: the same degrees, three ways" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Choose <em>Disassortative</em> and press <em>Play</em>: the hubs spread out, each wrapped in its own halo of leaves, the $k_{nn}$ dots tip downward, and $C$ collapses. <em>Reset</em>, choose <em>Assortative</em>, play again: the hubs pull into one dense core, small components break off, and the dots rise until the rewiring runs out of moves. Then try <em>Random</em>, the week-2 shuffle, and watch $r$ land near $-0.12$, not $0$. That is the assortativity that comes from network structure alone. A deep dive on all this can be found in the <a href="week3.html#degree-bounds">Goodies</a>.</p>
+
+  <p><strong>Assortativity, more generally</strong>. Degree is one attribute of nodes, but we can generalize to any attribute: age, gender, political leaning, which team a character belongs to. Calculating assortativity for any of these will often tell us more about the mechanisms that determine link-creation in a network (and we can test if our findings are significant by <em>shuffling attributes</em> giving us a new kind of null model, see the <a href="week3.html#attribute-shuffle">Goodies</a>).</p>
+
+  <p>One last connection: Assortative mixing by attribute is another name for <strong>homophily</strong>, one of the oldest findings in the sociology branch of network analysis. Our Marvel network is full of it: X-Men link to X-Men, Avengers to Avengers. The formula from above with categories instead of degrees gives the attribute assortativity (<code>networkx</code> has it as <code>attribute_assortativity_coefficient</code>). Next week we turn the question around when we work on community detection.</p>
+
+  <div class="exercise">
+    <h4>3.9 — Mixing, compared to what <span class="mode learn">🧠 Learn</span> + <span class="mode instrument">🔬 Tool</span></h4>
+    <ol>
+    <li>🧠 On paper: what is $r$ for a star (one hub, every other node linked only to it)? Draw a six-node network with $r > 0$ and one with $r < 0$, and sketch $k_{nn}(k)$ for each. Is a ring assortative, disassortative, or neither?</li>
+    <li>Compute $r$ for the undirected Marvel giant component and plot $k_{nn}(k)$ on log axes. Then run the degree-preserving shuffle 200 times and report the $z$-score of the real $r$. Write one sentence that states the result correctly.</li>
+    <li>Keep the arrows: <code>networkx</code> lets you correlate the out-degree of the source with the in-degree of the target (or in with out). Which of the two is positive on Marvel, and what does it mean about the pages that link out a lot?</li>
+    <li>🔬 Homophily: pick an attribute you can get for each character from Wikipedia (the API notes are in <a href="week1.html#go-nuts">week 1</a>; team membership or first-appearance decade are good), compute the attribute assortativity, and test it against a null that shuffles the <em>attribute labels</em> across nodes rather than the links. Why is that the right null here?</li>
+  </ol>
+  </div>
+
+  <h2 id="cliques">8 · Cliques</h2>
+
+  <p>One last topic. It's easy so I thought it would be OK if I squeezed it in.</p>
+
+  <p>A <strong>clique</strong> is a set of nodes in which every pair is linked: the strictest possible definition of a group. A 3-clique is a triangle; a $k$-clique has $k(k-1)/2$ links, and it stays a clique only if <em>every one</em> of them is present, which is why large cliques are rare. That's it ... that's all you need to know.</p>
+
+  <p>Now for a few more definitions that are less important. A clique is <strong>maximal</strong> if no node can be added to it; the size of the largest clique in a network is its <strong>clique number</strong>. Marvel has 1,835 triangles, 477 5-cliques, and a clique number of 8: Betsy Braddock, Cable, Cyclops, Emma Frost, Jean Grey, Northstar, Rachel Summers, and Wolverine, eight X-Men whose pages all link to each other. Finding the largest clique in a big network is NP-hard, but <code>networkx</code>'s <code>find_cliques</code> enumerates the maximal ones fast enough for anything in this course.</p>
+
+  <p>Cliques are a neat bridge to next week, where we will go deep on the topic of densely interconnected nodes.</p>
+
+  <p>Now for the course's most addictive explorable. Clique hunt. Finding 3 cliques is easy. Finding 4 cliques is surprisingly hard (at least for me), and 5 cliques are really, really hard. Once you start playing, you'll begin to find strategies. (Let me know on Teams if I'm the only one who finds this addicting!?)</p>
+
+  <iframe class="explorable-frame" src="../explorables/clique-hunt.html" height="560"
+    title="Explorable: clique hunt" loading="lazy"></iframe>
+
+  <p class="explorable-caption">Each network hides exactly one clique of the size you choose. Click nodes; a violet link means the pair is linked, a dashed line means it is not. Start with the 3-clique, then try the 5-clique, and notice how many promising sets of five fail on one missing link.</p>
+
+  <div class="exercise">
+    <h4>3.10 — Cliques by hand <span class="mode learn">🧠 Learn</span></h4>
+    <ol>
+    <li>In exercise 3.2's network, list every maximal clique. What is the clique number?</li>
+    <li>A 6-clique has how many links? What is the smallest degree a node in it can have? Use that to say, without computing anything, which Marvel characters <em>cannot</em> be in the 8-clique.</li>
+    <li>Explain why a network with clustering coefficient $C = 1$ is a set of disconnected cliques, and why $C = 0$ means it has no 3-clique at all.</li>
+  </ol>
+  </div>
+
+  <div class="reading">
+    <p class="eyebrow">Read</p>
+    <p>If you want more on cliques, check out the <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Network Atlas</a>, Ch.&nbsp;12 <em>Density</em>, section 12.3 <em>Cliques</em>.</p>
+  </div>
+
+  <div class="exercise">
+    <h4>3.11 — Ship an explorable <span class="mode builder">🚀 Builder</span> · stretch, optional</h4>
+    <p>The widgets on this page are a few hundred lines of vanilla JavaScript each (view source, nothing is hidden). Pick a claim from this week that none of them shows: the shortest-path count $\sigma_{st}$ accumulating into a betweenness score, a network where closeness and harmonic centrality disagree, the power iteration converging on the eigenvector, PageRank on a small web where a link farm tries to cheat, a $k_{nn}$ curve that updates as you drag links around, a clique finder that shows Bron–Kerbosch backtracking, and build the explorable that makes it grabbable, agents encouraged, taste yours. The best ones get embedded on this page with credit.</p>
+  </div>
+
+  <div class="exercise" id="go-nuts">
+    <h4>3.12 — Go nuts with your LLM <span class="mode builder">🚀 Builder</span> · every week</h4>
+    <p>The standing rules live in <a href="week1.html#go-nuts">week 1, exercise 1.8</a>: one free-form post on your group's site, on the shared Marvel network, link in this week's Teams channel by Monday evening, friendly criticism for at least one other group. Winner announced at 09:00 next Wednesday.</p>
+    <p>This week you have paths, centrality, mixing, and cliques. Some openers, if you want them:</p>
+    <ul>
+    <li>Who is the <em>most surprising</em> character in the network by any centrality, against the right null? Make the case, with a figure, and tell us what they bridge.</li>
+    <li>Which single character's removal fragments the network the most? Is it the same as the highest betweenness? Remove characters one by one in order of some measure and plot the giant component shrinking; compare orders.</li>
+    <li>Direction: find the characters whose in-ranking and out-ranking differ the most, and read their pages. Is there a kind of character who links out a lot but is rarely linked to?</li>
+    <li>Build a "six degrees of Spider-Man" tool: type a character, get the chain of links to Spider-Man. Then find the character with the <em>longest</em> chain and explain it.</li>
+    <li>Find the biggest cliques in the network and name them: are they all teams? Then find a <em>homophily</em> the network shows (by team, by decade, by anything you can scrape) and say whether it is stronger than chance.</li>
+    <li>Or ignore all of this and chase whatever the explorables made you wonder about. The winner is rarely the group that played it safe.</li>
+  </ul>
+    <p><strong>Standing option, weeks 2–4:</strong> crawl a different Wikipedia category of your own choosing (the API notes are in <a href="week1.html#go-nuts">week 1</a>) and run this week's toolkit there instead. Good rehearsal; your final project will live on a domain you pick.</p>
+  </div>
+
+  <section class="band band-essentials">
+
+  <h2 id="essentials" class="essentials">Essentials</h2>
+
+  <p>The 🧠 Learn core of the week: paths, the machine that computes them, four definitions of importance, the habit of asking "compared to what," and two words for how nodes group: mixing and cliques. All of it is pen-and-paper material; if a line below feels shaky, the section that teaches it is one click up the page.</p>
+
+  <dl class="defs">
+    <dt>Walk · path · shortest path</dt>
+    <dd>a walk is any sequence of linked nodes; a path never repeats a node; the shortest path between two nodes has the fewest links, and its length is their <strong>distance</strong> $d_{ij}$ (infinite if no path exists).</dd>
+    <dt>Breadth-first search (BFS)</dt>
+    <dd>from a start node, visit all nodes at distance 1, then all unvisited nodes at distance 2, and so on. The ring a node lands in is its distance. One run gives the distances from the start to every node.</dd>
+    <dt>Eccentricity · diameter · radius · center</dt>
+    <dd>a node's eccentricity is its distance to the farthest node; the diameter is the largest eccentricity, the radius the smallest, and the center the node(s) attaining it. Marvel: diameter 6, radius 3, center Spider-Man.</dd>
+    <dt>Reachability in directed networks</dt>
+    <dd>distances follow the arrows, so $d_{AB}$ and $d_{BA}$ can differ, and one can be infinite. <strong>Weakly connected</strong>: connected if you ignore direction. <strong>Strongly connected</strong>: every node reaches every other following the arrows.</dd>
+    <dt>Degree centrality</dt>
+    <dd>$k_i$; in directed networks $k_i^{\text{in}}$ (who is mentioned) and $k_i^{\text{out}}$ (who mentions) separately. Local and cheap. The question: <em>how many connections?</em></dd>
+    <dt>Closeness centrality</dt>
+    <dd>$C_i = (n-1)/\sum_{j\ne i} d_{ij}$, the inverse mean distance to everyone. High = everything is near. Breaks (goes to 0) if any node is unreachable. The question: <em>how fast can you reach everyone?</em></dd>
+    <dt>Harmonic centrality</dt>
+    <dd>$\frac{1}{n-1}\sum_{j\ne i} 1/d_{ij}$ with $1/\infty = 0$. Closeness that survives disconnected and directed networks.</dd>
+    <dt>Betweenness centrality</dt>
+    <dd>$b_i = \sum_{s\ne i\ne t} \sigma_{st}(i)/\sigma_{st}$, the summed fraction of shortest paths between other pairs that pass through $i$; normalized by the number of pairs. High = a <strong>broker</strong> or bridge; can be high at low degree (the only door to a region) and near zero at high degree (neighbors all linked to each other). The question: <em>who controls the flow?</em></dd>
+    <dt>Eigenvector centrality</dt>
+    <dd>$x_i = \frac{1}{\lambda}\sum_j A_{ij}x_j$: a node is important if its neighbors are important. The leading eigenvector of the adjacency matrix; computed by iterating "replace each score by the sum of the neighbors' scores, rescale."</dd>
+    <dt>PageRank</dt>
+    <dd>the directed version with a random walker: $\mathrm{PR}_i = \frac{1-\alpha}{n} + \alpha\sum_{j\to i}\mathrm{PR}_j/k_j^{\text{out}}$. Each page splits its vote among its out-links; with probability $1-\alpha$ the walker <strong>teleports</strong> to a random page, which fixes dangling pages and traps. $\alpha = 0.85$ by convention. The question: <em>who is linked to by the important?</em></dd>
+    <dt>Random walk, stationary distribution</dt>
+    <dd>on an undirected network a random walker spends time in proportion to degree, $\pi_i = k_i/2m$. Random-walk importance is degree unless direction is involved.</dd>
+    <dt>Centrality, compared to what</dt>
+    <dd>a centrality is only meaningful relative to a null. Against the degree-preserving shuffle, a node whose betweenness matches its shuffled value is "just its degree"; the surprises ($|z|$ large) are the brokers and the sheltered.</dd>
+    <dt>Degree assortativity $r$</dt>
+    <dd>the Pearson correlation between the degrees at the two ends of a link, over all links. $r > 0$ <strong>assortative</strong> (hubs link to hubs, typical of social networks), $r < 0$ <strong>disassortative</strong> (hubs link to leaves, typical of technological and biological ones). A star has $r = -1$.</dd>
+    <dt>Average neighbor degree $k_{nn}(k)$</dt>
+    <dd>the mean degree of the neighbors of nodes with degree $k$. Rising = assortative, falling = disassortative, flat at $\langle k^2\rangle/\langle k\rangle$ = no mixing.</dd>
+    <dt>Structural disassortativity</dt>
+    <dd>in a heavy-tailed network the hubs <em>must</em> link mostly to small nodes (there are not enough hubs), so $r < 0$ appears even under the degree-preserving null. Marvel: $-0.105$ real vs $-0.118 \pm 0.009$ shuffled. Compare to the null before calling a network disassortative.</dd>
+    <dt>Homophily</dt>
+    <dd>assortative mixing by an attribute (team, age, opinion) rather than degree: like links to like. Measured by the attribute assortativity; tested by shuffling the labels across nodes.</dd>
+    <dt>Clique · maximal clique · clique number</dt>
+    <dd>a set of nodes in which every pair is linked; a $k$-clique has $k(k-1)/2$ links. Maximal = no node can be added. The clique number is the size of the largest clique. A 3-clique is a triangle. Marvel's clique number is 8.</dd>
+  </dl>
+
+  <div class="on-the-test">
+    <p class="eyebrow">On Test 1</p>
+    <p>From this week, you should be able to do the following <strong>on paper, closed book</strong>. Any formula you need is printed on the test paper — you are never asked to write one from memory:</p>
+    <ul>
+    <li>define walk, path, shortest path, and distance; run BFS on a small drawn network and write the nodes ring by ring; read off the distance from a node to the one farthest from it (its <em>eccentricity</em>), the diameter, the radius, and the center;</li>
+    <li>handle direction: recompute distances when some links become arrows, identify unreachable pairs, and say what weakly and strongly connected mean;</li>
+    <li>compute closeness centrality for a node from its distance list, and say what goes wrong with it when part of the network is unreachable — and what harmonic centrality does about it;</li>
+    <li>compute betweenness for a node in a small network by counting the shortest paths that pass through it (including cases with two shortest paths between a pair); explain why betweenness can be high at low degree and low at high degree;</li>
+    <li>explain the idea behind eigenvector centrality — a node is important if its neighbors are — and the iteration that computes it;</li>
+    <li>apply the PageRank equation for one iteration by hand on a four-node directed network, explain what a node with no out-links does to the walk and what teleportation fixes, and say what happens as $\alpha \to 1$;</li>
+    <li>match a question to a measure (popularity / reach / control / prestige) and defend the choice; given two rankings, explain a disagreement;</li>
+    <li>spot the flaw in a short (possibly AI-written) claim about a node's importance: a misread definition, a measure that does not answer the question asked, or a "finding" that is only what the node's degree predicts under the degree-preserving null;</li>
+    <li>read the sign of degree assortativity off a small drawn network or a $k_{nn}(k)$ plot, say what assortative and disassortative mean, and explain why a heavy-tailed network is disassortative under the degree-preserving null even with no mixing at all;</li>
+    <li>find the cliques in a small drawn network, say how many links a $k$-clique has, and tell a maximal clique from the largest one.</li>
+  </ul>
+  </div>
+
+  </section>
+
+  <h2 id="goodies">Goodies</h2>
+
+  <p>Everything above is the course. Everything below is for the student who finished the page and wants more. Nothing here is on the test; all of it is worth your time.</p>
+
+  <div class="callout" id="brandes">
+    <p class="eyebrow">How betweenness is actually computed</p>
+    <p>The definition sums over all pairs and all shortest paths, which sounds like $n^3$ work or worse. Ulrik Brandes showed in 2001 that one BFS per node is enough. Run BFS from $s$, counting for every node $v$ the number of shortest paths $\sigma_{sv}$ from $s$ (a node's count is the sum of its predecessors' counts). Then walk back from the farthest ring toward $s$, accumulating each node's share of the paths that pass through it: $\delta_s(v) = \sum_{w} \frac{\sigma_{sv}}{\sigma_{sw}}(1 + \delta_s(w))$ over the nodes $w$ one ring further out that $v$ leads to. Add up $\delta_s(v)$ over all starts $s$ and you have the betweenness of every node, in $O(nm)$ time. This is what <code>networkx</code> runs, and it is why exercise 3.2's "count the shortest paths" is the whole game. For a million-node network even $O(nm)$ is too slow, so in practice betweenness is estimated from a random sample of start nodes, with an error bar you should report.</p>
+  </div>
+
+  <div class="callout" id="eigen-pagerank">
+    <p class="eyebrow">Deep dive: eigenvector centrality, PageRank, and how Google got its ranking</p>
+    <p>Part 5 put eigenvector centrality and PageRank next to each other and asked you to take on faith that they belong together. Here is the long version, which is the best short story in this course: a beautiful idea that does not survive contact with a real directed network, and the two-part repair that turned it into a company.</p>
+    <p><strong>1 · Eigenvector centrality.</strong> The circular definition — <em>you are important if important nodes point at you</em> — becomes an equation the moment you write it down: $x = \frac{1}{\lambda}Ax$, or $Ax = \lambda x$. The scores are an <strong>eigenvector of the adjacency matrix</strong> and $\lambda$ is its eigenvalue. You find it with the <strong>power method</strong>: start anywhere, multiply by $A$, rescale, repeat. Why that works is one line of algebra. Write the starting vector as a combination of $A$'s eigenvectors; each multiplication scales every component by its own eigenvalue, so the component with the largest eigenvalue outgrows the rest and the others fade. The <strong>Perron–Frobenius theorem</strong> is what makes the answer trustworthy: for a connected network with non-negative links, the largest eigenvalue is real, positive and unique, and its eigenvector can be chosen with every entry positive — which is the only reason you may read it as a centrality at all. On a disconnected network that guarantee fails, since each component has its own leading eigenvector, and on a bipartite network the iteration oscillates forever instead of settling.</p>
+    <p>Two facts worth carrying. On the Marvel giant component $\lambda_1 = 21.19$, and the ranking it produces agrees with plain degree at a rank correlation of $0.88$: close, but genuinely not the same measure. And on a <strong>regular</strong> network, where every node has identical degree, eigenvector centrality comes out perfectly uniform — every node scores the same. So the whole difference between eigenvector centrality and degree is a story about degree heterogeneity, and nothing else.</p>
+    <p><strong>2 · Directed networks, where the adjacency matrix stops working.</strong> Now keep the arrows. Importance flows <em>along</em> them: your score is built out of the nodes pointing at you. The trouble is that Perron–Frobenius asks for <strong>irreducibility</strong>, meaning the network must be strongly connected, and real directed networks are not. Marvel's largest strongly connected component holds 229 of 303 characters. The web is far worse.</p>
+    <p>What you get instead is a ranking that is mostly zeros, in a very specific pattern: the eigenvector lives on the dominant strongly connected component <em>plus everything downstream of it</em>, and every node upstream scores exactly zero. On the directed Marvel network that prediction is exact. 231 characters score above zero, which is the 229-node component plus the two nodes it feeds, and the remaining 72 are zero. Only 58 characters have no incoming link at all, so the starvation spreads from them.</p>
+    <p>Worse, the leading eigenvalue of the whole network is just the largest leading eigenvalue among its strongly connected components, so whichever dense cluster wins that contest captures the entire ranking. Page and Brin called these <strong>rank sinks</strong>, and they are not a theoretical worry. Here is the attack. Build a clique of fake pages, have every one of them also link to a single target, and bolt it onto the real network. A clique of $N$ nodes has leading eigenvalue $N-1$ and directed Marvel's is $11.1$, so thirteen fake pages is the tipping point:</p>
+    <table class="plain">
+    <tr><th>the link farm</th><th>eigenvector rank of the target</th><th>PageRank rank</th></tr>
+    <tr><td>none</td><td>246 of 303</td><td>246 of 303</td></tr>
+    <tr><td>10 fake pages</td><td>232</td><td>117 of 313</td></tr>
+    <tr><td>26 fake pages</td><td><strong>1</strong></td><td>99 of 329</td></tr>
+  </table>
+    <p>Twenty-six fabricated pages make a character with <em>no incoming links whatsoever</em> the single most important node in the network, and the network's leading eigenvalue becomes exactly the farm's own. That is the problem that had to be solved before links could be used to rank anything valuable.</p>
+    <p><strong>3a · Page and Brin's solution, part one: the walk matrix.</strong> Change the matrix. Instead of $A$, use the <strong>walk matrix</strong> $P = D^{-1}A$, which is the adjacency matrix with every row divided by that node's out-degree. Each row now sums to one, and $P_{ij}$ is the probability that a walker standing on $i$ steps to $j$ next. The walker's distribution is a row vector multiplied on the <em>right</em>, so the steady state satisfies $\pi P = \pi$: a <strong>left</strong> eigenvector of $P$ with eigenvalue exactly $1$. Contrast eigenvector centrality, a <strong>right</strong> eigenvector of $A$ with eigenvalue $21.19$. Same word, other side, different matrix. (The walk matrix shares its spectrum with the symmetric $D^{-1/2}AD^{-1/2}$, never with $A$ itself; the two agree only on regular networks.)</p>
+    <p>Why is splitting the right move? Three reasons, and only the first is about elegance.</p>
+    <ul>
+    <li><strong>The vote is conserved.</strong> Summing lets one page endorse a thousand others at full strength, which is precisely the link farm above. Splitting makes endorsement zero-sum: a page with a thousand out-links gives each of them a thousandth. Look at the table again. The attack that reaches rank 1 against eigenvector centrality only reaches 99th against PageRank.</li>
+    <li><strong>The scores mean something.</strong> They are a probability distribution, summing to one, so they read as <em>where attention actually ends up</em> rather than as an arbitrary positive vector.</li>
+    <li><strong>It runs at web scale.</strong> Every iteration is one sparse matrix–vector product, and you never need to know the eigenvalue, because for a row-normalized matrix it is always $1$.</li>
+  </ul>
+    <p>There is a price, and it is why Part 5 steers you away from PageRank on undirected data. On an undirected network the splitting collapses, and you can see it in two lines. Guess that the walker sits on node $i$ with probability $k_i/2m$, then push the guess through one step: every neighbor hands over its own probability divided by its own degree, the degrees cancel, and what arrives at $i$ is simply a count of the links into $i$. The guess reproduces itself, so it <em>is</em> the answer, exactly. Undirected PageRank is degree wearing a hat.</p>
+    <p><strong>3b · Part two: teleportation.</strong> The walk matrix alone does not fix the existence problem. A group of pages linking only to each other still absorbs everything, and a page with no out-links has a row of zeros, which is not a probability distribution at all. So Page and Brin mixed in a constant: with probability $1-\alpha$ the walker ignores the links entirely and jumps to a uniformly random page. Every entry of the resulting <strong>Google matrix</strong> is strictly positive, which makes it irreducible and aperiodic, which means Perron–Frobenius applies once more and a unique positive stationary distribution exists on <em>any</em> directed network, however ugly.</p>
+    <p>The teleport buys a second thing for free. The power method's convergence rate is set by the second eigenvalue, and for the Google matrix that is bounded by $\alpha$ itself. Measured on the directed Marvel network, $|\lambda_2| = 0.8499$ at $\alpha = 0.85$ and $0.5000$ at $\alpha = 0.50$. So $\alpha$ is a dial between a sharper ranking and a faster computation, and in 1998, when this had to run across the entire web on cheap hardware, that mattered enormously.</p>
+    <p><strong>4 · And then Google got to rule the world for a while.</strong> The core idea was in the air. Ranking by citation eigenvectors goes back to Katz in 1953 and Bonacich in 1972 in sociometry, and to Pinski and Narin in 1976 for journals, and Kleinberg built HITS at IBM from the same insight in the same year (the Katz and HITS box has the family tree). What Page and Brin had was the pair of repairs above, plus one product decision: PageRank is <strong>query-independent</strong>. It is computed once, offline, for the whole web, and only then combined with text matching when somebody types a query. HITS ranks a freshly built subgraph per query, which was hopeless at serve time in 1998. Two papers came out of Stanford, <a href="http://infolab.stanford.edu/~backrub/google.html" target="_blank" rel="noopener"><em>The Anatomy of a Large-Scale Hypertextual Web Search Engine</em></a> and the <em>PageRank Citation Ranking</em> tech report, and search stopped being about the words on the page.</p>
+    <p>The "for a while" is the honest part. Ranking by links is an adversarial game and the adversaries were good: link farms, paid links, comment spam, an entire industry. Google answered with algorithm after algorithm, stopped publishing per-page PageRank scores, and folded the eigenvector into one signal among hundreds of mostly learned ones. Nobody ranks the web today with a single stationary distribution. The algorithm itself, though, is everywhere else: personalized PageRank drives recommendations, Infomap describes communities as a compressed random walk (week 4), and node2vec turns biased random walks into node embeddings (week 7). You have not seen the last of the walker.</p>
+  </div>
+
+  <div class="callout" id="katz">
+    <p class="eyebrow">Katz, HITS, and the family tree</p>
+    <p>Eigenvector centrality and PageRank have relatives. <strong>Katz centrality</strong> (1953) scores a node by <em>all</em> walks arriving at it, with a walk of length $\ell$ weighted by $\beta^\ell$ for some $\beta$ smaller than the inverse leading eigenvalue: $x = \beta A x + \mathbf{1}$, so every node gets a free unit of importance and short walks count more than long ones. It behaves on directed networks where plain eigenvector centrality gives zeros to everything upstream of a dangling node (the deep dive above). <strong>HITS</strong> (Kleinberg, 1999), built for the web in the same year as PageRank, gives each node <em>two</em> scores: a good <strong>hub</strong> links to good authorities, and a good <strong>authority</strong> is linked to by good hubs, iterated together. On the Marvel network, hubs would be the pages that link out to the important characters, authorities the characters they link to; look at the out-degree top ten from Section 3 and guess who the hubs are. Atlas 14.5 has the details.</p>
+  </div>
+
+  <div class="callout" id="hitting">
+    <p class="eyebrow">Hitting times, and what a random walk knows</p>
+    <p>The random walker is a richer object than PageRank alone. The <strong>hitting time</strong> $H_{ij}$ is the expected number of steps a walker starting at $i$ needs to first reach $j$; it is asymmetric (the walk from a leaf to a hub is short, the reverse is long), which makes it a natural distance for directed or heterogeneous networks. The <strong>commute time</strong> $H_{ij} + H_{ji}$ is symmetric and, remarkably, equals $2m$ times the <em>effective resistance</em> between $i$ and $j$ if you treat the network as an electrical circuit with each link a one-ohm resistor. Random-walk quantities like these underlie half of modern network machine learning (the node embeddings you will meet in week 7 are, at heart, statistics of short random walks). Atlas 11.3 and 11.4.</p>
+  </div>
+
+  <div class="callout" id="attribute-shuffle">
+    <p class="eyebrow">Shuffling the labels instead of the links</p>
+    <p>Section 7 promised a second kind of null model, and exercise 3.9 asks you to build it. Here is why it is the right one.</p>
+    <p>Suppose you label every Marvel character X-Men, Avenger or neither, compute the attribute assortativity, and get a healthy positive number. X-Men link to X-Men. Is that a finding? Not yet — you have not said <em>compared to what</em>. Any network in which some group is large, or in which group members happen to be hubs, will produce a positive number without any preference for one's own kind being involved.</p>
+    <p>The degree-preserving shuffle from week 2 is the wrong tool here. It rewires the links, which destroys exactly the structure you are asking about, and it leaves the labels untouched. So turn it around: <strong>freeze the network and permute the labels.</strong> Keep every link exactly where it is, take the vector of team labels, shuffle it across the nodes, and recompute. Do that a few hundred times and you have the distribution of attribute assortativity you would see if team membership had nothing to do with who links to whom. Your $z$-score against that distribution is the finding.</p>
+    <p>This null is careful about the right things. The topology is untouched, so degrees, clustering and components cannot explain the result. The <em>number</em> of X-Men is untouched too, because a permutation moves labels around without inventing or destroying any, which matters because a rare label and a common one produce very different baselines. What the permutation destroys is precisely the one thing under test: the association between a node's label and its position.</p>
+    <p>One trap, and it is the same lesson twice. If the attribute correlates with degree — and in Marvel it will, since the famous X-Men are also the hubs — then a plain permutation breaks that correlation too, and part of your $z$-score is just "X-Men are hubs and hubs link to everything." The stricter null is a <strong>degree-stratified permutation</strong>: sort nodes into degree bins and shuffle labels only <em>within</em> each bin. The labels keep their degree profile, and what survives is homophily beyond popularity. If the two nulls disagree, the gap between them is the part of your effect that degree already explained.</p>
+    <p>Everything here is a permutation test in the sense of the <a href="week2.html#permutation">week 2 Goodies</a>: no distributional assumption, no formula, just the same statistic recomputed on a world where the thing you care about has been switched off. The recipe generalizes past assortativity — any statistic that couples a node attribute to network position, including "do infected nodes cluster" and "do my labels predict community membership," gets tested exactly this way.</p>
+  </div>
+
+  <div class="callout" id="degree-bounds">
+    <p class="eyebrow">Degree distributions and degree assortativity</p>
+    <p>Section 7 runs the mixing dial out to $+0.17$ and $-0.53$ and calls the space between them structural. Here is the precise version, because the claim is stronger than it sounds: those two numbers are not where the rewiring gave up. They are close to the best that <em>any</em> wiring of these degrees can do.</p>
+    <p>Start with the simplification that makes the question answerable at all. Newman's $r$ is a correlation over the degree pairs at the two ends of every link, and a degree-preserving rewiring never changes a single degree. So almost everything in the formula is frozen before you start: summed over links, $(j+k)$ is just $\sum_v k_v^2$ and $(j^2+k^2)$ is just $\sum_v k_v^3$, and both are properties of the degree sequence alone. Exactly one quantity can move, the sum of the degree <em>product</em> over links, $S = \sum_{(u,v)\in E} k_u k_v$. For the Marvel giant component that leaves</p>
+    <p>$$r = \frac{S/m - 495.18}{477.97}, \qquad m = 1421$$</p>
+    <p>so "how assortative can this network be?" is the same question as "how large can $S$ get?" That is a search over wirings with a cheap objective: one swap changes $S$ by $k_a k_e + k_b k_c - k_a k_b - k_c k_e$, which you can evaluate without looking at the rest of the network.</p>
+    <p><strong>Push the assortative side as hard as you like and it stops in the same place.</strong> The ordered rewiring from the explorable, a hill-climb that takes any swap raising $S$, simulated annealing with a slow cool and a final quench, and a graph built from scratch by the Havel–Hakimi construction, which connects the biggest node to the next-biggest and is about as close to "wire the hubs together first" as an algorithm gets: every one of them arrives at $r = +0.1698$. Six annealing runs from different seeds finish between $+0.16978$ and $+0.16981$. Building from scratch does slightly <em>worse</em> than rewiring ($+0.1642$) until you hill-climb it, and then it lands on the same number.</p>
+    <p>One node is responsible. Spider-Man has 106 links in a network of 277 characters, so he touches 38% of the network and owns 7.5% of all its links. Assortative mixing wants his neighbors to look like him, and they cannot: only 37 characters have degree 20 or more (counting him), and 99 have degree 10 or more. Give him the 106 highest-degree partners that exist and their mean degree is $18.8$, against his own $106$. Those 106 links are $(106, \approx 19)$ pairs no matter how the rest of the network is arranged, and they hold the correlation down by themselves.</p>
+    <p><strong>The disassortative side is nearly maxed out too, and there you can prove it.</strong> Drop the requirement that the answer be a simple graph — let links double up — and pair the degree stubs greedily, biggest with smallest. That is a real lower bound on $S$ for <em>any</em> graph with these degrees, and it works out to $r \ge -0.5374$. The rewiring reaches $-0.5313$, within 1.1% of a floor no algorithm can get under.</p>
+    <p>So the lopsidedness of the dial is not an artifact of how it rewires. A hub can always find leaves to attach to, which makes disassortative easy; there are never enough other hubs to go around, which makes assortative impossible. Every heavy-tailed network is built this way, which is the same reason the week-2 shuffle lands near $-0.12$ instead of $0$.</p>
+    <p><strong>The counterfactual.</strong> If the hub is what caps the ceiling, then capping the hub should raise it. Take the same degree sequence, truncate every degree at some maximum, and run the optimization again:</p>
+    <table class="plain">
+    <tr><th>largest degree</th><th>share of nodes it touches</th><th>links</th><th>best achievable $r$</th></tr>
+    <tr><td>106 (actual)</td><td>38%</td><td>1421</td><td>$+0.17$</td></tr>
+    <tr><td>60</td><td>22%</td><td>1394</td><td>$+0.46$</td></tr>
+    <tr><td>40</td><td>14%</td><td>1355</td><td>$+0.82$</td></tr>
+    <tr><td>30</td><td>11%</td><td>1324</td><td>$+0.96$</td></tr>
+    <tr><td>20</td><td>7%</td><td>1216</td><td>$+0.995$</td></tr>
+  </table>
+    <p>Truncating changes the link count a little, as the third column shows, so read the table as a trend rather than as five perfectly controlled experiments. The trend is not subtle. A network whose largest degree is a modest multiple of its mean can be wired to be almost perfectly assortative. Marvel cannot, and neither can anything else with a heavy tail — which is worth remembering the next time you read that some network "is disassortative," as though that were a discovery about the system rather than about its degree distribution.</p>
+    <p>One caveat. The two sides of this box are not equally solid. The disassortative floor is a proof. The assortative ceiling is not: $+0.1698$ is where six independent methods stop, but the best bound we can write down by hand is a much weaker $+0.52$, and it is weak because it lets every node claim the top-degree nodes as neighbors at the same time, which no actual graph can arrange. The evidence says the bound is slack rather than the search being stuck, but the claim that is actually supported is "nothing we tried beats $+0.17$," not "$+0.17$ is the maximum." Closing that gap honestly is a nice small research problem, and <code>tools/groundtruth/week3_assortativity_limits.py</code> in the course repo reproduces every number above if you want to attack it.</p>
+    <p>The narrower and better-behaved version of the question — are the hubs wired to <em>each other</em> more than their degrees force? — is the rich club in the next box.</p>
+  </div>
+
+  <div class="callout" id="richclub">
+    <p class="eyebrow">Rich clubs, the narrower question</p>
+    <p>The box above measures how hard the degree sequence caps $r$. The cure is to ask a narrower question. The <strong>rich-club coefficient</strong> $\phi(k)$ is the density of links <em>among</em> the nodes with degree above $k$, and the interesting quantity is its ratio to the same density in the degree-preserving shuffle: a ratio above one says the top nodes are more tightly wired to each other than their degrees alone require. Scientific collaboration and air-transport networks have strong rich clubs; the Internet, famously, does not. <code>networkx.rich_club_coefficient</code> computes it, and Atlas Ch.&nbsp;32 <em>Core-Periphery</em> puts it in context. On Marvel, try it: the eight-node X-Men clique is a rich club in miniature.</p>
+  </div>
+
+  <div class="callout" id="reading-goodies">
+    <p class="eyebrow">Reading: the Medici and the web</p>
+    <ul>
+    <li>John F. Padgett & Christopher K. Ansell, <em>Robust Action and the Rise of the Medici, 1400–1434</em>, American Journal of Sociology 98 (1993). The paper behind Section 4; the network argument is in the first half. Matthew Jackson's <em>Social and Economic Networks</em> (2008) opens its first chapter with the same example, with the numbers.</li>
+    <li>Sergey Brin & Lawrence Page, <em>The Anatomy of a Large-Scale Hypertextual Web Search Engine</em>, WWW 1998. Seven pages; section 2.1 is PageRank, and the paper's estimates of the web's size are a lovely time capsule.</li>
+    <li>Linton Freeman, <em>Centrality in Social Networks: Conceptual Clarification</em>, Social Networks 1 (1979). Where degree, closeness, and betweenness were first lined up as three answers to three questions, which is the way this page tells it.</li>
+    <li>M. E. J. Newman, <em>Assortative Mixing in Networks</em>, Physical Review Letters 89 (2002). Four pages; the table of $r$ for social, technological, and biological networks in Section 7 is from here, and the last page explains why assortative networks hold together under attack while disassortative ones fall apart.</li>
+  </ul>
+  </div>
+
+  <p><a href="../index.html#weeks">← All weeks</a></p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>02805 · Technical University of Denmark</span>
+    <span>Sune Lehmann · <a href="mailto:sljo@dtu.dk">sljo@dtu.dk</a></span>
+    <span>Content <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="license noopener">CC BY-SA 4.0</a></span>
+  </div>
+</footer>
+
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/js/toc.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/katex.min.js"></script>
+<script defer src="https://sunelehmann.com/socialgraphs2026-web/vendor/katex/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body, {delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false}], throwOnError: false});"></script>
+</body>
+</html>

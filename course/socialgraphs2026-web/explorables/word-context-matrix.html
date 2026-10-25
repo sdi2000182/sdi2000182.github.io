@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable &middot; Word-context matrix</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+</head>
+<body class="word-context-page">
+<div class="controls">
+  <label>Context window
+    <input id="context-window" type="range" min="1" max="4" value="2">
+    <span class="val" id="window-value">±2</span>
+  </label>
+  <label>Highlight row
+    <select id="target-word"></select>
+  </label>
+</div>
+
+<div class="panel">
+  <h2>Word-context matrix</h2>
+  <div class="matrix-wrap" id="context-matrix"></div>
+  <p class="note">Rows are target words. Columns are words found inside the selected window. Cells are raw co-occurrence counts.</p>
+</div>
+
+<div class="word-context-bottom">
+  <div class="panel">
+    <h2>Selected row as a vector</h2>
+    <div class="vector-line" id="selected-vector"></div>
+    <p class="note" id="vector-note"></p>
+  </div>
+  <div class="panel">
+    <h2>Occurrences in the tiny corpus</h2>
+    <div class="context-list" id="context-examples"></div>
+  </div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/word-context-matrix.js"></script>
+</body>
+</html>

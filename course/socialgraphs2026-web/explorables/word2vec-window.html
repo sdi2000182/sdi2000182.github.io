@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable &middot; Word2Vec window</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/meaning-explore.css">
+</head>
+<body>
+<div class="controls">
+  <span class="seg" id="arch-seg">
+    <button data-arch="skipgram" class="on">Skip-gram</button>
+    <button data-arch="cbow">CBOW</button>
+  </span>
+  <label>Center word <select id="target"></select></label>
+  <label>Window <input id="window" type="range" min="1" max="3" value="2"><span class="val" id="window-val">2</span></label>
+  <button id="resample">new negatives</button>
+</div>
+<div class="window-sentence" id="sentence"></div>
+<div class="text-panels">
+  <div class="panel">
+    <h2 id="positive-title">Positive training examples</h2>
+    <div class="training-list" id="positives"></div>
+  </div>
+  <div class="panel">
+    <h2>Negative samples</h2>
+    <div class="training-list" id="negatives"></div>
+    <p class="note">Negative words are sampled from the vocabulary. The real algorithm uses a smoothed unigram distribution.</p>
+  </div>
+</div>
+<div class="readout">
+  <div class="tile"><div class="label">Goal</div><div class="value" id="goal"></div></div>
+  <div class="tile"><div class="label">Positive contexts</div><div class="value" id="n-pos"></div></div>
+  <div class="tile"><div class="label">Dense vectors learned?</div><div class="value">yes, as parameters</div></div>
+</div>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/word2vec-window.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course data · The shared playground — 02805</title>
+<meta name="description" content="Frozen snapshots of the 02805 shared playground dataset: Wikipedia's Marvel superheroes, released in stages.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/site.css">
+<script data-goatcounter="https://suneman.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <a class="brand" href="../index.html">02805</a>
+  <a href="../the-new-way.html">The new way</a>
+  <a href="../index.html#weeks">Weeks</a>
+  <a href="../index.html#overview">Overview</a>
+  <span class="spacer"></span>
+  <a href="https://www.networkatlas.eu/" target="_blank" rel="noopener">Textbook ↗</a>
+</nav>
+
+<main class="wrap">
+
+  <p class="eyebrow">Course data</p>
+  <h1>The shared playground</h1>
+  <p class="lede">One dataset, all semester: the 303 characters in Wikipedia's
+    <a href="https://en.wikipedia.org/wiki/Category:Marvel_Comics_superheroes" target="_blank"
+    rel="noopener">Category:Marvel Comics superheroes</a> — first the network of links
+    between their pages, later the pages themselves. Released in frozen stages that follow the
+    syllabus, so every group computes on identical data while Wikipedia moves on.
+    <strong>Week 4 is the one exception</strong>: communities need a network with lots of
+    them, so that week runs on a second snapshot, the philosophers born before 1900.</p>
+
+  <h2>Releases</h2>
+  <table class="plain">
+    <thead><tr><th>Files</th><th>Arrives</th><th>What</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="https://sunelehmann.com/socialgraphs2026-web/data/week1_edges.tsv">week1_edges.tsv</a><br>
+            <a href="https://sunelehmann.com/socialgraphs2026-web/data/week1_nodes.tsv">week1_nodes.tsv</a></td>
+        <td>week 1 · out now</td>
+        <td>The unweighted directed network: an edge A&nbsp;→&nbsp;B wherever A's article
+            links to B's. 303 nodes, 1,784 edges. The node file carries names, Wikidata
+            ids, URLs and one-line blurbs — no degrees, no statistics: computing those
+            is your job.</td>
+      </tr>
+      <tr>
+        <td><a href="https://sunelehmann.com/socialgraphs2026-web/data/week4_edges_weighted.tsv">week4_edges_weighted.tsv</a></td>
+        <td>week 4 · out now</td>
+        <td>The same 1,784 edges with a <b>weight</b>: how many times A's article links to
+            B's. Most links happen once; a few characters link to each other a dozen times.
+            Sum the two directions for an undirected weighted network. Same node file as
+            week 1.</td>
+      </tr>
+      <tr>
+        <td><a href="https://sunelehmann.com/socialgraphs2026-web/data/week4_philosophers_edges.tsv">week4_philosophers_edges.tsv</a><br>
+            <a href="https://sunelehmann.com/socialgraphs2026-web/data/week4_philosophers_nodes.tsv">week4_philosophers_nodes.tsv</a></td>
+        <td>week 4 · out now</td>
+        <td><b>Week 4's own network: philosophers.</b> Everyone on Wikipedia's seven lists of
+            philosophers born before the 20th century (<i>List of philosophers born in the
+            centuries BC</i> … <i>born in the 19th century</i>): 1,444 nodes, 11,135 directed
+            edges, each with a <b>weight</b> (how many times A's article links to B's). The
+            node file adds two list-membership columns: <code>era</code> (which century list)
+            and <code>subfields</code> (any of Wikipedia's subfield lists, e.g. ethicists or
+            logicians, the philosopher is also on).</td>
+      </tr>
+      <tr>
+        <td><a href="https://sunelehmann.com/socialgraphs2026-web/data/marvel_pages.zip">marvel_pages.zip</a></td>
+        <td>week 5 · out now</td>
+        <td><b>The text half of the same playground.</b> The full plain-text Wikipedia
+            article for every one of the 303 characters, one file per character — the same
+            303 nodes as <code>week1_nodes.tsv</code>, so the language joins straight onto
+            the network you already have. 1.8&nbsp;MB zipped, 4.4M characters of prose.
+            Pages run from 1,244 characters to 87,256, median 7,642 — a 70× spread that is
+            worth looking at before you average anything across documents.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 id="loading">Loading it</h2>
+  <p>The network files are tab-separated with <code>#</code> comment headers; node ids are
+    Wikipedia page titles with underscores. One thing to know: <strong>17 of the 303
+    characters have no link in either direction</strong>, so if you build the graph from
+    the edge list alone you get 286 nodes and silently lose the isolates — and the isolates
+    are part of the story. Add every node first:</p>
+  <pre><code>import pandas as pd, networkx as nx
+
+nodes = pd.read_csv("week1_nodes.tsv", sep="\t", comment="#",
+                    quoting=3)  # QUOTE_NONE: TSVs never quote, but blurbs may contain "quotes"
+edges = pd.read_csv("week1_edges.tsv", sep="\t", comment="#",
+                    names=["source", "target"])
+
+G = nx.DiGraph()
+G.add_nodes_from(nodes.node_id)
+G.add_edges_from(edges.itertuples(index=False))
+# G: 303 nodes, 1784 edges</code></pre>
+
+  <p>The philosophers network (week 4) loads the same way; sum the two directions to get the
+    undirected weighted network the week works with:</p>
+  <pre><code>nodes = pd.read_csv("week4_philosophers_nodes.tsv", sep="\t", comment="#", quoting=3)
+edges = pd.read_csv("week4_philosophers_edges.tsv", sep="\t", comment="#")
+
+G = nx.Graph()
+G.add_nodes_from(nodes.node_id)
+for s, t, w in edges.itertuples(index=False):
+    if G.has_edge(s, t):
+        G[s][t]["weight"] += w
+    else:
+        G.add_edge(s, t, weight=w)
+giant = G.subgraph(max(nx.connected_components(G), key=len)).copy()
+# G: 1444 nodes, 9140 links; giant: 1374 nodes, 9139 links</code></pre>
+
+  <p>The text ships as one zip so it is a single download. Unzipping is optional —
+    Python reads it in place, and decoding the filenames gives you keys that are exactly
+    the <code>node_id</code>s from the network files:</p>
+  <pre><code>import zipfile, urllib.parse
+
+with zipfile.ZipFile("marvel_pages.zip") as z:
+    marvel_pages = {
+        urllib.parse.unquote(n.split("/")[-1][:-4]): z.read(n).decode("utf-8")
+        for n in z.namelist()
+        if n.endswith(".txt") and "README" not in n
+    }
+# marvel_pages: 303 pages, keyed by node_id — set(marvel_pages) == set(nodes.node_id)</code></pre>
+
+  <p>Why the decoding step: a filename cannot contain every character a Wikipedia title
+    can, so the titles are URL-encoded on disk — <code>Mark_Hazzard%3A_Merc</code> is
+    <code>Mark_Hazzard:_Merc</code>. Skip the <code>unquote</code> and that one page will
+    quietly fail to join against the network.</p>
+
+  <h2>Where it comes from</h2>
+  <p>The Marvel snapshot was built 26 August 2026 from the live English Wikipedia (the
+    philosophers on 15 September, with the same pipeline) — network and text come from the
+    same crawl on the same day, so they describe the same 303 articles. Three
+    decisions in the pipeline are worth knowing about, because they are exactly the kind
+    of decision §3 of week 1 is on about:</p>
+  <ul>
+    <li><strong>Edges come from the article text, not from Wikipedia's link index.</strong>
+      The index counts links contributed by shared navigation templates — every Avenger
+      carries the same team navbox, which would make whole rosters mutually adjacent by
+      templating artefact, not because anyone's article mentions anyone. Here an edge
+      means the running text of A's article actually links B.</li>
+    <li><strong>Redirects are resolved on both ends</strong>, so
+      <code>[[Spidey]]</code> and <code>[[Spider-Man]]</code> are one node, and a link
+      to any alias still lands on the character.</li>
+    <li><strong>The text is the rendered prose, not the wiki markup.</strong> Templates,
+      infoboxes, reference markers and navigation furniture are gone; what is left is what
+      a reader sees. That is a preprocessing decision made for you, and week 5 §2 is about
+      exactly this kind of decision — so it is fair game to ask what it removed. The
+      section headings are still in there, and so is a good deal of Wikipedia's house
+      phrasing.</li>
+  </ul>
+  <p>Could you have made those choices differently? Yes — and you would have gotten a
+    different network. That is the point of week 1, and when your project crawls a domain
+    of its own, the choices are yours.</p>
+
+  <p><a href="../index.html#weeks">← All weeks</a></p>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>02805 · Technical University of Denmark</span>
+    <span>Sune Lehmann · <a href="mailto:sljo@dtu.dk">sljo@dtu.dk</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

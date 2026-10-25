@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Where chance gives up: Marvel vs a random network</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label>degree
+    <span class="seg" id="deg-seg">
+      <button data-v="und">undirected</button><button data-v="in" class="on">in</button><button data-v="out">out</button>
+    </span>
+  </label>
+  <label>axes
+    <span class="seg" id="ax-seg">
+      <button data-v="lin" class="on">linear</button><button data-v="log">log–log</button>
+    </span>
+  </label>
+  <label>binning
+    <span class="seg" id="bin-seg">
+      <button data-v="raw" class="on">raw</button><button data-v="binned">binned</button>
+    </span>
+  </label>
+  <label>reference
+    <span class="seg" id="ref-seg">
+      <button data-v="none">none</button><button data-v="poisson" class="on">random network, same ⟨k⟩</button>
+    </span>
+  </label>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>P(k) — fraction of nodes with degree k</h2>
+    <div class="legend" id="legend"></div>
+    <svg class="chart" id="chart"></svg>
+  </div>
+  <div class="panel">
+    <h2>The tail, by name</h2>
+    <ol id="top" style="margin: 6px 0 0; padding-left: 22px; color: var(--text-secondary); font-size: 13.5px; line-height: 1.9"></ol>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Nodes</div><div class="value" id="r-n">–</div></div>
+  <div class="tile"><div class="label">Directed edges</div><div class="value" id="r-m">–</div></div>
+  <div class="tile"><div class="label">Max k</div><div class="value" id="r-max">–</div></div>
+  <div class="tile"><div class="label">Mean k</div><div class="value" id="r-mean">–</div></div>
+  <div class="tile"><div class="label">Median k</div><div class="value" id="r-med">–</div></div>
+  <div class="tile"><div class="label">Nodes with k = 0</div><div class="value" id="r-iso">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/vendor/d3.v7.min.js"></script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/vizkit.js"></script>
+<script>window.RD_DEFAULTS = { deg: "in", ax: "log", bin: "raw", ref: "poisson" };</script>
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/real-degrees.js"></script>
+</body>
+</html>

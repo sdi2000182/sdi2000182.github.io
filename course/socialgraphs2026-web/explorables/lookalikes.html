@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable · Marvel lookalikes</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+<style>
+  .controls select { font: inherit; color: var(--text-primary); background: var(--page);
+    border: 1px solid var(--baseline); border-radius: 7px; padding: 3px 6px; max-width: 250px; }
+  .nb-list { display: grid; gap: 2px; }
+  .nb-row { display: grid; grid-template-columns: 22px minmax(120px, 1.6fr) minmax(50px, 0.8fr) 44px 74px minmax(110px, 1.3fr);
+    gap: 10px; align-items: center; padding: 5px 4px; border-bottom: 1px solid var(--grid); font-size: 13px; }
+  .nb-row > * { min-width: 0; }
+  .nb-row .barcell .bar { display: block; }
+  .nb-row.pair .who { grid-column: span 1; white-space: normal; }
+  .nb-row.head { color: var(--text-muted); font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; border-bottom-color: var(--baseline); }
+  .nb-row .rank { color: var(--text-muted); font-variant-numeric: tabular-nums; text-align: right; }
+  .nb-row .who { color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nb-row .who button { border: 0; padding: 0; color: inherit; text-align: left; font: inherit; }
+  .nb-row .who button:hover { color: var(--accent); text-decoration: underline; }
+  .nb-row .num { font-variant-numeric: tabular-nums; color: var(--text-secondary); text-align: right; }
+  .nb-row .why { color: var(--text-muted); font: 12px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .link { font-size: 11.5px; padding: 1px 6px; border-radius: 5px; text-align: center; white-space: nowrap; }
+  .link.yes { background: var(--series-2-wash); color: var(--text-primary); border: 1px solid var(--series-2); }
+  .link.no { color: var(--text-muted); border: 1px solid var(--grid); }
+  @media (max-width: 640px) {
+    .nb-row { grid-template-columns: 18px 1fr 44px 58px; }
+    .nb-row .barcell, .nb-row .why { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <span class="seg" id="view-seg">
+    <button data-view="one" class="on">one character</button>
+    <button data-view="unlinked">closest unlinked pairs</button>
+  </span>
+  <span class="seg" id="mode-seg">
+    <button data-mode="raw" class="on">raw counts</button>
+    <button data-mode="nostop">stopwords removed</button>
+  </span>
+  <label id="pick-label">Character <select id="pick"></select></label>
+  <button id="random">random</button>
+</div>
+
+<div class="panel">
+  <h2 id="list-title">Ten most similar pages</h2>
+  <div class="nb-list" id="list"></div>
+  <p class="note" id="note-one">Every page is one Bag-of-Words vector over the whole Marvel vocabulary; similarity is the cosine between two vectors. <em>Words behind it</em> are the terms that contribute most to that cosine. <em>Linked</em> means one page links to the other in the week 1 network. Click a name to jump to that character.</p>
+  <p class="note" id="note-unlinked" hidden>The most similar pairs of pages in the whole corpus that do <em>not</em> link to each other in either direction. Click a name to see its neighbors.</p>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label" id="r-hits-label">Linked among these 10</div><div class="value" id="r-hits">–</div></div>
+  <div class="tile"><div class="label">Average over all 303 pages</div><div class="value" id="r-mean-hits">–</div></div>
+  <div class="tile"><div class="label">10 random pages would give</div><div class="value" id="r-random">–</div></div>
+  <div class="tile"><div class="label">Cosine of two random pages</div><div class="value" id="r-mean-sim">–</div></div>
+</div>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/lookalikes.js"></script>
+</body>
+</html>

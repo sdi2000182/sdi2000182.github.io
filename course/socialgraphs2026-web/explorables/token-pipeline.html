@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorable - Tokenization and preprocessing</title>
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/css/tokens.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/explore.css">
+<link rel="stylesheet" href="https://sunelehmann.com/socialgraphs2026-web/explorables/text-explore.css">
+</head>
+<body>
+
+<div class="controls">
+  <label class="inline-check"><input type="checkbox" id="lower"> lowercase</label>
+  <label class="inline-check"><input type="checkbox" id="punct"> drop punctuation</label>
+  <label class="inline-check"><input type="checkbox" id="stop"> remove stopwords</label>
+  <button id="reset">Reset</button>
+</div>
+
+<div class="text-panels">
+  <div class="panel">
+    <h2>Raw text</h2>
+    <textarea class="textbox" id="text">Marvel's heroes weren't fighting in New York. Fans marvel at heroes who fight, too.</textarea>
+    <p class="note">Tokenization happens first. The controls above are applied afterwards. The browser version mirrors the spaCy splits used in the Python example below.</p>
+  </div>
+  <div class="panel">
+    <h2>Tokens after your choices</h2>
+    <div class="token-row" id="tokens"></div>
+    <div class="small-label">Vocabulary</div>
+    <div class="token-row" id="types"></div>
+  </div>
+</div>
+
+<div class="readout">
+  <div class="tile"><div class="label">Tokens</div><div class="value" id="r-tokens">-</div></div>
+  <div class="tile"><div class="label">Types</div><div class="value" id="r-types">-</div></div>
+  <div class="tile"><div class="label">Type/token ratio</div><div class="value" id="r-ttr">-</div></div>
+  <div class="tile"><div class="label">Sentences</div><div class="value" id="r-sentences">-</div></div>
+</div>
+
+<p class="note token-help">Hover over a token to inspect <code>is_stop</code>, <code>is_punct</code>, <code>lemma_</code>, and its sentence number. <code>New</code> and <code>York</code> remain separate tokens. Deciding that together they name one place is a job for a later step, not for the tokenizer.</p>
+
+<script src="https://sunelehmann.com/socialgraphs2026-web/explorables/token-pipeline.js"></script>
+</body>
+</html>
