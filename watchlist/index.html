@@ -778,7 +778,7 @@ function cardHTML(r, total) {
   return `<article class="film ${vetoed ? 'vetoed' : ''}" data-k="${esc(f.k)}" tabindex="0">
     ${posterHTML(f, info, `<span class="votes ${votes.length === total && total > 1 ? 'all' : ''}">${votes.length}/${total}</span>${isNew ? '<span class="newb" title="Added to a watchlist this week">NEW</span>' : ''}
     <button class="veto" data-veto="${esc(f.k)}" title="${vetoed ? 'Un-veto' : 'Veto — nobody wants this tonight'}" aria-label="Veto">${vetoed ? '↺' : '✕'}</button>
-    <button class="addb ${onBallot(f.k) ? 'on' : ''}" data-add="${esc(f.k)}" title="${onBallot(f.k) ? 'On tonight\'s ballot' : 'Add to tonight\'s ballot'}" aria-label="Add to ballot">${onBallot(f.k) ? '✓' : '+'}</button>`)}
+    <button class="addb ${onBallot(f.k) ? 'on' : ''}" data-add="${esc(f.k)}" title="${onBallot(f.k) ? 'In tonight\'s vote' : 'Add to tonight\'s vote'}" aria-label="Add to the vote">${onBallot(f.k) ? '✓' : '+'}</button>`)}
     <div class="meta"><div class="t">${esc(f.t)}</div><div class="y">${meta || '&nbsp;'}</div>
     <div class="stack">${ppl.slice(0, 8).map(p => L.avatar(p, 'xs')).join('')}${ppl.length > 8 ? `<span class="faint" style="font-size:11px;margin-left:4px">+${ppl.length - 8}</span>` : ''}</div>
     ${seenBy.length ? `<div class="seen">👁 seen by ${esc(seenBy.map(p => p.name).join(', '))}</div>` : ''}</div>
@@ -905,7 +905,7 @@ function openFilm(k, fallback) {
     ${r.seenBy.length ? `<h4>Already seen by</h4><div class="who">${r.seenBy.map(x => `<span class="pill">${L.avatar(x.p, 'xs')} ${esc(x.p.name)}${x.w.r ? ' · ' + stars(x.w.r) : ''}</span>`).join('')}</div>` : ''}
     <div class="row" style="margin-top:18px">
       <a class="btn primary" href="${L.filmUrl(f)}" target="_blank" rel="noopener">Open on Letterboxd ↗</a>
-      <button class="btn" id="dAdd">${onBallot(k) ? '✓ On ballot' : '+ Add to ballot'}</button>
+      <button class="btn" id="dAdd">${onBallot(k) ? '✓ In the vote' : '+ Add to the vote'}</button>
       ${S.vetoes ? `<button class="btn" id="dVeto">${S.vetoes.includes(k) ? 'Un-veto' : 'Veto'}</button>` : ''}
     </div>`);
   m.querySelector('#dVeto').onclick = () => { toggleVeto(k); m.close(); };
@@ -1150,7 +1150,7 @@ function needMe() {
 function ballotAdd(f) {
   if (!needMe()) return;
   const k = f.k || L.keyOf(f);
-  if (onBallot(k)) return L.toast('Already on the ballot.');
+  if (onBallot(k)) return L.toast('Already in the vote.');
   publish({ op: 'add', by: myKey(), f: { k, t: f.t, y: f.y || 0, s: f.s || '', i: f.i || 0, v: f.v || '' } });
   L.toast(`Added “${f.t}” to the Vote tab.`);
 }
@@ -1180,9 +1180,9 @@ function renderBallot() {
       <div class="bt" data-detail="${esc(f.k)}" style="cursor:pointer"><b>${esc(f.t)}</b><small>${f.y || ''}${adder ? ' · added by ' + esc(adder.name) : ''}</small>
         <div class="stack" style="margin-top:4px">${ppl.map(p => L.avatar(p, 'xs' + (here.has(fkey(p)) ? '' : ' out'))).join('')}${out ? `<span class="faint" style="font-size:11px;margin-left:6px">${out} not watching</span>` : ''}</div></div>
       <button class="vbtn ${mine ? 'on' : ''}" data-vote="${esc(f.k)}" title="${mine ? 'Take back your vote' : 'Vote for this'}">👍 ${n}</button>
-      <button class="bx" data-unadd="${esc(f.k)}" title="Remove from ballot">✕</button>
+      <button class="bx" data-unadd="${esc(f.k)}" title="Take it out of the vote">✕</button>
     </div>`;
-  }).join('') : `<div class="bempty">Nothing on the ballot yet. Tap <b>+</b> on any poster below, search above, or add the top 5 — then everyone votes from their own phone.</div>`;
+  }).join('') : `<div class="bempty">Nothing to vote on yet. Tap <b>+</b> on a poster in Browse, type a film above, or add the top 5. Then everyone votes from their own phone.</div>`;
 }
 $('#winner').addEventListener('click', e => { const d = e.target.closest('[data-detail]'); if (d) openFilm(d.dataset.detail, ballot.films.get(d.dataset.detail)); });
 $('#me').addEventListener('change', e => { setMe(e.target.value); renderBallot(); });
@@ -1192,7 +1192,7 @@ $('#blist').addEventListener('click', e => {
   const v = e.target.closest('[data-vote]');
   if (v) { if (!needMe()) return; const k = v.dataset.vote; publish({ op: 'vote', k, by: myKey(), on: !(ballot.votes.get(k) || new Set()).has(myKey()) }); return; }
   const x = e.target.closest('[data-unadd]');
-  if (x) { const f = ballot.films.get(x.dataset.unadd); if (f && confirm(`Take “${f.t}” off the ballot?`)) publish({ op: 'remove', k: f.k, by: myKey() }); }
+  if (x) { const f = ballot.films.get(x.dataset.unadd); if (f && confirm(`Take “${f.t}” out of the vote?`)) publish({ op: 'remove', k: f.k, by: myKey() }); }
 });
 $('#addTop').onclick = () => {
   if (!needMe()) return;
@@ -1209,7 +1209,7 @@ $('#pickWinner').onclick = () => {
   publish({ op: 'winner', k: pick.k, by: myKey() });
   if (tied.length > 1) L.toast(`${tied.length}-way tie at ${best} vote${best === 1 ? '' : 's'} — picked at random.`);
 };
-$('#ballotReset').onclick = () => { if (ballot.films.size && confirm('Clear the ballot for everyone?')) publish({ op: 'reset', by: myKey() }); };
+$('#ballotReset').onclick = () => { if (ballot.films.size && confirm('Clear the vote for everyone?')) publish({ op: 'reset', by: myKey() }); };
 
 /* add-a-film search: crew watchlists first, or any title typed in */
 let suggIdx = 0, suggItems = [];
