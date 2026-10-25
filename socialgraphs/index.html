@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Who Speaks Up</title>
+<meta name="description" content="A 02805 Social Graphs and Interactions project plan: seniority language and aviation safety as a social graph, mapped against every week of the course.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f7f6f2;--surface:#fcfcfb;--surface-2:#efede6;--line:#dcd8cc;
+  --ink:#141414;--ink-2:#52514e;--ink-3:#7d7a72;
+  --accent:#2a78d6;--accent-2:#eb6834;--good:#1baf7a;--warn:#c98500;--bad:#e34948;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--other:#b9b5aa;
+  --seq-0:#dbe8f8;--seq-1:#a9c9ef;--seq-2:#6fa4e3;--seq-3:#3d82d8;--seq-4:#235fae;--seq-5:#163f77;
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    color-scheme:dark;
+    --bg:#121211;--surface:#1a1a19;--surface-2:#232321;--line:#34332f;
+    --ink:#f0efec;--ink-2:#c3c2b7;--ink-3:#8d8b83;
+    --accent:#3987e5;--accent-2:#d95926;--good:#199e70;--warn:#c98500;--bad:#e66767;
+    --s1:#3987e5;--s2:#d95926;--s3:#199e70;--other:#55534d;
+    --seq-0:#1d2b3d;--seq-1:#21406a;--seq-2:#2a5a96;--seq-3:#3a78c4;--seq-4:#6aa0e3;--seq-5:#a9c9ef;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121211;--surface:#1a1a19;--surface-2:#232321;--line:#34332f;
+  --ink:#f0efec;--ink-2:#c3c2b7;--ink-3:#8d8b83;
+  --accent:#3987e5;--accent-2:#d95926;--good:#199e70;--warn:#c98500;--bad:#e66767;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--other:#55534d;
+  --seq-0:#1d2b3d;--seq-1:#21406a;--seq-2:#2a5a96;--seq-3:#3a78c4;--seq-4:#6aa0e3;--seq-5:#a9c9ef;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{font-family:"Source Serif 4",Georgia,serif;line-height:1.15;margin:0}
+h1{font-size:clamp(32px,6vw,54px);font-weight:700;letter-spacing:-.5px}
+h2{font-size:clamp(24px,3.4vw,32px);font-weight:600;margin-bottom:6px}
+h3{font-size:19px;font-weight:600}
+p{margin:.6em 0}
+a{color:var(--accent)}
+.muted{color:var(--ink-2)}.faint{color:var(--ink-3)}
+.kicker{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+header.hero{padding:56px 0 30px;border-bottom:1px solid var(--line)}
+header.hero p.lede{font-size:19px;max-width:720px;color:var(--ink-2)}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:18px;font-size:14px}
+nav.toc a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line)}
+nav.toc a:hover{color:var(--ink)}
+section{padding:46px 0 10px}
+section > .wrap > .intro{max-width:720px;color:var(--ink-2)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.slide{display:grid;grid-template-columns:150px 1fr;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.slide > div{padding:14px 18px;border-bottom:1px solid var(--line)}
+.slide > div:nth-last-child(-n+2){border-bottom:0}
+.slide .k{background:var(--surface-2);font-weight:600;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+@media (max-width:640px){.slide{grid-template-columns:1fr}.slide .k{border-bottom:0!important;padding-bottom:4px}}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);margin-right:4px;white-space:nowrap}
+.tag.net{background:color-mix(in srgb,var(--s1) 18%,transparent);color:var(--ink)}
+.tag.nlp{background:color-mix(in srgb,var(--s2) 18%,transparent);color:var(--ink)}
+.tag.both{background:color-mix(in srgb,var(--s3) 20%,transparent);color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat .v{font-family:"Source Serif 4",Georgia,serif;font-size:28px;font-weight:600;line-height:1.1}
+.stat .l{font-size:12px;color:var(--ink-3);font-weight:500}
+.figure{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin:16px 0}
+.figure figcaption{font-size:14px;color:var(--ink-2);margin-top:10px}
+.controls{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:14px;margin-bottom:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);color:var(--ink-2);padding:6px 12px;font:600 13px Inter,sans-serif;cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--surface)}
+#net{width:100%;height:520px;display:block;touch-action:none}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink-2)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--surface);font-size:13px;line-height:1.4;padding:8px 10px;border-radius:8px;max-width:280px;z-index:30;display:none}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.week{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:12px 0;overflow:hidden}
+.week summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:14px 18px}
+.week summary::-webkit-details-marker{display:none}
+.week .wn{font-family:"Source Serif 4",serif;font-size:30px;font-weight:700;color:var(--ink-3);line-height:1}
+.week .wt{font-weight:600}
+.week .ws{font-size:14px;color:var(--ink-2)}
+.week .chev{color:var(--ink-3);transition:transform .2s}
+.week[open] .chev{transform:rotate(90deg)}
+.week .body{padding:0 18px 16px 94px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 22px}
+.week .body h4{margin:6px 0 2px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.week .body p,.week .body ul{margin:0;font-size:14.5px}
+.week .body ul{padding-left:18px}
+@media (max-width:640px){.week .body{padding-left:18px}.week summary{grid-template-columns:44px 1fr auto}.week .wn{font-size:24px}}
+.model{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;align-items:start}
+@media (max-width:820px){.model{grid-template-columns:1fr}}
+.model>*,.sim>*,.grid2>*,.grid3>*{min-width:0}
+.eq{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;background:var(--surface-2);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre}
+.levels{display:grid;grid-template-columns:28px 150px 1fr;gap:6px 10px;font-size:14px;align-items:baseline}
+.levels .n{font-weight:700;color:var(--ink-3);text-align:right}
+.levels .q{color:var(--ink-2);font-style:italic}
+.sim{display:grid;grid-template-columns:300px 1fr;gap:18px}
+@media (max-width:820px){.sim{grid-template-columns:1fr}}
+.sim label{display:block;font-size:14px;font-weight:600;margin:10px 0 2px}
+.sim input[type=range]{width:100%;accent-color:var(--accent)}
+.sim .val{float:right;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.big{font-family:"Source Serif 4",serif;font-size:46px;font-weight:700;line-height:1}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;margin-top:12px}
+.quiz .item{border-top:1px solid var(--line);padding:10px 0}
+.quiz .say{font-style:italic;margin-bottom:6px}
+.quiz button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 10px;font:500 13px Inter,sans-serif;cursor:pointer;margin:2px}
+.quiz button.right{background:var(--good);border-color:var(--good);color:#fff}
+.quiz button.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:15px}
+.callout.warn{border-left-color:var(--warn)}
+ol.refs{font-size:14px;color:var(--ink-2);padding-left:20px}
+ol.refs li{margin:6px 0}
+footer{padding:40px 0 60px;color:var(--ink-3);font-size:13px;border-top:1px solid var(--line);margin-top:40px}
+.theme{position:fixed;right:14px;bottom:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 12px;font:600 12px Inter,sans-serif;cursor:pointer;z-index:20}
+.bars{display:grid;grid-template-columns:110px 1fr 48px;gap:4px 10px;align-items:center;font-size:13px}
+.bars .b{height:16px;border-radius:0 4px 4px 0;background:var(--seq-3)}
+.bars .t{font-variant-numeric:tabular-nums;color:var(--ink-2)}
+@media (max-width:480px){.levels{grid-template-columns:22px 1fr}.levels .q{grid-column:2}.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">02805 Social Graphs and Interactions · DTU · Fall 2026 · project plan</div>
+    <h1 style="margin-top:10px">Who speaks up?</h1>
+    <p class="lede">Seniority language and aviation safety as a social graph. When a junior pilot sees the danger first, how do they say it, and does the cockpit hierarchy decide whether anyone listens? This page lays out the project against every week of the course: the theory, the data, the model, and the checks.</p>
+    <nav class="toc">
+      <a href="#slide">The project on one slide</a><a href="#data">First contact with the data</a><a href="#model">The model</a>
+      <a href="#sim">Explorable: the authority gradient</a><a href="#weeks">Theory × weeks 1–8</a><a href="#sources">Data sources</a>
+      <a href="#checks">Checks &amp; roads not taken</a><a href="#timeline">Timeline</a><a href="#refs">References</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ THE ONE SLIDE ============ -->
+<section id="slide"><div class="wrap">
+  <div class="kicker">Week 8 asks for this, on one slide</div>
+  <h2>The project on one slide</h2>
+  <p class="intro">The course's project brief: a question in one sentence, a dataset with both networks and text, a measurement from both halves of the course, a check, and the one figure you can already picture. This is that slide.</p>
+  <div class="slide">
+    <div class="k">Question</div>
+    <div>When a junior pilot sees the danger first, is the warning phrased as a hint instead of a command, and has that <b>seniority language</b> become more direct since crew resource management (CRM) training began in 1981?</div>
+    <div class="k">Dataset</div>
+    <div><b>Macro graph:</b> airliner-accident articles on Wikipedia (nodes) linked by the links in their prose (edges), with the article text on each node; <span id="slideN">a few hundred</span> accidents, crawled with the week-1 pipeline.<br>
+      <b>Micro graphs:</b> for each accident with a published cockpit-voice-recorder (CVR) transcript, one small directed graph per flight: crew roles as nodes, every utterance as an edge carrying its text.</div>
+    <div class="k">Measurement</div>
+    <div>A <b>mitigation level</b> (1 = command … 6 = hint) for every crew utterance, and from it the <b>authority gradient</b> of each flight: how much more indirect speech travels up the hierarchy than down. Network side: PageRank, communities and assortativity of the accident graph. Language side: TF-IDF, Scattertext, embeddings and an LLM-labelled, hand-validated mitigation instrument.</div>
+    <div class="k">Check</div>
+    <div>Shuffle speaker labels inside each transcript (is the gradient bigger than chance?); shuffle years (is the CRM change real?); hand-label 300 utterances and report Cohen's κ against the instrument. <b>We abandon the question if</b> the gradient is indistinguishable from the speaker-shuffle null, or κ &lt; 0.6.</div>
+    <div class="k">The figure</div>
+    <div>Authority gradient per flight against year, with the 1981 CRM line and the shuffled-speaker null as a grey band. One dot per accident, sized by its PageRank in the macro graph, so the "teaching cases" stand out.</div>
+  </div>
+</div></section>
+
+<!-- ============ REAL DATA ============ -->
+<section id="data"><div class="wrap">
+  <div class="kicker">A dataset you have actually touched</div>
+  <h2>First contact with the data</h2>
+  <p class="intro">Week 8: "every idea that survives has a dataset you have actually touched." So the macro graph is already crawled: Wikipedia's categories of airliner accidents caused by pilot error, controlled flight into terrain, stalls, fuel exhaustion and air-traffic-control error, one level of subcategories deep. Edges come from links in the running prose, not the navigation boxes, the same choice the course made for the Marvel network, because every accident page carries a year navbox that would link whole decades by templating alone.</p>
+  <div class="stats" id="stats"><div class="stat"><div class="v">…</div><div class="l">loading the crawl</div></div></div>
+  <figure class="figure" style="margin:0">
+    <div class="controls">
+      <span class="faint">Colour by</span>
+      <div class="seg" id="colorBy"><button data-c="era" class="on">CRM era</button><button data-c="comm">Community</button><button data-c="sen">Seniority language</button></div>
+      <span class="faint" id="netNote"></span>
+    </div>
+    <svg id="net" role="img" aria-label="Network of airliner accident articles"></svg>
+    <div class="legend" id="legend"></div>
+    <figcaption>Each dot is an accident article, sized by PageRank (how much the rest of the record points at it); a line means one article's prose links to the other. Drag to move, hover for details. The tabs recolour the same graph by era, by Louvain community, and by how often the article uses seniority and challenge vocabulary.</figcaption>
+  </figure>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3>Teaching cases: highest PageRank</h3><p class="faint" style="font-size:14px;margin-top:2px">The accidents the record keeps pointing back to.</p><div class="tablewrap" style="border:0"><table id="topPR"><tbody><tr><td class="faint">loading…</td></tr></tbody></table></div></div>
+    <div class="card"><h3>Seniority language by decade</h3><p class="faint" style="font-size:14px;margin-top:2px">Share of accident articles that use challenge / seniority vocabulary, and that mention CRM.</p><div id="decades" class="bars"></div></div>
+  </div>
+  <div class="callout" id="firstCheck">Loading the first check…</div>
+  <p class="faint" style="font-size:13px">What this measures and what it misses: the vocabulary counts measure how Wikipedia editors <i>describe</i> an accident, not what the crew said. That gap is why the micro graphs come from the transcripts themselves.</p>
+</div></section>
+
+<!-- ============ THE MODEL ============ -->
+<section id="model"><div class="wrap">
+  <div class="kicker">Two graphs and a bridge</div>
+  <h2>The model</h2>
+  <p class="intro">Week 8 names two ways to join networks and language: text as an <b>attribute</b> on nodes (tested with a shuffle), and text <b>as a network</b> (entities or speakers connected by what they say, tested by reading a sample of edges). This project uses both, on two scales.</p>
+  <div class="model">
+    <div>
+      <h3>1 · The micro graph: one per flight</h3>
+      <p>For flight <i>f</i>, the CVR transcript becomes a directed multigraph. Nodes are the people on the recording (captain CPT, first officer FO, flight engineer FE, air traffic control ATC, cabin crew CA). Every utterance is an edge from speaker to addressee, carrying its text and its mitigation level <i>m</i>.</p>
+      <div class="eq">G_f = (V_f, E_f),   V_f ⊆ {CPT, FO, FE, ATC, CA}
+e = (speaker, addressee, text, m),   m ∈ {1 … 6}
+
+authority gradient   AG_f = mean m(FO→CPT) − mean m(CPT→FO)
+warning uptake       U_f  = share of hazard call-outs that change
+                            what the addressee does next</div>
+      <h3 style="margin-top:18px">2 · The macro graph: the accident record</h3>
+      <p>Nodes are accidents, edges are prose links between their articles, weighted by link count. Each node carries attributes: year, CRM era, the crew's seniority gap (captain vs first-officer hours, from the final reports), the airline country's power-distance index, and from the micro graph, its authority gradient AG and uptake U.</p>
+      <h3 style="margin-top:18px">3 · The bridge</h3>
+      <p>The micro graph's numbers become node attributes of the macro graph. Then the network questions become testable: are high-gradient accidents the teaching cases (PageRank)? Do they cluster (assortativity on AG against a shuffle)? Did the gradient fall after 1981?</p>
+    </div>
+    <div class="card">
+      <h3>The mitigation scale</h3>
+      <p class="faint" style="font-size:14px">Fischer &amp; Orasanu's six levels, from most to least direct, with their weather-deviation examples. "Mitigated speech" is anything that softens a request out of deference.</p>
+      <div class="levels">
+        <span class="n">1</span><b>Command</b><span class="q">"Turn thirty degrees right."</span>
+        <span class="n">2</span><b>Crew obligation</b><span class="q">"I think we need to deviate right about now."</span>
+        <span class="n">3</span><b>Crew suggestion</b><span class="q">"Let's go around the weather."</span>
+        <span class="n">4</span><b>Query</b><span class="q">"Which direction would you like to deviate?"</span>
+        <span class="n">5</span><b>Preference</b><span class="q">"I think it would be wise to turn left or right."</span>
+        <span class="n">6</span><b>Hint</b><span class="q">"That return at twenty-five miles looks mean."</span>
+      </div>
+      <svg id="cockpit" viewBox="0 0 320 210" style="width:100%;margin-top:14px" role="img" aria-label="A cockpit communication graph"></svg>
+      <p class="faint" style="font-size:13px;margin:4px 0 0">A sketch of one micro graph: arrows are utterances, darker means more indirect. In a steep cockpit the arrows going up to the captain are the dark ones.</p>
+    </div>
+  </div>
+  <h3 style="margin-top:24px">Hypotheses, each with its null</h3>
+  <div class="grid3" style="margin-top:8px">
+    <div class="card"><b>H1 · The gradient exists.</b><p style="font-size:14.5px">AG &gt; 0: speech up the hierarchy is more mitigated than speech down it.<br><span class="faint">Null: permute speaker roles within each transcript, 1,000 times.</span></p></div>
+    <div class="card"><b>H2 · CRM flattened it.</b><p style="font-size:14.5px">AG is lower after 1981, and lower where power distance is lower.<br><span class="faint">Null: shuffle years across flights; control for airline country.</span></p></div>
+    <div class="card"><b>H3 · The record remembers it.</b><p style="font-size:14.5px">High-AG accidents have higher PageRank: they became the cases that later reports cite.<br><span class="faint">Null: degree-preserving rewiring of the macro graph; shuffled AG.</span></p></div>
+  </div>
+</div></section>
+
+<!-- ============ EXPLORABLE ============ -->
+<section id="sim"><div class="wrap">
+  <div class="kicker">An explorable, in the spirit of the course</div>
+  <h2>The authority gradient</h2>
+  <p class="intro">A toy model of one hazard. The first officer spots it and warns the captain. How directly the warning is phrased depends on how steep the cockpit is; how likely the captain is to act depends on how direct it was. With CRM, an ignored warning is repeated more directly; without it, it is repeated the same way. Move the sliders and watch how many of 2,000 simulated hazards get caught.</p>
+  <div class="callout warn">The numbers inside the model (how likely a captain acts on each level) are illustrative assumptions, not measurements. Estimating them from the transcripts is the project.</div>
+  <div class="sim figure">
+    <div>
+      <label>Authority gradient <span class="val" id="gV"></span></label>
+      <input type="range" id="g" min="0" max="1" step="0.01" value="0.7">
+      <div class="faint" style="font-size:12px;display:flex;justify-content:space-between"><span>flat</span><span>steep</span></div>
+      <label>Attempts before it is too late <span class="val" id="aV"></span></label>
+      <input type="range" id="att" min="1" max="4" step="1" value="2">
+      <div class="check"><input type="checkbox" id="crm"><label for="crm" style="margin:0;font-weight:600">CRM training (escalate when ignored)</label></div>
+      <div style="margin-top:18px"><div class="big" id="caught">–</div><div class="faint">of hazards acted on in time</div></div>
+      <div style="margin-top:12px"><div class="big" style="font-size:30px" id="meanLvl">–</div><div class="faint">average mitigation of the first warning</div></div>
+    </div>
+    <div>
+      <div class="kicker" style="margin-bottom:6px">How the first warning is phrased</div>
+      <div id="lvlBars" class="bars"></div>
+      <div class="kicker" style="margin:18px 0 6px">Hazards caught, across the gradient</div>
+      <svg id="curve" viewBox="0 0 520 200" style="width:100%" role="img" aria-label="Share of hazards caught as the authority gradient grows"></svg>
+      <p class="faint" style="font-size:13px;margin:4px 0 0">Blue: without CRM. Orange: with CRM. The dot is where the sliders are.</p>
+    </div>
+  </div>
+  <div class="card quiz" id="quiz" style="margin-top:16px">
+    <h3>Label it yourself <span class="tag">🧠 Learn</span></h3>
+    <p class="faint" style="font-size:14px;margin-top:2px">The 🔬 check behind the whole project is your own labels against the instrument's. Try four. These are paraphrased in the style of cockpit speech, not quotes.</p>
+  </div>
+</div></section>
+
+<!-- ============ WEEKS ============ -->
+<section id="weeks"><div class="wrap">
+  <div class="kicker">The course, week by week</div>
+  <h2>Theory × weeks 1–8</h2>
+  <p class="intro">Every week of 02805, what it teaches, what it does in this project, and the check it supplies. Weeks 1–4 are the networks half, 5–7 the language half, 8 puts them together. The "on paper" line is the kind of thing that is on the tests.</p>
+  <div id="weekList"></div>
+</div></section>
+
+<!-- ============ SOURCES ============ -->
+<section id="sources"><div class="wrap">
+  <div class="kicker">Both halves, from places you can actually get</div>
+  <h2>Data sources</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Source</th><th>Gives</th><th>Half</th><th>How</th></tr></thead>
+    <tbody>
+      <tr><td><b>Wikipedia</b>, accident categories</td><td>Macro graph: accident articles, prose links, article text, years</td><td><span class="tag both">both</span></td><td>MediaWiki API, the week-1 crawl (done above)</td></tr>
+      <tr><td><b>NTSB CAROL</b> and final reports</td><td>Probable cause, crew hours (seniority gap), findings text</td><td><span class="tag nlp">text</span></td><td>CAROL's search is fed by a JSON endpoint: the week-8 undocumented-API workshop, applied</td></tr>
+      <tr><td><b>CVR transcripts</b> in final reports and public collections</td><td>Micro graphs: who said what to whom, in order</td><td><span class="tag both">both</span></td><td>Appendices of NTSB/BEA/AAIB reports; parse speaker tags (CAM-1, CAM-2, RDO…)</td></tr>
+      <tr><td><b>NASA ASRS</b></td><td>Thousands of confidential incident narratives, many tagged "communication breakdown, flight crew"</td><td><span class="tag nlp">text</span></td><td>Database search with CSV export; a near-miss counterpart to the crashes</td></tr>
+      <tr><td><b>Hofstede</b> power-distance index</td><td>One number per airline's home country</td><td><span class="tag">attribute</span></td><td>Published country scores</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">Week 8 says the richest projects fuse two datasets nobody put together. Here the fusion is the Wikipedia record (what the world remembers) with the transcripts (what was actually said). Name resolution is ours to check: "Flight 801" in a report and "Korean Air Flight 801" on Wikipedia must be the same node.</div>
+</div></section>
+
+<!-- ============ CHECKS ============ -->
+<section id="checks"><div class="wrap">
+  <div class="kicker">"A result without a check is a claim about your software"</div>
+  <h2>Checks, and the roads not taken</h2>
+  <div class="grid2">
+    <div class="card"><h3>Every number, and what checks it</h3>
+      <ul style="font-size:14.5px;padding-left:18px">
+        <li><b>Mitigation level</b> (LLM or fine-tuned classifier, 🔬): 300 utterances hand-labelled by two of us; report κ between us and between us and the model; publish the confusion matrix.</li>
+        <li><b>Authority gradient</b>: speaker-role permutation null within each transcript.</li>
+        <li><b>CRM effect</b>: year shuffle; the same test on ASRS near-miss narratives as a second dataset.</li>
+        <li><b>Communities</b>: modularity against degree-preserving nulls (shown above), Louvain vs Infomap NMI, and NMI against Wikipedia's own cause categories.</li>
+        <li><b>Teaching cases</b>: PageRank vs in-degree, so a "central" accident is not just a well-linked one.</li>
+        <li><b>Name resolution</b>: a hand-read sample of 50 report↔article matches.</li>
+      </ul></div>
+    <div class="card"><h3>Two ideas we killed (and keep)</h3>
+      <p style="font-size:14.5px"><b>ATC phraseology across countries.</b> Pilot–controller radio as a network, with native vs non-native English speakers. Killed: transcripts are scarce and mostly in accident reports anyway, so it is a subset of this project.</p>
+      <p style="font-size:14.5px"><b>The citation graph of safety recommendations.</b> NTSB recommendations citing earlier ones. Killed: great network, very little text per node. Kept as insurance in case the CVR set is too small.</p>
+      <p class="faint" style="font-size:13px">The course's advice: around week 12 a third of groups find a hole in their data. A written-down alternative means switching takes a day.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ TIMELINE ============ -->
+<section id="timeline"><div class="wrap">
+  <div class="kicker">Mapped to the course calendar</div>
+  <h2>Timeline</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>When</th><th>Course</th><th>This project</th></tr></thead>
+    <tbody>
+      <tr><td>Wed 28 Oct</td><td>Week 8 · networks × language; register the group</td><td>This one slide; group registered on DTU Learn</td></tr>
+      <tr><td>Wed 4 Nov</td><td>Test 2, then project kickoff</td><td>Dataset locked: macro graph frozen, CVR list fixed; question drafted</td></tr>
+      <tr><td>Wed 11 Nov</td><td>Project period</td><td>Transcripts parsed into micro graphs; 300 utterances hand-labelled; κ</td></tr>
+      <tr><td>Wed 18 Nov</td><td>Project period</td><td>Gradient, nulls, CRM test; the main figure</td></tr>
+      <tr><td>Wed 25 Nov</td><td>Project period</td><td>Macro-graph bridge (H3); write the six pages</td></tr>
+      <tr><td>Fri 27 Nov, 23:59</td><td>Hand-in on DTU Learn</td><td>PNAS paper (≤ 6 pages), 3 slides, half-page reflection</td></tr>
+      <tr><td>Wed 2 Dec</td><td>Demo fair</td><td>Three slides, three minutes; everyone can explain every number</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<!-- ============ REFERENCES ============ -->
+<section id="refs"><div class="wrap">
+  <h2>References</h2>
+  <ol class="refs">
+    <li>S. Lehmann, <i>02805 Social Graphs and Interactions</i>, DTU, Fall 2026. <a href="https://sunelehmann.com/socialgraphs2026-web/">sunelehmann.com/socialgraphs2026-web</a></li>
+    <li>M. Coscia, <i>The Atlas for the Aspiring Network Scientist</i>, 2nd ed. (course network textbook).</li>
+    <li>D. Jurafsky, J. H. Martin, <i>Speech and Language Processing</i>, 3rd ed. draft (course NLP textbook).</li>
+    <li>U. Fischer, J. Orasanu, "Say it again, Sam! Effective communication strategies to mitigate pilot error," Proc. 10th International Symposium on Aviation Psychology (1999). The six-level mitigation scale.</li>
+    <li>R. L. Helmreich, A. C. Merritt, <i>Culture at Work in Aviation and Medicine</i>, Ashgate (1998). National culture, power distance and the cockpit.</li>
+    <li>G. Hofstede, <i>Culture's Consequences</i>, 2nd ed., Sage (2001). The power-distance index.</li>
+    <li>P. Brown, S. C. Levinson, <i>Politeness: Some Universals in Language Usage</i>, Cambridge University Press (1987).</li>
+    <li>C. Danescu-Niculescu-Mizil, L. Lee, B. Pang, J. Kleinberg, "Echoes of power: language effects and power differences in social interaction," WWW (2012). Linguistic coordination toward the more powerful, measured on networks.</li>
+    <li>C. Danescu-Niculescu-Mizil et al., "A computational approach to politeness with application to social factors," ACL (2013). A politeness instrument to compare the mitigation labels against.</li>
+    <li>M. Gladwell, <i>Outliers</i>, ch. 7 "The Ethnic Theory of Plane Crashes," Little, Brown (2008). The popular account of mitigated speech; a claim to test, not a source of numbers.</li>
+    <li>A. Enggaard, A. Lohse, M. Pedersen, S. Lehmann, "Analyzing differences between discursive communities using dialectograms," <i>Scientific Reports</i> (2024). How two communities use the same word, e.g. "captain" before and after CRM.</li>
+  </ol>
+</div></section>
+
+<footer><div class="wrap">A student project plan built on the public 02805 course pages (content CC BY-SA 4.0). Wikipedia data crawled <span id="crawled">recently</span> through the MediaWiki API. Not an official DTU page.</div></footer>
+<button class="theme" id="themeBtn" aria-label="Switch light or dark">Light / dark</button>
+<div class="tip" id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="page.js"></script>
+</body>
+</html>
