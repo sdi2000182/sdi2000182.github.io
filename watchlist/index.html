@@ -20,10 +20,6 @@
 .crew{margin-top:6px}
 .addrow{display:flex;gap:8px;flex-wrap:wrap}
 .addrow .input{flex:1 1 220px}
-.drop{display:block;margin-top:10px;border-radius:4px;padding:12px 14px;color:var(--ink3);cursor:pointer;font-size:13px;background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(68,85,102,.18) 8px 9px);box-shadow:inset 0 0 0 1px var(--line-lo);transition:.15s}
-.drop b{color:var(--ink2);font-weight:600}
-.drop:hover,.drop.over{box-shadow:inset 0 0 0 1px var(--green);color:var(--ink2)}
-.drop:hover b,.drop.over b{color:var(--green)}
 .friends{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:16px}
 .fchip{display:flex;align-items:center;gap:10px;background:var(--slate);border-radius:4px;padding:8px 8px 8px 9px;min-width:0;position:relative;transition:opacity .15s}
 .fchip.away{opacity:.4}
@@ -323,10 +319,7 @@ pre.code{background:var(--bg);border-radius:4px;padding:12px;overflow:auto;font-
         <input class="input" id="addInput" placeholder="Letterboxd username" aria-label="Letterboxd username">
         <button class="btn small primary" type="submit">Add</button>
       </form>
-      <label class="drop" id="drop">
-        <input type="file" id="fileInput" multiple accept=".zip,.csv,.json" hidden>
-        <b>Drop a Letterboxd export ZIP</b> to add someone's full history
-      </label>
+      <input type="file" id="fileInput" multiple accept=".zip,.csv,.json" hidden>
       <div class="blocked hidden" id="blocked"></div>
     </div>
     <div class="dgroup">
@@ -421,7 +414,7 @@ function renderCrew() {
       <li>Paste <span class="kbd">${esc(names)}</span> into “usernames to add” → <b>Run workflow</b></li>
       <li>Come back in ~2 minutes; they'll load here automatically, every 3 hours from then on.</li></ol>
       <div class="row"><button class="btn small" data-copy="${esc(names)}">Copy usernames</button>
-      <span class="faint">Not the site owner? Send them the usernames, or drop an export ZIP above.</span></div>`;
+      <span class="faint">Not the site owner? Send them the usernames.</span></div>`;
   }
   $('#presentNote').innerHTML = fs.length ? `Watching: <b>${pr.length}</b> of ${fs.length} · tap people to pick` : '';
   renderGroups();
@@ -562,10 +555,6 @@ async function runQueue(list) {
 $('#refreshAll').onclick = () => { if (presetInfo) poll(true); runQueue(S.friends.filter(f => !f.preset)); };
 
 /* files */
-const drop = $('#drop');
-['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => handleFiles([...e.dataTransfer.files]));
 $('#fileInput').addEventListener('change', e => { handleFiles([...e.target.files]); e.target.value = ''; });
 
 async function handleFiles(files) {
@@ -817,7 +806,7 @@ function renderResults() {
     el.innerHTML = `<div class="empty"><h3>Who's coming to movie night?</h3>
       <p>Add 2–30 friends above. Works best with your whole group chat.</p>
       <div class="steps">
-        <div class="s"><b>1 · Add the crew</b>Type Letterboxd usernames, or drop everyone's export ZIPs.</div>
+        <div class="s"><b>1 · Add the crew</b>Type Letterboxd usernames.</div>
         <div class="s"><b>2 · Mark who's here</b>Tap someone's face if they're out tonight — only people present count.</div>
         <div class="s"><b>3 · Pick</b>Films wanted by the most people rise to the top. Spin, duel, or veto.</div>
       </div></div>`;
