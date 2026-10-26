@@ -10,12 +10,18 @@ S.headers["User-Agent"] = "SocialGraphsCourseProject/0.1 (student project; githu
 
 def api(**p):
     p.update(format="json", formatversion=2, maxlag=5)
-    for i in range(5):
-        r = S.get(API, params=p, timeout=60)
-        if r.status_code == 200 and "error" not in r.json():
-            return r.json()
-        time.sleep(2 + 2 * i)
-    r.raise_for_status(); return r.json()
+    last = None
+    for i in range(8):
+        try:
+            r = S.post(API, data=p, timeout=90)
+            j = r.json()
+            if r.status_code == 200 and "error" not in j:
+                return j
+            last = f"{r.status_code} {j.get('error')}"
+        except Exception as e:
+            last = repr(e)
+        time.sleep(min(60, 3 * 2 ** i))
+    raise RuntimeError(f"api failed: {last}")
 
 CATS = [
     "Airliner accidents and incidents caused by pilot error",
@@ -53,7 +59,8 @@ log.append(f"total candidate pages: {len(pages)}")
 def resolve(titles):
     m = {}
     for i in range(0, len(titles), 50):
-        j = api(action="query", titles="|".join(titles[i:i+50]), redirects=1)
+        try: j = api(action="query", titles="|".join(titles[i:i+50]), redirects=1)
+        except Exception as e: log.append(f"resolve batch {i} failed: {e}"); continue
         for r in j["query"].get("redirects", []): m[r["from"]] = r["to"]
         for r in j["query"].get("normalized", []): m[r["from"]] = r["to"]
         time.sleep(0.2)
@@ -67,22 +74,30 @@ TERMS = {
     "culture": r"\bpower distance\b|\bculture\b|\bcultural\b",
 }
 def strip(wt):
-    wt = re.sub(r"<ref[^>]*/>|<ref[^>]*>.*?</ref>", " ", wt, flags=re.S)
-    depth, out, i = 0, [], 0
-    while i < len(wt):                      # drop {{templates}} (infoboxes, navboxes, citations)
-        if wt.startswith("{{", i): depth += 1; i += 2; continue
-        if wt.startswith("}}", i) and depth: depth -= 1; i += 2; continue
-        if not depth: out.append(wt[i])
-        i += 1
-    return "".join(out)
+    wt = re.sub(r"<!--.*?-->|<ref[^>]*/>|<ref[^>]*>.*?</ref>", " ", wt, flags=re.S)
+    while True:                             # drop {{templates}} (infoboxes, navboxes, citations), innermost first
+        wt2 = re.sub(r"\{\{[^{}]*\}\}", " ", wt)
+        if wt2 == wt: return wt
+        wt = wt2
+
+def contents(titles):
+    """wikitext for up to 50 pages per request (redirects followed)"""
+    out = {}
+    for i in range(0, len(titles), 50):
+        try:
+            j = api(action="query", titles="|".join(titles[i:i+50]), prop="revisions", rvprop="content", rvslots="main", redirects=1)
+        except Exception as e:
+            log.append(f"content batch {i} failed: {e}"); continue
+        for pg in j["query"].get("pages", []):
+            if pg.get("revisions"): out[pg["title"]] = pg["revisions"][0]["slots"]["main"]["content"]
+        print(i, len(out), flush=True)
+        time.sleep(0.5)
+    return out
 
 data, raw_links = {}, {}
-for n, t in enumerate(pages):
-    try:
-        j = api(action="parse", page=t, prop="wikitext", redirects=1)
-    except Exception as e:
-        log.append(f"parse failed {t}: {e}"); continue
-    wt = j["parse"]["wikitext"]
+texts = contents(pages)
+log.append(f"fetched wikitext for {len(texts)} pages")
+for t, wt in texts.items():
     date = re.search(r"\|\s*date\s*=\s*([^\n|]+)", wt)
     year = None
     for src in [date.group(1) if date else "", wt[:3000]]:
@@ -96,8 +111,7 @@ for n, t in enumerate(pages):
     text = re.sub(r"\s+", " ", text)
     data[t] = {"year": year, "chars": len(text), "terms": {k: len(re.findall(v, text, flags=re.I)) for k, v in TERMS.items()}}
     raw_links[t] = links
-    if n % 50 == 0: print(n, t, flush=True)
-    time.sleep(0.15)
+print("parsed", len(data), flush=True)
 
 alias = resolve(sorted({l for ls in raw_links.values() for l in ls}))
 G = nx.DiGraph(); G.add_nodes_from(data)
@@ -170,4 +184,5 @@ out = {"summary": summary,
        "nodes": [{"id": n, **{k: data[n][k] for k in ("year", "era", "indeg", "outdeg", "pr", "bt", "comm", "seniority", "seniority_per_10k", "chars")}, "terms": data[n]["terms"]} for n in nodes],
        "edges": [[s, t, d["weight"]] for s, t, d in G.edges(data=True)]}
 json.dump(out, open("aviation_graph.json", "w"), ensure_ascii=False)
+print("wrote aviation_graph.json", flush=True)
 print(json.dumps(summary, indent=1, ensure_ascii=False)[:6000])
