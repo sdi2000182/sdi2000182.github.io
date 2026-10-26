@@ -14,7 +14,7 @@
 650 699
 700 749
 750 763
-parsed 703
+parsed 744
 wrote aviation_graph.json
 {
  "crawled": "2026-10-26",
@@ -34,138 +34,138 @@ wrote aviation_graph.json
   "Aviation accidents and incidents caused by air traffic controller error: 55 pages, 0 subcats",
   "total candidate pages: 764",
   "fetched wikitext for 763 pages",
-  "kept 703 accident articles; skipped 60 without an occurrence infobox, e.g. ['1955 Cincinnati mid-air collision', '1956 Grand Canyon mid-air collision', '1938 Jersey Airport disaster', '1959 Transair Douglas Dakota accident', '1985 Zolochiv mid-air collision', '1979 Ankara Turkish Airlines F28 crash', '1962 Taurus Mountains Turkish Airlines F-27 crash', '1962 Avensa Fairchild F-27 accident', '1972 Lake Winnebago mid-air collision', '1972 Adana Turkish Airlines DC-9 crash', '1981 Zheleznogorsk mid-air collision', '1984 San Luis Obispo mid-air collision']"
+  "kept 744 accident articles; skipped 19 without an occurrence infobox, e.g. ['China Clipper', 'Controlled flight into terrain', 'Erebus: The Aftermath', 'Death and state funeral of Lech and Maria Kaczyński', 'Death of Stevie Ray Vaughan', 'Iberia (airline)', 'Hurum air disaster', 'Gordon Vette', 'John Blumsky', 'Mount Erebus', 'Lewis Bay', 'New Zealand Special Service Medal']"
  ],
- "nodes": 703,
- "edges": 841,
- "undirected_links": 684,
- "isolates": 305,
- "giant": 338,
- "avg_degree": 1.95,
- "density": 0.0028,
- "clustering": 0.115,
- "reciprocity": 0.373,
- "modularity": 0.751,
- "modularity_null_mean": 0.574,
- "modularity_null_sd": 0.007,
- "communities": 346,
+ "nodes": 744,
+ "edges": 899,
+ "undirected_links": 736,
+ "isolates": 329,
+ "giant": 360,
+ "avg_degree": 1.98,
+ "density": 0.0027,
+ "clustering": 0.114,
+ "reciprocity": 0.363,
+ "modularity": 0.746,
+ "modularity_null_mean": 0.562,
+ "modularity_null_sd": 0.006,
+ "communities": 368,
  "top_pagerank": [
   [
    "National Airlines Flight 102",
-   0.01539,
+   0.01455,
    2013
   ],
   [
    "TAM Airlines Flight 3054",
-   0.01276,
+   0.01251,
    2007
   ],
   [
    "Air France Flight 447",
-   0.0094,
+   0.00909,
    2009
   ],
   [
    "MK Airlines Flight 1602",
-   0.00911,
+   0.00864,
    2004
   ],
   [
+   "Trigana Air Flight 267",
+   0.00839,
+   2015
+  ],
+  [
    "2001 Linate Airport runway collision",
-   0.00811,
+   0.00776,
    2001
   ],
   [
    "Tenerife airport disaster",
-   0.00805,
+   0.00769,
    1977
   ],
   [
-   "Trigana Air Flight 267",
-   0.00776,
-   2015
-  ],
-  [
    "Fine Air Flight 101",
-   0.00766,
+   0.00726,
    1997
-  ],
-  [
-   "1983 Madrid Airport runway collision",
-   0.00743,
-   1983
-  ],
-  [
-   "1990 Detroit Metropolitan Airport runway collision",
-   0.00738,
-   1990
-  ],
-  [
-   "Jeju Air Flight 2216",
-   0.00734,
-   2024
-  ],
-  [
-   "Sriwijaya Air Flight 182",
-   0.00696,
-   2021
   ],
   [
    "Colgan Air Flight 3407",
-   0.00642,
+   0.00717,
    2009
   ],
   [
-   "West Air Sweden Flight 294",
-   0.00634,
-   2016
+   "1983 Madrid Airport runway collision",
+   0.0071,
+   1983
   ],
   [
-   "Korean Air Flight 801",
-   0.00612,
-   1997
+   "Jeju Air Flight 2216",
+   0.00709,
+   2024
+  ],
+  [
+   "1990 Detroit Metropolitan Airport runway collision",
+   0.00705,
+   1990
+  ],
+  [
+   "Sriwijaya Air Flight 182",
+   0.00666,
+   2021
+  ],
+  [
+   "Aeroflot Flight 821",
+   0.0062,
+   2008
+  ],
+  [
+   "West Air Sweden Flight 294",
+   0.00609,
+   2016
   ]
  ],
  "top_betweenness": [
   [
    "American Airlines Flight 965",
-   0.03465
+   0.03265
   ],
   [
    "Korean Air Flight 801",
-   0.02389
+   0.02185
   ],
   [
    "Colgan Air Flight 3407",
-   0.01944
+   0.01899
   ],
   [
    "Aeroflot Flight 821",
-   0.01896
-  ],
-  [
-   "Avianca Flight 011",
-   0.01715
-  ],
-  [
-   "Air China Flight 129",
-   0.01643
-  ],
-  [
-   "Airborne Express Flight 827",
-   0.0164
-  ],
-  [
-   "Jeju Air Flight 2216",
-   0.01554
-  ],
-  [
-   "Asiana Airlines Flight 214",
-   0.01546
+   0.01754
   ],
   [
    "Air France Flight 447",
-   0.01532
+   0.01564
+  ],
+  [
+   "Avianca Flight 011",
+   0.01561
+  ],
+  [
+   "Airborne Express Flight 827",
+   0.01427
+  ],
+  [
+   "Jeju Air Flight 2216",
+   0.01425
+  ],
+  [
+   "Air China Flight 129",
+   0.01423
+  ],
+  [
+   "Tenerife airport disaster",
+   0.01417
   ]
  ],
  "top_seniority": [
@@ -245,10 +245,10 @@ wrote aviation_graph.json
    2016
   ]
  ],
- "rho_indeg_seniority": 0.376,
+ "rho_indeg_seniority": 0.216,
  "rho_null_95": [
-  0.166,
-  0.301
+  -0.071,
+  0.068
  ],
  "p_rho": 0.0,
  "by_decade": {
@@ -268,47 +268,47 @@ wrote aviation_graph.json
    "seniority": 2
   },
   "1930": {
-   "n": 12,
+   "n": 13,
    "crm": 0,
    "seniority": 4
   },
   "1940": {
-   "n": 39,
+   "n": 41,
    "crm": 0,
    "seniority": 6
   },
   "1950": {
-   "n": 46,
+   "n": 52,
    "crm": 0,
-   "seniority": 8
+   "seniority": 9
   },
   "1960": {
-   "n": 84,
+   "n": 94,
    "crm": 1,
-   "seniority": 8
+   "seniority": 10
   },
   "1970": {
-   "n": 101,
+   "n": 105,
    "crm": 6,
    "seniority": 18
   },
   "1980": {
-   "n": 93,
+   "n": 97,
    "crm": 5,
    "seniority": 20
   },
   "1990": {
-   "n": 121,
+   "n": 124,
    "crm": 14,
-   "seniority": 25
+   "seniority": 26
   },
   "2000": {
-   "n": 99,
+   "n": 108,
    "crm": 19,
-   "seniority": 33
+   "seniority": 35
   },
   "2010": {
-   "n": 86,
+   "n": 87,
    "crm": 16,
    "seniority": 28
   },
@@ -318,5 +318,5 @@ wrote aviation_graph.json
    "seniority": 8
   }
  },
- "years_known": 703
+ "years_known": 743
 }
