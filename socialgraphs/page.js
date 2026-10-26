@@ -61,7 +61,7 @@
 
     // the first check: is seniority language related to being linked to?
     const sig = s.p_rho < 0.05;
-    $('#firstCheck').innerHTML = `<b>A first check, with its null.</b> Do accidents described with more seniority and challenge vocabulary get linked to more (become the cases others cite)? Spearman ρ between in-degree and that vocabulary's density is <b>${s.rho_indeg_seniority}</b>. Shuffling the vocabulary across articles 500 times puts 95% of chance correlations between ${s.rho_null_95[0]} and ${s.rho_null_95[1]} (p = ${s.p_rho}). ${sig ? 'So the link is real for how Wikipedia writes about these accidents, which is exactly why the transcripts have to tell us whether it is real for the cockpit.' : 'So for now this is indistinguishable from chance: a good reminder that a correlation needs its null, and that the editors\' wording is not the crew\'s.'}`;
+    $('#firstCheck').innerHTML = `<b>A first check, with its null.</b> Do accidents described with more seniority and challenge vocabulary get linked to more (become the cases others cite)? Spearman ρ between in-degree and that vocabulary's density is <b>${s.rho_indeg_seniority}</b>. Shuffling the vocabulary across articles 500 times puts 95% of chance correlations between ${s.rho_null_95[0]} and ${s.rho_null_95[1]} (p ${s.p_rho === 0 ? "< 0.002" : "= " + s.p_rho}). ${sig ? 'So the link is real for how Wikipedia writes about these accidents, which is exactly why the transcripts have to tell us whether it is real for the cockpit.' : 'So for now this is indistinguishable from chance: a good reminder that a correlation needs its null, and that the editors\' wording is not the crew\'s.'}`;
     drawNet();
   }
 
