@@ -94,16 +94,20 @@ def contents(titles):
         time.sleep(0.5)
     return out
 
-data, raw_links = {}, {}
+data, raw_links, skipped = {}, {}, []
 texts = contents(pages)
 log.append(f"fetched wikitext for {len(texts)} pages")
 for t, wt in texts.items():
-    date = re.search(r"\|\s*date\s*=\s*([^\n|]+)", wt)
+    box = re.search(r"\{\{\s*Infobox (?:aircraft occurrence|aviation accident|airliner accident)", wt, re.I)
+    if not box:                             # concept pages, people, films, inquiries: not an accident
+        skipped.append(t); continue
+    prose = strip(wt)
+    # year: title, then the infobox's own date field, then the lead ({{Use dmy dates|date=...}} is not the accident)
+    date = re.search(r"\|\s*(?:occurrence_)?date\s*=\s*([^\n]+)", wt[box.start():])
     year = None
-    for src in [date.group(1) if date else "", wt[:3000]]:
+    for src in [t, date.group(1) if date else "", prose.strip()[:800]]:
         y = re.search(r"\b(19[0-9]{2}|20[0-2][0-9])\b", src)
         if y: year = int(y.group(1)); break
-    prose = strip(wt)
     links = [m.split("|")[0].split("#")[0].strip() for m in re.findall(r"\[\[([^\]]+)\]\]", prose)]
     links = [l[0].upper() + l[1:] for l in links if l and ":" not in l]
     text = re.sub(r"\[\[(?:[^\]|]*\|)?([^\]]+)\]\]", r"\1", prose)
@@ -111,6 +115,7 @@ for t, wt in texts.items():
     text = re.sub(r"\s+", " ", text)
     data[t] = {"year": year, "chars": len(text), "terms": {k: len(re.findall(v, text, flags=re.I)) for k, v in TERMS.items()}}
     raw_links[t] = links
+log.append(f"kept {len(data)} accident articles; skipped {len(skipped)} without an occurrence infobox, e.g. {skipped[:12]}")
 print("parsed", len(data), flush=True)
 
 alias = resolve(sorted({l for ls in raw_links.values() for l in ls}))
