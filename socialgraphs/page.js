@@ -78,7 +78,8 @@
     if (!G || !window.d3) return;
     const svg = d3.select('#net'); svg.selectAll('*').remove();
     const W = $('#net').clientWidth, H = $('#net').clientHeight;
-    const nodes = G._nodes || (G._nodes = G.nodes.map(n => Object.assign({}, n)));
+    // isolates have no links to place them by, so the force layout would just pile them on the frame
+    const nodes = G._nodes || (G._nodes = G.nodes.filter(n => n.indeg + n.outdeg > 0).map(n => Object.assign({}, n)));
     const idx = new Map(nodes.map(n => [n.id, n]));
     const links = G._links || (G._links = G.edges.filter(e => idx.has(e[0]) && idx.has(e[1])).map(e => ({ source: e[0], target: e[1], w: e[2] })));
     const commSize = {}; nodes.forEach(n => commSize[n.comm] = (commSize[n.comm] || 0) + 1);
@@ -100,7 +101,7 @@
     if (sim) sim.stop();
     sim = d3.forceSimulation(nodes)
       .force('link', d3.forceLink(links).id(d => d.id).distance(28).strength(0.5))
-      .force('charge', d3.forceManyBody().strength(-26).distanceMax(260))
+      .force('charge', d3.forceManyBody().strength(-34).distanceMax(300))
       .force('x', d3.forceX(W / 2).strength(0.05)).force('y', d3.forceY(H / 2).strength(0.07))
       .force('collide', d3.forceCollide().radius(n => r(n) + 1))
       .on('tick', () => {
@@ -118,7 +119,7 @@
       const lab = c => { const m = nodes.filter(n => n.comm === c).sort((a, b) => b.pr - a.pr)[0]; return `around ${m ? m.id : '?'} (${commSize[c]})`; };
       $('#legend').innerHTML = top3.map((c, i) => L(css(['--s1', '--s2', '--s3'][i]), lab(c))).join('') + L(css('--other'), 'the other communities');
     } else $('#legend').innerHTML = L(css('--seq-0'), 'none') + L(css('--seq-1'), 'low') + L(css('--seq-3'), 'middle') + L(css('--seq-5'), 'highest fifth') + '<span class="faint">seniority + challenge + CRM words per 10k characters</span>';
-    $('#netNote').textContent = `${fmt(nodes.length)} nodes · ${fmt(links.length)} links`;
+    $('#netNote').textContent = `${fmt(nodes.length)} linked articles · ${fmt(links.length)} links · ${fmt(G.nodes.length - nodes.length)} isolates not drawn`;
   }
   $('#colorBy').addEventListener('click', e => {
     const b = e.target.closest('[data-c]'); if (!b) return;
