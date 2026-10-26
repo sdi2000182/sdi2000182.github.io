@@ -14,7 +14,7 @@
 650 699
 700 749
 750 763
-parsed 763
+parsed 703
 wrote aviation_graph.json
 {
  "crawled": "2026-10-26",
@@ -33,160 +33,156 @@ wrote aviation_graph.json
   "Airliner accidents and incidents caused by stalls: 36 pages, 0 subcats",
   "Aviation accidents and incidents caused by air traffic controller error: 55 pages, 0 subcats",
   "total candidate pages: 764",
-  "fetched wikitext for 763 pages"
+  "fetched wikitext for 763 pages",
+  "kept 703 accident articles; skipped 60 without an occurrence infobox, e.g. ['1955 Cincinnati mid-air collision', '1956 Grand Canyon mid-air collision', '1938 Jersey Airport disaster', '1959 Transair Douglas Dakota accident', '1985 Zolochiv mid-air collision', '1979 Ankara Turkish Airlines F28 crash', '1962 Taurus Mountains Turkish Airlines F-27 crash', '1962 Avensa Fairchild F-27 accident', '1972 Lake Winnebago mid-air collision', '1972 Adana Turkish Airlines DC-9 crash', '1981 Zheleznogorsk mid-air collision', '1984 San Luis Obispo mid-air collision']"
  ],
- "nodes": 763,
- "edges": 1182,
- "undirected_links": 984,
- "isolates": 278,
- "giant": 454,
- "avg_degree": 2.58,
- "density": 0.0034,
- "clustering": 0.146,
- "reciprocity": 0.335,
- "modularity": 0.661,
- "modularity_null_mean": 0.509,
- "modularity_null_sd": 0.005,
- "communities": 307,
+ "nodes": 703,
+ "edges": 841,
+ "undirected_links": 684,
+ "isolates": 305,
+ "giant": 338,
+ "avg_degree": 1.95,
+ "density": 0.0028,
+ "clustering": 0.115,
+ "reciprocity": 0.373,
+ "modularity": 0.751,
+ "modularity_null_mean": 0.574,
+ "modularity_null_sd": 0.007,
+ "communities": 346,
  "top_pagerank": [
   [
-   "Pilot error",
-   0.06517,
-   2019
-  ],
-  [
-   "Controlled flight into terrain",
-   0.03776,
-   2018
-  ],
-  [
-   "Korean Air Flight 801",
-   0.02205,
-   2018
-  ],
-  [
    "National Airlines Flight 102",
-   0.01144,
-   2026
+   0.01539,
+   2013
   ],
   [
    "TAM Airlines Flight 3054",
-   0.01105,
-   2026
+   0.01276,
+   2007
   ],
   [
    "Air France Flight 447",
-   0.00884,
-   2020
-  ],
-  [
-   "Tenerife airport disaster",
-   0.00749,
-   2025
-  ],
-  [
-   "Colgan Air Flight 3407",
-   0.0072,
-   2024
+   0.0094,
+   2009
   ],
   [
    "MK Airlines Flight 1602",
-   0.00696,
-   2014
-  ],
-  [
-   "Mount Erebus disaster",
-   0.00661,
-   2025
+   0.00911,
+   2004
   ],
   [
    "2001 Linate Airport runway collision",
-   0.00655,
-   2019
+   0.00811,
+   2001
   ],
   [
-   "Jeju Air Flight 2216",
-   0.0065,
-   2025
-  ],
-  [
-   "Delta Air Lines Flight 1141",
-   0.00643,
-   2026
-  ],
-  [
-   "1983 Madrid Airport runway collision",
-   0.00637,
-   2024
+   "Tenerife airport disaster",
+   0.00805,
+   1977
   ],
   [
    "Trigana Air Flight 267",
-   0.00636,
+   0.00776,
    2015
+  ],
+  [
+   "Fine Air Flight 101",
+   0.00766,
+   1997
+  ],
+  [
+   "1983 Madrid Airport runway collision",
+   0.00743,
+   1983
+  ],
+  [
+   "1990 Detroit Metropolitan Airport runway collision",
+   0.00738,
+   1990
+  ],
+  [
+   "Jeju Air Flight 2216",
+   0.00734,
+   2024
+  ],
+  [
+   "Sriwijaya Air Flight 182",
+   0.00696,
+   2021
+  ],
+  [
+   "Colgan Air Flight 3407",
+   0.00642,
+   2009
+  ],
+  [
+   "West Air Sweden Flight 294",
+   0.00634,
+   2016
+  ],
+  [
+   "Korean Air Flight 801",
+   0.00612,
+   1997
   ]
  ],
  "top_betweenness": [
   [
-   "Pilot error",
-   0.2268
-  ],
-  [
-   "Controlled flight into terrain",
-   0.09629
-  ],
-  [
    "American Airlines Flight 965",
-   0.01626
-  ],
-  [
-   "Mount Erebus disaster",
-   0.01549
-  ],
-  [
-   "Asiana Airlines Flight 214",
-   0.0122
-  ],
-  [
-   "Korean Air Cargo Flight 8509",
-   0.01211
-  ],
-  [
-   "Air France Flight 447",
-   0.01197
+   0.03465
   ],
   [
    "Korean Air Flight 801",
-   0.01179
-  ],
-  [
-   "TAM Airlines Flight 3054",
-   0.01142
+   0.02389
   ],
   [
    "Colgan Air Flight 3407",
-   0.0106
+   0.01944
+  ],
+  [
+   "Aeroflot Flight 821",
+   0.01896
+  ],
+  [
+   "Avianca Flight 011",
+   0.01715
+  ],
+  [
+   "Air China Flight 129",
+   0.01643
+  ],
+  [
+   "Airborne Express Flight 827",
+   0.0164
+  ],
+  [
+   "Jeju Air Flight 2216",
+   0.01554
+  ],
+  [
+   "Asiana Airlines Flight 214",
+   0.01546
+  ],
+  [
+   "Air France Flight 447",
+   0.01532
   ]
  ],
  "top_seniority": [
   [
-   "Pilot error",
-   23,
-   2019
-  ],
-  [
    "Gulf Air Flight 072",
    19,
-   2016
+   2000
   ],
   [
    "Tenerife airport disaster",
    14,
-   2025
+   1977
   ],
   [
    "Korean Air Flight 801",
    8,
-   2018
+   1997
   ],
   [
    "Pakistan International Airlines Flight 8303",
@@ -196,7 +192,7 @@ wrote aviation_graph.json
   [
    "United Airlines Flight 173",
    8,
-   2026
+   1978
   ],
   [
    "2006 Kenyan Air Force Harbin Y-12 crash",
@@ -206,22 +202,22 @@ wrote aviation_graph.json
   [
    "Air France Flight 447",
    7,
-   2020
+   2009
   ],
   [
    "Korean Air Lines Flight 007",
    7,
-   2025
+   1983
   ],
   [
    "Smolensk air disaster",
    7,
-   2025
+   2010
   ],
   [
    "RusAir Flight 9605",
    7,
-   2014
+   2011
   ],
   [
    "Tara Air Flight 197",
@@ -231,76 +227,96 @@ wrote aviation_graph.json
   [
    "1994 Mull of Kintyre Chinook crash",
    6,
-   2011
+   1994
   ],
   [
    "Aerosvit Flight 241",
    6,
-   2014
+   1997
   ],
   [
    "Dana Air Flight 0992",
    6,
-   2019
+   2012
+  ],
+  [
+   "EgyptAir Flight 804",
+   6,
+   2016
   ]
  ],
- "rho_indeg_seniority": 0.394,
+ "rho_indeg_seniority": 0.376,
  "rho_null_95": [
-  0.175,
-  0.304
+  0.166,
+  0.301
  ],
  "p_rho": 0.0,
  "by_decade": {
-  "1930": {
+  "1900": {
+   "n": 2,
+   "crm": 0,
+   "seniority": 0
+  },
+  "1910": {
+   "n": 2,
+   "crm": 0,
+   "seniority": 0
+  },
+  "1920": {
    "n": 2,
    "crm": 0,
    "seniority": 2
   },
-  "1940": {
-   "n": 6,
+  "1930": {
+   "n": 12,
    "crm": 0,
-   "seniority": 0
-  },
-  "1950": {
-   "n": 15,
-   "crm": 0,
-   "seniority": 3
-  },
-  "1960": {
-   "n": 17,
-   "crm": 0,
-   "seniority": 2
-  },
-  "1970": {
-   "n": 24,
-   "crm": 0,
-   "seniority": 1
-  },
-  "1980": {
-   "n": 15,
-   "crm": 1,
-   "seniority": 2
-  },
-  "1990": {
-   "n": 22,
-   "crm": 2,
-   "seniority": 2
-  },
-  "2000": {
-   "n": 20,
-   "crm": 3,
    "seniority": 4
   },
+  "1940": {
+   "n": 39,
+   "crm": 0,
+   "seniority": 6
+  },
+  "1950": {
+   "n": 46,
+   "crm": 0,
+   "seniority": 8
+  },
+  "1960": {
+   "n": 84,
+   "crm": 1,
+   "seniority": 8
+  },
+  "1970": {
+   "n": 101,
+   "crm": 6,
+   "seniority": 18
+  },
+  "1980": {
+   "n": 93,
+   "crm": 5,
+   "seniority": 20
+  },
+  "1990": {
+   "n": 121,
+   "crm": 14,
+   "seniority": 25
+  },
+  "2000": {
+   "n": 99,
+   "crm": 19,
+   "seniority": 33
+  },
   "2010": {
-   "n": 276,
-   "crm": 26,
-   "seniority": 76
+   "n": 86,
+   "crm": 16,
+   "seniority": 28
   },
   "2020": {
-   "n": 366,
-   "crm": 36,
-   "seniority": 81
+   "n": 16,
+   "crm": 5,
+   "seniority": 8
   }
  },
- "years_known": 763
+ "years_known": 703
 }
