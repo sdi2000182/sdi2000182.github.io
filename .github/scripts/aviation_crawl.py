@@ -99,11 +99,12 @@ texts = contents(pages)
 log.append(f"fetched wikitext for {len(texts)} pages")
 for t, wt in texts.items():
     box = re.search(r"\{\{\s*Infobox (?:aircraft occurrence|aviation accident|airliner accident)", wt, re.I)
-    if not box:                             # concept pages, people, films, inquiries: not an accident
+    named = re.search(r"\bFlight \d+|\b(19|20)\d\d\b.*\b(crash|collision|disaster|accident|incident)\b", t, re.I)
+    if not box and not named:               # concept pages, people, films, inquiries: not an accident
         skipped.append(t); continue
     prose = strip(wt)
     # year: title, then the infobox's own date field, then the lead ({{Use dmy dates|date=...}} is not the accident)
-    date = re.search(r"\|\s*(?:occurrence_)?date\s*=\s*([^\n]+)", wt[box.start():])
+    date = re.search(r"\|\s*(?:occurrence_)?date\s*=\s*([^\n]+)", wt[box.start():]) if box else None
     year = None
     for src in [t, date.group(1) if date else "", prose.strip()[:800]]:
         y = re.search(r"\b(19[0-9]{2}|20[0-2][0-9])\b", src)
@@ -148,10 +149,16 @@ for n in G:
     d["seniority_per_10k"] = round(1e4 * d["seniority"] / max(1, d["chars"]), 2)
 
 # does talking about seniority/CRM go with being linked to (a "teaching case")? Spearman vs shuffled attribute
+def avg_ranks(v):                           # ties share their average rank, or tie order fakes a correlation
+    order = sorted(range(len(v)), key=lambda i: v[i]); r = [0.0] * len(v); i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and v[order[j + 1]] == v[order[i]]: j += 1
+        for k in range(i, j + 1): r[order[k]] = (i + j) / 2
+        i = j + 1
+    return r
 def spearman(a, b):
-    ra = {v: i for i, v in enumerate(sorted(range(len(a)), key=lambda i: a[i]))}
-    rb = {v: i for i, v in enumerate(sorted(range(len(b)), key=lambda i: b[i]))}
-    x = [ra[i] for i in range(len(a))]; y = [rb[i] for i in range(len(b))]
+    x, y = avg_ranks(a), avg_ranks(b)
     mx, my = statistics.mean(x), statistics.mean(y)
     num = sum((p - mx) * (q - my) for p, q in zip(x, y)); den = (sum((p - mx) ** 2 for p in x) * sum((q - my) ** 2 for q in y)) ** .5
     return num / den if den else 0
